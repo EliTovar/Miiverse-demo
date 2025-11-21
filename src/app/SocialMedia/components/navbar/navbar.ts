@@ -17,11 +17,13 @@ export class Navbar implements OnInit {
         this.items = [
             {
                 label: 'Home',
-                icon: 'pi pi-home'
+                icon: 'pi pi-home',
+                routerLink: '/'
             },
             {
                 label: 'MiiVerse',
-                icon: 'pi pi-star'
+                icon: 'pi pi-star',
+                routerLink: '/social'
             },
             {
                 label: 'Actions',
@@ -29,35 +31,39 @@ export class Navbar implements OnInit {
                 items: [
                     {
                         label: 'Saludar',
-                        icon: 'pi pi-bolt'
+                        icon: 'pi pi-face-smile'
                     },
                     {
                         label: 'auto-caminar',
-                        icon: 'pi pi-server'
+                        icon: 'pi pi-bolt'
                     },
                     {
                         label: 'sentarse',
-                        icon: 'pi pi-pencil'
+                        icon: 'pi pi-moon'
                     },
                     {
                         label: 'tarjetas',
-                        icon: 'pi pi-palette',
+                        icon: 'pi pi-credit-card',
                         items: [
                             {
                                 label: 'recolectar',
-                                icon: 'pi pi-palette'
+                                icon: 'pi pi-star-fill'
                             },
                             {
                                 label: 'repartir',
-                                icon: 'pi pi-palette'
+                                icon: 'pi pi-send'
                             }
                         ]
                     }
                 ]
             },
             {
+                label: 'Cards',
+                icon: 'pi pi-images'
+            },
+            {
                 label: 'Chat',
-                icon: 'pi pi-comment'
+                icon: 'pi pi-comments'
             }
         ]
     }
