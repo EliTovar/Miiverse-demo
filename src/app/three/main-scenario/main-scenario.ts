@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit, inject } from '@angular/core';
 import * as THREE from 'three';
 
 import { SceneManager } from '../../three/core/SceneManager';
@@ -11,6 +11,13 @@ import { OrbitControlManager } from '../../three/controls/OrbitControlManager';
 import { LightsManager } from '../../three/lighting/LightsManager';
 
 import { FloorManager } from '../../three/environment/FloorManager';
+import { SocketService } from '../../SocialMedia/services/socket.service';
+import { MultiplayerManager } from '../overwolrd-Online/multiplayer/MultiplayerManager';
+import { SocialMediaServicie } from '../../SocialMedia/services/social-media.service';
+import { effect } from '@angular/core';
+
+// let loopManager: LoopManager | null = null;
+// let multiplayer: MultiplayerManager | null = null;
 
 @Component({
   selector: 'main-scenario',
@@ -19,53 +26,171 @@ import { FloorManager } from '../../three/environment/FloorManager';
   styleUrl: './main-scenario.css',
 })
 export class MainScenario implements AfterViewInit {
+  // private multiplayer?: MultiplayerManager;
+  private loopManager?: LoopManager;
+  private multiplayer?: MultiplayerManager;
 
-  @ViewChild('canvasContainer', { static: true }) container!: ElementRef;
+  private sceneManager!: SceneManager;
+  private cameraManager!: CameraManager;
+  private rendererManager!: RendererManager;
 
-  ngAfterViewInit(): void {
+  private unsubscribeMultiplayerLoop: (() => void) | null = null;
+
+  // Helper para esperar conexión
+  private waitForSocketConnection(): Promise<void> {
+    const socket = this.socketService.getSocket();
+
+    if (socket.connected) return Promise.resolve();
+
+    return new Promise((resolve) => {
+      socket.once('connect', () => {
+        console.log('🟢 Socket listo para multiplayer');
+        resolve();
+      })
+    })
+  }
+
+  private async setupMultiplayer() {
+  if (!this.loopManager || !this.sceneManager) return;
+
+  const mode = this.auth.isGuest() ? 'spectator' : 'player';
+
+  console.log('♻️ Recreating MultiplayerManager as', mode);
+
+  // 🔥 ESPERAR SOCKET
+  await this.waitForSocketConnection();
+
+this.multiplayer = new MultiplayerManager(
+  this.socketService.getSocket(),
+  this.sceneManager.scene,
+  this.auth.isGuest() ? 'spectator' : 'player'
+);
+
+if (!this.auth.isGuest()) {
+  await this.multiplayer.spawnLocalPlayer();
+}
+
+this.unsubscribeMultiplayerLoop =
+  this.loopManager.addUpdateCallback((dt, time) => {
+    this.multiplayer?.update(dt);
+    this.multiplayer?.sendUpdates(time);
+  });
+
+}
+
+  constructor(
+    private socketService: SocketService,
+    private auth: SocialMediaServicie
+    
+  ) {
+   effect(() => {
+  const role = this.auth.role();
+  if (!this.multiplayer) return;
+
+  const mode = role === 'guest' ? 'spectator' : 'player';
+
+  console.log('🔁 Role changed →', role);
+
+  this.multiplayer.setMode(mode);
+
+  if (mode === 'player') {
+    this.multiplayer.spawnLocalPlayer();
+  } else {
+    this.multiplayer.disposeLocalPlayer();
+  }
+    });
+  }
+
+  @ViewChild('canvasContainer', { static: true })
+  container!: ElementRef<HTMLDivElement>;
+
+  async ngAfterViewInit(): Promise<void> {
+    
+
     const width = this.container.nativeElement.clientWidth;
     const height = this.container.nativeElement.clientHeight;
 
-    // --- Core
-    const sceneManager = new SceneManager();
-    const cameraManager = new CameraManager(width, height);
-    const rendererManager = new RendererManager(this.container.nativeElement, width, height);
-    const loopManager = new LoopManager(
-      rendererManager.renderer,
-      sceneManager.scene,
-      cameraManager.camera
+    const mode = this.auth.isGuest() ? 'spectator' : 'player';
+
+    /* =========================
+       CORE
+    ========================= */
+
+    this.sceneManager = new SceneManager();
+    this.cameraManager = new CameraManager(width, height);
+    this.rendererManager = new RendererManager(
+      this.container.nativeElement,
+      width,
+      height
     );
 
-    // --- Create floor
-    const floor = new FloorManager(sceneManager.scene, 50);
+    //loopManager
 
-    // --- Camera limits
-    const boundaries = new CameraBoundaryManager(cameraManager.camera, 50);
-    loopManager.addUpdateCallback(() => boundaries.update());
+    /* =========================
+       ENVIRONMENT
+    ========================= */
 
-    new ResizeManager(this.container.nativeElement, cameraManager.camera, rendererManager.renderer);
-    new LightsManager(sceneManager.scene);
+    new FloorManager(this.sceneManager.scene, 50);
+    new LightsManager(this.sceneManager.scene);
 
-    // --- Controls
+    /* =========================
+       SOCKET + MULTIPLAYER
+    ========================= */
+
+    // this.socketService.connect();
+
+    this.loopManager = new LoopManager(
+    this.rendererManager.renderer,
+    this.sceneManager.scene,
+    this.cameraManager.camera
+  );
+
+  
+
+
+
+
+    /* =========================
+       CAMERA
+    ========================= */
+
+    const boundaries = new CameraBoundaryManager(
+      this.cameraManager.camera,
+      50
+    );
+    this.loopManager.addUpdateCallback(() => boundaries.update());
+
     const orbitControls = new OrbitControlManager(
-      cameraManager.camera,
-      rendererManager.renderer
+      this.cameraManager.camera,
+      this.rendererManager.renderer
     );
-    loopManager.addUpdateCallback(() => orbitControls.update());
+    this.loopManager.addUpdateCallback(() => orbitControls.update());
 
-    // --- Demo cube
+    new ResizeManager(
+      this.container.nativeElement,
+      this.cameraManager.camera,
+      this.rendererManager.renderer
+    );
+
+    /* =========================
+       DEMO CUBE
+    ========================= */
+
     const cube = new THREE.Mesh(
       new THREE.BoxGeometry(),
       new THREE.MeshStandardMaterial({ color: 0x00ff88 })
     );
     cube.position.y = 1;
-    sceneManager.add(cube);
+    this.sceneManager.add(cube);
 
-    loopManager.addUpdateCallback(() => {
-      cube.rotation.y += 0.01;
-    });
 
-    // --- Start
-    loopManager.start();
+  // 🔥 Crear multiplayer inicial una vez que la escena ya existe
+  await this.setupMultiplayer();
+
+    /* =========================
+       START LOOP
+    ========================= */
+
+    this.loopManager.start();
   }
 }

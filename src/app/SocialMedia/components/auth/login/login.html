@@ -1,0 +1,19 @@
+<div class="card flex flex-column gap-3 w-20rem mx-auto mt-8">
+  <h2>Login</h2>
+
+  <input
+    type="email"
+    [(ngModel)]="email"
+    placeholder="Email"
+  />
+
+  <input
+    type="password"
+    [(ngModel)]="password"
+    placeholder="Password"
+  />
+
+  <button (click)="login()">Entrar</button>
+
+  <small class="text-red-500" *ngIf="error">{{ error }}</small>
+</div>

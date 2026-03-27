@@ -13,5 +13,13 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./SocialMedia/social-media.module')
         .then(m => m.SocialMediaModule)
-  }
+  },
+
+  {
+    path: 'auth',
+    loadChildren: () =>
+      import('./SocialMedia/components/auth/auth.module')
+        .then(m => m.AuthModule)
+  },
+
 ];

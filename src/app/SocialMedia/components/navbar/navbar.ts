@@ -1,70 +1,59 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, effect } from '@angular/core';
 import { MenuItem } from 'primeng/api';
-import { Menubar } from 'primeng/menubar';
-
+import { MenubarModule } from 'primeng/menubar';
+import { SocialMediaServicie } from '../../services/social-media.service';
+import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-navbar',
-  imports: [Menubar],
-  templateUrl: './navbar.html',
-  styleUrl: './navbar.css',
   standalone: true,
+  imports: [MenubarModule, CommonModule, ButtonModule],
+  templateUrl: './navbar.html',
 })
-export class Navbar implements OnInit {
-    items: MenuItem[] | undefined;
+export class Navbar {
+  auth = inject(SocialMediaServicie);
+  router = inject(Router);
 
-    ngOnInit() {
-        this.items = [
-            {
-                label: 'Home',
-                icon: 'pi pi-home',
-                routerLink: '/'
-            },
-            {
-                label: 'MiiVerse',
-                icon: 'pi pi-star',
-                routerLink: '/social'
-            },
-            {
-                label: 'Actions',
-                icon: 'pi pi-forward',
-                items: [
-                    {
-                        label: 'Saludar',
-                        icon: 'pi pi-face-smile'
-                    },
-                    {
-                        label: 'auto-caminar',
-                        icon: 'pi pi-bolt'
-                    },
-                    {
-                        label: 'sentarse',
-                        icon: 'pi pi-moon'
-                    },
-                    {
-                        label: 'tarjetas',
-                        icon: 'pi pi-credit-card',
-                        items: [
-                            {
-                                label: 'recolectar',
-                                icon: 'pi pi-star-fill'
-                            },
-                            {
-                                label: 'repartir',
-                                icon: 'pi pi-send'
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                label: 'Cards',
-                icon: 'pi pi-images'
-            },
-            {
-                label: 'Chat',
-                icon: 'pi pi-comments'
-            }
-        ]
+  items: MenuItem[] = [];
+
+  constructor() {
+    effect(() => {
+      this.auth.role();
+      this.buildMenu();
+    });
+  }
+
+  buildMenu() {
+    this.items = [
+      { label: 'Home', icon: 'pi pi-home', routerLink: '/' },
+      { label: 'MiiVerse', icon: 'pi pi-star', routerLink: '/social' },
+    ];
+
+    if (!this.auth.isGuest()) {
+      this.items.push({
+        label: 'Crear Post',
+        icon: 'pi pi-plus',
+        routerLink: '/create-post',
+      });
     }
+
+    if (this.auth.role() === 'admin') {
+      this.items.push({
+        label: 'Admin',
+        icon: 'pi pi-cog',
+        routerLink: '/social/admin',
+      });
+    }
+  }
+
+  goLogin() {
+    this.router.navigate(['/auth/login']);
+  }
+
+  logout() {
+    this.auth.logout();
+    this.router.navigate(['/']);
+  }
 }

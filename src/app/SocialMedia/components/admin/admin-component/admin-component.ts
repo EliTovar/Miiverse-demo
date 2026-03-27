@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
-  selector: 'app-post-card',
+  selector: 'admin-component',
   imports: [],
-  templateUrl: './post-card.html',
-  styleUrl: './post-card.css',
+  templateUrl: './admin-component.html',
+  styleUrl: './admin-component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PostCard { }
+export class AdminComponent { }
