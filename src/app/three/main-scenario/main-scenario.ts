@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, AfterViewInit, inject } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit, inject, OnDestroy } from '@angular/core';
 import * as THREE from 'three';
 
 import { SceneManager } from '../../three/core/SceneManager';
@@ -25,7 +25,7 @@ import { effect } from '@angular/core';
   templateUrl: './main-scenario.html',
   styleUrl: './main-scenario.css',
 })
-export class MainScenario implements AfterViewInit {
+export class MainScenario implements AfterViewInit, OnDestroy {
   // private multiplayer?: MultiplayerManager;
   private loopManager?: LoopManager;
   private multiplayer?: MultiplayerManager;
@@ -52,6 +52,12 @@ export class MainScenario implements AfterViewInit {
 
   private async setupMultiplayer() {
   if (!this.loopManager || !this.sceneManager) return;
+
+  // 🧹 Cleanup previous multiplayer loop
+  if (this.unsubscribeMultiplayerLoop) {
+    this.unsubscribeMultiplayerLoop();
+    this.unsubscribeMultiplayerLoop = null;
+  }
 
   const mode = this.auth.isGuest() ? 'spectator' : 'player';
 
@@ -192,5 +198,21 @@ this.unsubscribeMultiplayerLoop =
     ========================= */
 
     this.loopManager.start();
+  }
+
+  ngOnDestroy(): void {
+    console.log('💀 MainScenario DESTROYED - Cleaning up...');
+    
+    if (this.unsubscribeMultiplayerLoop) {
+      this.unsubscribeMultiplayerLoop();
+    }
+
+    if (this.multiplayer) {
+      this.multiplayer.dispose();
+    }
+
+    if (this.loopManager) {
+      this.loopManager.stop();
+    }
   }
 }

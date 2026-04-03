@@ -6,9 +6,6 @@ import { loadFBXCharacter } from '../loaders/character-loader';
 import { InputGate } from '../characters/InputGate';
 
 type ClientMode = 'spectator' | 'player';
-/* =========================
-   Tipos de red
-========================= */
 
 interface NetworkPlayer {
   id: string;
@@ -35,26 +32,36 @@ export class MultiplayerManager {
 
   localController?: CharacterController;
   localPlayer?: THREE.Group;
+  private initialLocalPosition?: THREE.Vector3;
+  private initialLocalRotationY?: number;
 
+  private resolveSync!: () => void;
+  private syncPromise: Promise<void>;
+
+  private pendingUpdates = new Map<string, NetworkPlayer>();
   private loadingRemotes = new Set<string>();
-
   private lastSendTime = 0;
-  private readonly SEND_INTERVAL = 100; // ms
+  private readonly SEND_INTERVAL = 33; // 30 updates per second for 1:1 real-time precision
 
   remotePlayers = new Map<string, RemotePlayer>();
 
   constructor(
     socket: Socket,
     scene: THREE.Scene,
-    mode: ClientMode // 👈 NUEVO
+    mode: ClientMode
   ) {
     this.socket = socket;
     this.scene = scene;
     this.mode = mode;
 
+    this.syncPromise = new Promise((res) => {
+      this.resolveSync = res;
+      // Seguridad: timeout de 1s para no bloquear el spawn si falla la red
+      setTimeout(res, 1000);
+    });
+
     this.registerEvents();
 
-    //pide la lista cuando el manager inicia.
     this.socket.emit('request-current-players');
   }
 
@@ -64,19 +71,27 @@ export class MultiplayerManager {
 
   private registerEvents() {
     this.socket.on('current-players', (players: NetworkPlayer[]) => {
+      console.log('📡 Jugadores actuales recibidos:', players.length);
       players.forEach((p) => {
-        if (this.mode === 'player' && p.id === this.socket.id) return;
-            this.addRemotePlayer(p);
-        });
+        if (this.mode === 'player' && p.id === this.socket.id) {
+          // Capturar posición inicial desde persistencia del servidor
+          this.initialLocalPosition = new THREE.Vector3(p.position.x, p.position.y, p.position.z);
+          this.initialLocalRotationY = p.rotation.y;
+          return;
+        }
+        this.addRemotePlayer(p);
+      });
+      this.resolveSync();
     });
 
     this.socket.on('player-joined', (player: NetworkPlayer) => {
+      console.log('📡 Nuevo jugador unido:', player.username, player.id);
       if (this.mode === 'player' && player.id === this.socket.id) return;
-        this.addRemotePlayer(player);
+      this.addRemotePlayer(player);
     });
 
     this.socket.on('player-left', (id: string) => {
-      if(id === this.socket.id) {
+      if (id === this.socket.id) {
         console.log('🧹 Soy yo, eliminando jugador local');
         this.disposeLocalPlayer();
         return;
@@ -90,157 +105,173 @@ export class MultiplayerManager {
     });
   }
 
-    setMode(mode: ClientMode) { //role dinamico
+  setMode(mode: ClientMode) {
     this.mode = mode;
   }
-
 
   /* =========================
      LOCAL PLAYER
   ========================= */
 
   async spawnLocalPlayer() {
-    if (this.mode !== 'player') return; //Si no es player entonces no crea avatar
+    if (this.mode !== 'player') return;
+    if (this.localPlayer || this.localController) {
+      console.warn('⚠️ Local player already spawned, skipping...');
+      return;
+    }
 
-    InputGate.enabled = true; //Reactiva Input
+    InputGate.enabled = true;
+
+    // 🔥 ESPERAR A LOS DATOS DEL SERVIDOR (o al timeout de 1s)
+    await this.syncPromise;
 
     console.log('🚀 Escena iniciada');
-  try {
-    const { model, animations } = await loadFBXCharacter();
+    try {
+      const { model, animations } = await loadFBXCharacter();
 
-    this.localPlayer = model;
-    this.scene.add(model);
+      // 1. Aplicar posición inicial persistente ANTES de dar de alta al jugador
+      if (this.initialLocalPosition) {
+        model.position.copy(this.initialLocalPosition);
+      }
+      if (typeof this.initialLocalRotationY === 'number') {
+        model.rotation.y = this.initialLocalRotationY;
+      }
 
-    this.localController = new CharacterController(
-      model,
-      animations,
-      document.body,
-      true
-    );
-  } catch (e) { //Evita que se muera la aplicacion.
-    console.error('❌ No se pudo cargar el personaje', e);
-  }
-}
+      // 2. Añadir a la escena
+      this.scene.add(model);
 
+      // 3. REGISTRAR EL PLAYER (solo ahora sendUpdates podrá verlo con su posición correcta)
+      this.localPlayer = model;
 
-dispose() {
-  console.log('☠️ CharacterController dispose', this);
-  InputGate.enabled = false; // 🔒 BLOQUEO TOTAL
-
-  this.loadingRemotes.clear();
-
-  // 🔴 matar controller local
-  if (this.localController) {
-    this.localController.disable();
-    this.localController = undefined;
+      this.localController = new CharacterController(
+        model,
+        animations,
+        document.body,
+        true
+      );
+    } catch (e) {
+      console.error('❌ No se pudo cargar el personaje', e);
+    }
   }
 
-  if (this.localPlayer) {
-    this.scene.remove(this.localPlayer);
-    this.localPlayer = undefined;
-  }
-  
+  dispose() {
+    console.log('☠️ CharacterController dispose', this);
+    InputGate.enabled = false;
 
-  // 🔴 eliminar remotos
-  this.remotePlayers.forEach((remote) => {
-    this.scene.remove(remote.mesh);
-    remote.controller.dispose?.();
-  });
-  this.remotePlayers.clear();
-  
+    this.loadingRemotes.clear();
+    this.pendingUpdates.clear();
 
-  // 🔴 quitar listeners del socket
-  this.socket.off('current-players');
-  this.socket.off('player-joined');
-  this.socket.off('player-left');
-  this.socket.off('player-moved');
+    if (this.localController) {
+      this.localController.disable();
+      this.localController = undefined;
+    }
 
-  // 🔴 modo spectator
-  this.mode = 'spectator';
-}
+    if (this.localPlayer) {
+      this.scene.remove(this.localPlayer);
+      this.localPlayer = undefined;
+    }
 
-public disposeLocalPlayer() {
-  InputGate.enabled = false;
+    this.remotePlayers.forEach((remote) => {
+      this.scene.remove(remote.mesh);
+      remote.controller.dispose?.();
+    });
+    this.remotePlayers.clear();
 
-  if (this.localController) {
-    this.localController.disable();   // ⬅️ CLAVE
-    this.localController.dispose();
-    this.localController = undefined;
+    this.socket.off('current-players');
+    this.socket.off('player-joined');
+    this.socket.off('player-left');
+    this.socket.off('player-moved');
+
+    this.mode = 'spectator';
   }
 
-  if (this.localPlayer) {
-    this.scene.remove(this.localPlayer);
-    this.localPlayer = undefined;
+  public disposeLocalPlayer() {
+    InputGate.enabled = false;
+
+    if (this.localController) {
+      this.localController.disable();
+      this.localController.dispose();
+      this.localController = undefined;
+    }
+
+    if (this.localPlayer) {
+      this.scene.remove(this.localPlayer);
+      this.localPlayer = undefined;
+    }
+
+    this.mode = 'spectator';
   }
-
-  this.mode = 'spectator';
-}
-
-
 
   /* =========================
      REMOTE PLAYERS
   ========================= */
 
   private async addRemotePlayer(player: NetworkPlayer) {
+    if (player.id == this.socket.id) return;
+    if (this.remotePlayers.has(player.id)) return;
+    if (this.loadingRemotes.has(player.id)) return;
 
-    //Nunca agregarte como como remoto
-  if (player.id == this.socket.id) return;
-  // 🚫 Ya existe
-  if (this.remotePlayers.has(player.id)) return;
-  // 🚫 Ya se está cargando
-  if (this.loadingRemotes.has(player.id)) return;
+    this.loadingRemotes.add(player.id);
 
-  this.loadingRemotes.add(player.id);
+    try {
+      const { model, animations } = await loadFBXCharacter();
 
-  try {
-    const { model, animations } = await loadFBXCharacter();
+      if (this.remotePlayers.has(player.id)) {
+        this.loadingRemotes.delete(player.id);
+        return;
+      }
 
-    // ⚠️ Puede que el jugador se haya ido mientras cargaba
-    if (this.remotePlayers.has(player.id)) {
-      this.loadingRemotes.delete(player.id);
-      return;
+      const latest = this.pendingUpdates.get(player.id) || player;
+      
+      model.position.set(
+        latest.position.x,
+        latest.position.y,
+        latest.position.z
+      );
+      if (typeof latest.rotation?.y === 'number') {
+        model.rotation.y = latest.rotation.y;
+      }
+
+      this.scene.add(model);
+
+      const controller = new CharacterController(
+        model,
+        animations,
+        null,
+        false
+      );
+
+      if (latest.animation) {
+        controller.play(latest.animation);
+      }
+
+      this.remotePlayers.set(player.id, {
+        mesh: model,
+        controller,
+        username: latest.username,
+        targetPosition: model.position.clone(),
+        targetRotationY: model.rotation.y,
+        targetAnimation: latest.animation,
+      });
+
+      this.pendingUpdates.delete(player.id);
+
+    } catch (e) {
+      console.error('Error cargando remoto', e);
     }
 
-    model.position.set(
-      player.position.x,
-      player.position.y,
-      player.position.z
-    );
-
-    this.scene.add(model);
-
-    const controller = new CharacterController(
-      model,
-      animations,
-      null,
-      false
-    );
-
-    // 🔥 FORZAR animación inicial
-    if (player.animation) {
-      controller.play(player.animation);
-    }
-
-    this.remotePlayers.set(player.id, {
-      mesh: model,
-      controller,
-      username: player.username,
-      targetPosition: model.position.clone(),
-      targetRotationY: player.rotation?.y,
-      targetAnimation: player.animation,
-    });
-
-  } catch (e) {
-    console.error('Error cargando remoto', e);
+    this.loadingRemotes.delete(player.id);
   }
-
-  this.loadingRemotes.delete(player.id);
-}
 
   private updateRemotePlayer(data: NetworkPlayer) {
     const remote = this.remotePlayers.get(data.id);
-    if (!remote) return;
+    
+    if (!remote) {
+      if (this.loadingRemotes.has(data.id)) {
+        this.pendingUpdates.set(data.id, data);
+      }
+      return;
+    }
 
     remote.targetPosition?.set(
       data.position.x,
@@ -261,35 +292,55 @@ public disposeLocalPlayer() {
      UPDATE LOOP
   ========================= */
 
+  private readonly POSITION_THRESHOLD = 0.001;
+  private readonly ROTATION_THRESHOLD = 0.001;
+
   update(dt: number) {
+    const clampedDt = Math.min(dt, 0.1); 
 
-  // 🔴 UPDATE LOCAL (solo si existe)
-  if (this.localController && this.localPlayer) {
-    this.localController.update(dt);
-  }
-
-  // 🟢 UPDATE REMOTOS (SIEMPRE)
-  this.remotePlayers.forEach((remote) => {
-    remote.controller.update(dt);
-
-    if (remote.targetPosition) {
-      remote.mesh.position.lerp(remote.targetPosition, 0.1);
+    if (this.localController && this.localPlayer) {
+      this.localController.update(clampedDt);
     }
 
-    if (typeof remote.targetRotationY === 'number') {
-      remote.mesh.rotation.y +=
-        (remote.targetRotationY - remote.mesh.rotation.y) * 0.1;
-    }
+    const LERP_FACTOR = 1 - Math.exp(-35 * clampedDt); 
 
-    if (
+    this.remotePlayers.forEach((remote) => {
+      remote.controller.update(clampedDt);
+
+      if (remote.targetPosition) {
+        const distSq = remote.mesh.position.distanceToSquared(remote.targetPosition);
+        
+        if (distSq > 25) { 
+          remote.mesh.position.copy(remote.targetPosition);
+        } else if (distSq > this.POSITION_THRESHOLD) {
+          remote.mesh.position.lerp(remote.targetPosition, LERP_FACTOR);
+        } else {
+          remote.mesh.position.copy(remote.targetPosition);
+        }
+      }
+
+      if (typeof remote.targetRotationY === 'number') {
+        const currentRot = remote.mesh.rotation.y;
+        let diff = remote.targetRotationY - currentRot;
+        
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+
+        if (Math.abs(diff) > this.ROTATION_THRESHOLD) {
+          remote.mesh.rotation.y += diff * LERP_FACTOR;
+        } else {
+          remote.mesh.rotation.y = remote.targetRotationY;
+        }
+      }
+
+      if (
         remote.targetAnimation &&
         remote.controller.currentAnimationName !== remote.targetAnimation
       ) {
         remote.controller.play(remote.targetAnimation);
       }
-  });
-}
-
+    });
+  }
 
   /* =========================
      NETWORK SYNC
@@ -303,7 +354,11 @@ public disposeLocalPlayer() {
     this.lastSendTime = time;
 
     this.socket.emit('update-position', {
-      position: this.localPlayer.position,
+      position: {
+        x: this.localPlayer.position.x,
+        y: this.localPlayer.position.y,
+        z: this.localPlayer.position.z,
+      },
       rotation: { y: this.localPlayer.rotation.y },
       animation: this.localController.currentAnimationName,
     });
@@ -320,5 +375,6 @@ public disposeLocalPlayer() {
     this.scene.remove(remote.mesh);
     remote.controller.dispose?.();
     this.remotePlayers.delete(id);
+    this.pendingUpdates.delete(id);
   }
 }

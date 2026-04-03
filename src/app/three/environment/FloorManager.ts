@@ -16,7 +16,6 @@ export class FloorManager {
 
     this.floor = new THREE.Mesh(geometry, material);
     this.floor.rotation.x = -Math.PI / 2;
-    this.floor.receiveShadow = true;
 
     // Grid visual
     this.grid = new THREE.GridHelper(size, size, 0x00ffff, 0x555555);
