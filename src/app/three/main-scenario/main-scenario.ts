@@ -10,6 +10,8 @@ import { ResizeManager } from '../../three/core/ResizeManager';
 import { OrbitControlManager } from '../../three/controls/OrbitControlManager';
 import { LightsManager } from '../../three/lighting/LightsManager';
 
+import { SteamManager } from '../../three/overwolrd-Online/Games/managers/SteamManager';
+
 import { FloorManager } from '../../three/environment/FloorManager';
 import { SocketService } from '../../SocialMedia/services/socket.service';
 import { MultiplayerManager } from '../overwolrd-Online/multiplayer/MultiplayerManager';
@@ -34,6 +36,8 @@ export class MainScenario implements AfterViewInit, OnDestroy {
   private cameraManager!: CameraManager;
   private rendererManager!: RendererManager;
 
+  private steamManager?: SteamManager;
+
   private unsubscribeMultiplayerLoop: (() => void) | null = null;
 
   // Helper para esperar conexión
@@ -51,59 +55,59 @@ export class MainScenario implements AfterViewInit, OnDestroy {
   }
 
   private async setupMultiplayer() {
-  if (!this.loopManager || !this.sceneManager) return;
+    if (!this.loopManager || !this.sceneManager) return;
 
-  // 🧹 Cleanup previous multiplayer loop
-  if (this.unsubscribeMultiplayerLoop) {
-    this.unsubscribeMultiplayerLoop();
-    this.unsubscribeMultiplayerLoop = null;
+    // 🧹 Cleanup previous multiplayer loop
+    if (this.unsubscribeMultiplayerLoop) {
+      this.unsubscribeMultiplayerLoop();
+      this.unsubscribeMultiplayerLoop = null;
+    }
+
+    const mode = this.auth.isGuest() ? 'spectator' : 'player';
+
+    console.log('♻️ Recreating MultiplayerManager as', mode);
+
+    // 🔥 ESPERAR SOCKET
+    await this.waitForSocketConnection();
+
+    this.multiplayer = new MultiplayerManager(
+      this.socketService.getSocket(),
+      this.sceneManager.scene,
+      this.auth.isGuest() ? 'spectator' : 'player'
+    );
+
+    if (!this.auth.isGuest()) {
+      await this.multiplayer.spawnLocalPlayer();
+    }
+
+    this.unsubscribeMultiplayerLoop =
+      this.loopManager.addUpdateCallback((dt, time) => {
+        this.multiplayer?.update(dt);
+        this.multiplayer?.sendUpdates(time);
+      });
+
   }
-
-  const mode = this.auth.isGuest() ? 'spectator' : 'player';
-
-  console.log('♻️ Recreating MultiplayerManager as', mode);
-
-  // 🔥 ESPERAR SOCKET
-  await this.waitForSocketConnection();
-
-this.multiplayer = new MultiplayerManager(
-  this.socketService.getSocket(),
-  this.sceneManager.scene,
-  this.auth.isGuest() ? 'spectator' : 'player'
-);
-
-if (!this.auth.isGuest()) {
-  await this.multiplayer.spawnLocalPlayer();
-}
-
-this.unsubscribeMultiplayerLoop =
-  this.loopManager.addUpdateCallback((dt, time) => {
-    this.multiplayer?.update(dt);
-    this.multiplayer?.sendUpdates(time);
-  });
-
-}
 
   constructor(
     private socketService: SocketService,
     private auth: SocialMediaServicie
-    
+
   ) {
-   effect(() => {
-  const role = this.auth.role();
-  if (!this.multiplayer) return;
+    effect(() => {
+      const role = this.auth.role();
+      if (!this.multiplayer) return;
 
-  const mode = role === 'guest' ? 'spectator' : 'player';
+      const mode = role === 'guest' ? 'spectator' : 'player';
 
-  console.log('🔁 Role changed →', role);
+      console.log('🔁 Role changed →', role);
 
-  this.multiplayer.setMode(mode);
+      this.multiplayer.setMode(mode);
 
-  if (mode === 'player') {
-    this.multiplayer.spawnLocalPlayer();
-  } else {
-    this.multiplayer.disposeLocalPlayer();
-  }
+      if (mode === 'player') {
+        this.multiplayer.spawnLocalPlayer();
+      } else {
+        this.multiplayer.disposeLocalPlayer();
+      }
     });
   }
 
@@ -111,7 +115,7 @@ this.unsubscribeMultiplayerLoop =
   container!: ElementRef<HTMLDivElement>;
 
   async ngAfterViewInit(): Promise<void> {
-    
+
 
     const width = this.container.nativeElement.clientWidth;
     const height = this.container.nativeElement.clientHeight;
@@ -136,7 +140,8 @@ this.unsubscribeMultiplayerLoop =
        ENVIRONMENT
     ========================= */
 
-    new FloorManager(this.sceneManager.scene, 50);
+    // 🔧 CONFIGURACIÓN DEL TAMAÑO DEL SUELO (Piso)
+    new FloorManager(this.sceneManager.scene, 80);
     new LightsManager(this.sceneManager.scene);
 
     /* =========================
@@ -146,12 +151,12 @@ this.unsubscribeMultiplayerLoop =
     // this.socketService.connect();
 
     this.loopManager = new LoopManager(
-    this.rendererManager.renderer,
-    this.sceneManager.scene,
-    this.cameraManager.camera
-  );
+      this.rendererManager.renderer,
+      this.sceneManager.scene,
+      this.cameraManager.camera
+    );
 
-  
+
 
 
 
@@ -160,9 +165,10 @@ this.unsubscribeMultiplayerLoop =
        CAMERA
     ========================= */
 
+    // 🔧 LÍMITE DE LA CÁMARA (Para no perderse en el vacío)
     const boundaries = new CameraBoundaryManager(
       this.cameraManager.camera,
-      50
+      500
     );
     this.loopManager.addUpdateCallback(() => boundaries.update());
 
@@ -190,19 +196,34 @@ this.unsubscribeMultiplayerLoop =
     this.sceneManager.add(cube);
 
 
-  // 🔥 Crear multiplayer inicial una vez que la escena ya existe
-  await this.setupMultiplayer();
+    // 🔥 Crear multiplayer inicial una vez que la escena ya existe
+    await this.setupMultiplayer();
 
     /* =========================
        START LOOP
     ========================= */
 
     this.loopManager.start();
+
+    /* =========================
+       STEAM GAMES
+    ========================= */
+
+    this.steamManager = new SteamManager(
+      this.sceneManager.scene,
+      this.cameraManager.camera
+    );
+
+    this.loopManager.addUpdateCallback((dt, time) => {
+      this.steamManager?.update(dt, time);
+    });
+
+    await this.steamManager.init();
   }
 
   ngOnDestroy(): void {
     console.log('💀 MainScenario DESTROYED - Cleaning up...');
-    
+
     if (this.unsubscribeMultiplayerLoop) {
       this.unsubscribeMultiplayerLoop();
     }
@@ -214,5 +235,6 @@ this.unsubscribeMultiplayerLoop =
     if (this.loopManager) {
       this.loopManager.stop();
     }
+    this.steamManager?.dispose();
   }
 }

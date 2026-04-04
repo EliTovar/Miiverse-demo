@@ -203,6 +203,14 @@ private enabled = true;
       this.personaje.position.add(this.tempVector);
     }
 
+    // -------------------------------------------------------------------------
+    // 🧱 LÍMITES DEL MAPA (MUROS INVISIBLES)
+    // -------------------------------------------------------------------------
+    const mapLimit = 40; // El suelo mide 80frenamos un poco antes
+    this.personaje.position.x = Math.max(-mapLimit, Math.min(mapLimit, this.personaje.position.x));
+    this.personaje.position.z = Math.max(-mapLimit, Math.min(mapLimit, this.personaje.position.z));
+    // -------------------------------------------------------------------------
+
     // salto + gravedad
     if (this.isJumping) {
       this.personaje.position.y += this.jumpVelocity * delta;

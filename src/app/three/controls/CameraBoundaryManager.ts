@@ -17,8 +17,12 @@ export class CameraBoundaryManager {
     pos.x = Math.max(-half, Math.min(half, pos.x));
     pos.z = Math.max(-half, Math.min(half, pos.z));
 
-    // Limitar altura de la cámara
-    if (pos.y < 2) pos.y = 2;   // no bajar al piso
-    if (pos.y > 20) pos.y = 20; // no volar demasiado alto
+    // -------------------------------------------------------------------------
+    // 🔧 LÍMITES DE ALTURA DE LA CÁMARA (MODIFICA AQUÍ)
+    // Esto evita que la cámara atraviese el suelo o vuele demasiado lejos.
+    // -------------------------------------------------------------------------
+    if (pos.y < 2) pos.y = 2;    // Altura mínima (suelo)
+    if (pos.y > 100) pos.y = 100; // Altura máxima (antes era 20)
+    // -------------------------------------------------------------------------
   }
 }
