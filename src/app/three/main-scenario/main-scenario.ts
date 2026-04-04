@@ -10,7 +10,8 @@ import { ResizeManager } from '../../three/core/ResizeManager';
 import { OrbitControlManager } from '../../three/controls/OrbitControlManager';
 import { LightsManager } from '../../three/lighting/LightsManager';
 
-import { SteamManager } from '../../three/overwolrd-Online/Games/managers/SteamManager';
+import { SteamBillboardManager } from '../../three/overwolrd-Online/Games/managers/SteamBillboardManager';
+import { SteamService } from '../../three/overwolrd-Online/Games/services/SteamService.service';
 
 import { FloorManager } from '../../three/environment/FloorManager';
 import { SocketService } from '../../SocialMedia/services/socket.service';
@@ -36,7 +37,7 @@ export class MainScenario implements AfterViewInit, OnDestroy {
   private cameraManager!: CameraManager;
   private rendererManager!: RendererManager;
 
-  private steamManager?: SteamManager;
+  private steamManagers: SteamBillboardManager[] = [];
 
   private unsubscribeMultiplayerLoop: (() => void) | null = null;
 
@@ -176,7 +177,41 @@ export class MainScenario implements AfterViewInit, OnDestroy {
       this.cameraManager.camera,
       this.rendererManager.renderer
     );
+
+    // -------------------------------------------------------------------------
+    // 🔧 PUNTO DE ENFOQUE INICIAL (Donde mira la cámara al empezar)
+    // -------------------------------------------------------------------------
+    // orbitControls.controls.target.set(0, 0, 0); // Apunta al centro (0,0,0)
+    // -------------------------------------------------------------------------
+
     this.loopManager.addUpdateCallback(() => orbitControls.update());
+
+    // -------------------------------------------------------------------------
+    // 🛠️ DEBUG HUD (Coordenadas en pantalla)
+    // -------------------------------------------------------------------------
+    const debugHud = document.createElement('div');
+    debugHud.style.position = 'absolute';
+    debugHud.style.top = '10px';
+    debugHud.style.left = '10px';
+    debugHud.style.padding = '10px';
+    debugHud.style.background = 'rgba(0, 0, 0, 0.7)';
+    debugHud.style.color = '#00ff00';
+    debugHud.style.fontFamily = 'monospace';
+    debugHud.style.fontSize = '12px';
+    debugHud.style.borderRadius = '5px';
+    debugHud.style.pointerEvents = 'none';
+    debugHud.style.zIndex = '1000';
+    document.body.appendChild(debugHud);
+
+    this.loopManager.addUpdateCallback(() => {
+      const pos = this.cameraManager.camera.position;
+      const target = orbitControls.controls.target;
+      debugHud.innerHTML = `
+        <div style="color: #ffaa00; font-weight: bold; margin-bottom: 5px;">🎥 CAMERA DEBUG</div>
+        Cam Pos: ${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)}<br>
+        Target: ${target.x.toFixed(2)}, ${target.y.toFixed(2)}, ${target.z.toFixed(2)}
+      `;
+    });
 
     new ResizeManager(
       this.container.nativeElement,
@@ -206,19 +241,49 @@ export class MainScenario implements AfterViewInit, OnDestroy {
     this.loopManager.start();
 
     /* =========================
-       STEAM GAMES
+       STEAM GAMES (DUAL BILLBOARDS)
     ========================= */
+    const steamService = new SteamService();
 
-    this.steamManager = new SteamManager(
+    // 1. Cartel de Tendencias (Trending) - Izquierda
+    const trendingManager = new SteamBillboardManager(
       this.sceneManager.scene,
-      this.cameraManager.camera
+      this.cameraManager.camera,
+      {
+        title: 'Trending Now',
+        subtitle: 'Top by Concurrent Players',
+        icon: '🔥',
+        color: '#66c0f4',
+        position: { x: -10.27, y: 16.27, z: -50 }, 
+        size: { w: 16.4, h: 16.4, r: 2.0 },
+        fetchMethod: () => steamService.getTrendingGames()
+      }
     );
 
-    this.loopManager.addUpdateCallback((dt, time) => {
-      this.steamManager?.update(dt, time);
-    });
+    // 2. Cartel de Novedades (Recent) - Derecha
+    const recentManager = new SteamBillboardManager(
+      this.sceneManager.scene,
+      this.cameraManager.camera,
+      {
+        title: 'New Releases',
+        subtitle: 'Latest on Steam Store',
+        icon: '✨',
+        color: '#00ff88',
+        position: { x: 10.27, y: 16.27, z: -50 }, 
+        size: { w: 16.4, h: 16.4, r: 2.0 },
+        fetchMethod: () => steamService.getRecentGames()
+      }
+    );
 
-    await this.steamManager.init();
+    this.steamManagers = [trendingManager, recentManager];
+
+    // Inicializar ambos
+    await Promise.all(this.steamManagers.map(m => m.init()));
+
+    // Añadir al loop de actualización
+    this.loopManager.addUpdateCallback((dt, time) => {
+      this.steamManagers.forEach(m => m.update(dt, time));
+    });
   }
 
   ngOnDestroy(): void {
@@ -235,6 +300,6 @@ export class MainScenario implements AfterViewInit, OnDestroy {
     if (this.loopManager) {
       this.loopManager.stop();
     }
-    this.steamManager?.dispose();
+    this.steamManagers.forEach(m => m.dispose());
   }
 }

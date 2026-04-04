@@ -13,7 +13,17 @@ export class SteamService {
             const res = await fetch('http://192.168.100.15:3000/games/trending');
             return await res.json();
         } catch (e) {
-            console.error('❌ Error fetching trending games from backend:', e);
+            console.error('❌ Error fetching trending games:', e);
+            return [];
+        }
+    }
+
+    async getRecentGames(): Promise<SteamGame[]> {
+        try {
+            const res = await fetch('http://192.168.100.15:3000/games/recent');
+            return await res.json();
+        } catch (e) {
+            console.error('❌ Error fetching recent games:', e);
             return [];
         }
     }

@@ -117,11 +117,21 @@ export class SteamBillboard {
     this.mesh.position.set(x, y, z);
   }
 
+  private currentImage: HTMLImageElement | null = null;
+  private previousImage: HTMLImageElement | null = null;
+  private transitionAlpha = 1.0; // 0 = anterior, 1 = actual
+  private transitionSpeed = 0.04; // Velocidad del fundido
+
   setImage(url: string) {
     const img = new Image();
-    img.crossOrigin = 'anonymous'; // 🔥 Crucial para evitar errores de seguridad en Canvas
+    img.crossOrigin = 'anonymous'; 
     img.onload = () => {
-      this.drawToCanvas(img);
+      // Si ya hay una imagen actual, la pasamos a "anterior" para el fundido
+      if (this.currentImage) {
+        this.previousImage = this.currentImage;
+      }
+      this.currentImage = img;
+      this.transitionAlpha = 0; // Iniciar transición
     };
     img.onerror = () => {
       this.setFallback();
@@ -129,28 +139,43 @@ export class SteamBillboard {
     img.src = url;
   }
 
-  private drawToCanvas(img: HTMLImageElement) {
+  private renderToCanvas() {
+    const cw = this.canvas.width;
+    const ch = this.canvas.height;
+    
+    this.ctx.clearRect(0, 0, cw, ch);
+    this.ctx.fillStyle = '#0a0f17';
+    this.ctx.fillRect(0, 0, cw, ch);
+
+    // 1. Dibujar imagen anterior (desvaneciéndose)
+    if (this.previousImage && this.transitionAlpha < 1) {
+      this.ctx.globalAlpha = 1 - this.transitionAlpha;
+      this.drawCoverImage(this.previousImage);
+    }
+
+    // 2. Dibujar imagen actual (apareciendo)
+    if (this.currentImage) {
+      this.ctx.globalAlpha = this.transitionAlpha;
+      this.drawCoverImage(this.currentImage);
+    }
+
+    this.ctx.globalAlpha = 1.0;
+    this.canvasTexture.needsUpdate = true;
+  }
+
+  private drawCoverImage(img: HTMLImageElement) {
     const cw = this.canvas.width;
     const ch = this.canvas.height;
     const iw = img.width;
     const ih = img.height;
     
-    // 🎨 LÓGICA DE RECORTADO "COVER" (Como en CSS)
-    // Esto garantiza que la imagen llene el cuadrado sin deformarse
     const ratio = Math.max(cw / iw, ch / ih);
     const nw = iw * ratio;
     const nh = ih * ratio;
-    const nx = (cw - nw) / 2; // Centrado horizontal
-    const ny = (ch - nh) / 2; // Centrado vertical
+    const nx = (cw - nw) / 2;
+    const ny = (ch - nh) / 2;
 
-    // Dibujar en el lienzo 2D
-    this.ctx.clearRect(0, 0, cw, ch);
-    this.ctx.fillStyle = '#0a0f17';
-    this.ctx.fillRect(0, 0, cw, ch);
     this.ctx.drawImage(img, nx, ny, nw, nh);
-    
-    // Notificar a Three.js que la textura ha cambiado
-    this.canvasTexture.needsUpdate = true;
   }
 
   private setFallback() {
@@ -163,6 +188,13 @@ export class SteamBillboard {
   }
 
   update(time: number) {
+    // 1. Manejar transición de imagen
+    if (this.transitionAlpha < 1) {
+      this.transitionAlpha = Math.min(1, this.transitionAlpha + this.transitionSpeed);
+      this.renderToCanvas();
+    }
+
+    // 2. Animación de pulso del brillo
     const pulse = Math.sin(time * 0.003) * 0.5 + 1.5;
     const baseGlow = this.glowMaterial.opacity > 0.6 ? 4 : 2; 
     this.glowMaterial.emissiveIntensity = baseGlow * (pulse * 0.5 + 0.5);

@@ -11,7 +11,7 @@ export class CameraManager {
     // 🔧 POSICIÓN INICIAL DE LA CÁMARA (MODIFICA AQUÍ)
     // Parámetros: (X, Y, Z) - Determina dónde empieza la cámara al cargar.
     // -------------------------------------------------------------------------
-    this.camera.position.set(10, 8, 15); 
+    this.camera.position.set(.27, 26.26, 57.00); 
     // -------------------------------------------------------------------------
   }
 }
