@@ -12,6 +12,7 @@ import { LightsManager } from '../../three/lighting/LightsManager';
 
 import { SteamBillboardManager } from '../../three/overwolrd-Online/Games/managers/SteamBillboardManager';
 import { SteamService } from '../../three/overwolrd-Online/Games/services/SteamService.service';
+import { DiscordService } from '../../three/overwolrd-Online/Games/services/DiscordService.service';
 
 import { FloorManager } from '../../three/environment/FloorManager';
 import { SocketService } from '../../SocialMedia/services/socket.service';
@@ -275,9 +276,41 @@ export class MainScenario implements AfterViewInit, OnDestroy {
       }
     );
 
-    this.steamManagers = [trendingManager, recentManager];
+    /* =========================
+       DISCORD BOTS (TOP.GG)
+    ========================= */
+    const discordService = new DiscordService();
 
-    // Inicializar ambos
+    // 3. Cartel de Top Discord Bots - Centro/Atrás
+    // -------------------------------------------------------------------------
+    // 🎮 POSICIÓN DEL CARTEL DISCORD (MODIFICA AQUÍ)
+    // x: Izquierda(-) / Derecha(+)  |  y: Altura  |  z: Profundidad
+    // -------------------------------------------------------------------------
+    const discordManager = new SteamBillboardManager(
+      this.sceneManager.scene,
+      this.cameraManager.camera,
+      {
+        title: 'Top Discord Bots',
+        subtitle: 'Most Voted on Top.gg',
+        icon: '🤖',
+        color: '#7289da', // Color Discord Blurple
+        position: { x: 0, y: 16.27, z: -70 },
+        size: { w: 16.4, h: 16.4, r: 2.0 },
+        fetchMethod: async () => {
+          const bots = await discordService.getTopBots();
+          // Mapear a la interfaz SteamGame para compatibilidad con el billboard
+          return bots.map(bot => ({
+            appid: parseInt(bot.id) || 0,
+            name: bot.name,
+            image: bot.image // Widget PNG de Top.gg
+          }));
+        }
+      }
+    );
+
+    this.steamManagers = [trendingManager, recentManager, discordManager];
+
+    // Inicializar todos
     await Promise.all(this.steamManagers.map(m => m.init()));
 
     // Añadir al loop de actualización
