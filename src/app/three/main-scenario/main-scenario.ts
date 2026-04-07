@@ -255,7 +255,7 @@ export class MainScenario implements AfterViewInit, OnDestroy {
         subtitle: 'Top by Concurrent Players',
         icon: '🔥',
         color: '#66c0f4',
-        position: { x: -10.27, y: 16.27, z: -50 }, 
+        position: { x: -15.00, y: 16.27, z: -40 }, 
         size: { w: 16.4, h: 16.4, r: 2.0 },
         fetchMethod: () => steamService.getTrendingGames()
       }
@@ -270,18 +270,18 @@ export class MainScenario implements AfterViewInit, OnDestroy {
         subtitle: 'Latest on Steam Store',
         icon: '✨',
         color: '#00ff88',
-        position: { x: 10.27, y: 16.27, z: -50 }, 
+        position: { x: 15.00, y: 16.27, z: -40 }, 
         size: { w: 16.4, h: 16.4, r: 2.0 },
         fetchMethod: () => steamService.getRecentGames()
       }
     );
 
     /* =========================
-       DISCORD BOTS (TOP.GG)
+       DISCORD CHANNELS (TOP.GG)
     ========================= */
     const discordService = new DiscordService();
 
-    // 3. Cartel de Top Discord Bots - Centro/Atrás
+    // 3. Cartel de Top Discord Channel - Centro/Atrás
     // -------------------------------------------------------------------------
     // 🎮 POSICIÓN DEL CARTEL DISCORD (MODIFICA AQUÍ)
     // x: Izquierda(-) / Derecha(+)  |  y: Altura  |  z: Profundidad
@@ -294,7 +294,7 @@ export class MainScenario implements AfterViewInit, OnDestroy {
         subtitle: 'Most Voted on Top.gg',
         icon: '🤖',
         color: '#7289da', // Color Discord Blurple
-        position: { x: 0, y: 16.27, z: -70 },
+        position: { x: -40, y: 16.27, z: -20 },
         size: { w: 16.4, h: 16.4, r: 2.0 },
         fetchMethod: async () => {
           const bots = await discordService.getTopBots();
