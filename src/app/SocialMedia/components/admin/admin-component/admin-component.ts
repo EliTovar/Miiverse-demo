@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'admin-component',
-  imports: [],
+  standalone: true, // 👈 ESTO TE FALTA
+  imports: [RouterModule],
   templateUrl: './admin-component.html',
   styleUrl: './admin-component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminComponent { }

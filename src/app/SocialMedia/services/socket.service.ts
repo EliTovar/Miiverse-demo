@@ -8,11 +8,17 @@ export class SocketService {
   private socket?: Socket;
 
   connect(token?: string): void {
-    if (this.socket) return; // ⛔ CLAVE
+    if (this.socket?.connected) return; 
+
+    if (this.socket) {
+      console.log('🔄 Re-conectando socket existente...');
+      this.socket.connect();
+      return;
+    }
 
     this.socket = io('http://localhost:3000', {
       transports: ['websocket'],
-      auth: token ? { token } : undefined, // 👈 opcional
+      auth: token ? { token } : undefined,
     });
 
     this.socket.on('connect', () => {
@@ -27,6 +33,14 @@ export class SocketService {
       console.error('❌ Error de conexión socket:', err.message);
     });
   }
+  
+    emit(event: string, data: any): void {
+    this.socket?.emit(event, data);
+  }
+
+  on(event: string, callback: (data: any) => void): void {
+    this.socket?.on(event, callback);
+  }
 
   getSocket(): Socket {
     if (!this.socket) throw new Error('Socket no conectado');
@@ -39,4 +53,5 @@ export class SocketService {
     this.socket.disconnect();
     this.socket = undefined;
   }
+  
 }
