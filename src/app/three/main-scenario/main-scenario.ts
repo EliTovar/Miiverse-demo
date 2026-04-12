@@ -448,7 +448,8 @@ export class MainScenario implements AfterViewInit, OnDestroy {
         subtitle: 'Most Active Users',
         icon: '👑',
         color: '#ff4444', 
-        position: { x: 0, y: 16.27, z: 60 }, // En el muro frontal/centro
+        position: { x: -15.00, y: 16.27, z: 40 }, // En el muro frontal/centro
+        //position: { x: -15.00, y: 16.27, z: -40 }, 
         size: { w: 20, h: 20, r: 2.5 },
         fetchMethod: async () => [] // Vacío por ahora
       }
