@@ -3,6 +3,7 @@
 export interface SteamGame {
     appid: number;
     name: string;
+    author?: string; // Nuevo campo opcional
     image: string;
 }
 

@@ -15,10 +15,12 @@ export class SteamBillboard {
 
   private width: number;
   private height: number;
+  private thickness: number;
 
-  constructor(width = 12, height = 12, radius = 0.6) {
+  constructor(width = 20, height = 20, radius = 0.6, thickness = 1.2) {
     this.width = width;
     this.height = height;
+    this.thickness = thickness;
     this.mesh = new THREE.Group();
 
     // 1. Inicializar Canvas 2D para manejo de texturas perfecto
@@ -71,24 +73,35 @@ export class SteamBillboard {
     });
 
     this.poster = new THREE.Mesh(geometry, this.material);
+    this.poster.position.z = (this.thickness / 2) + 0.01; // Justo delante de la superficie frontal
 
-    // 4. Marco de brillo (glow)
-    const glowGeometry = new THREE.ShapeGeometry(
-      this.createRoundedRectShape(width + 0.3, height + 0.3, radius + 0.05)
-    );
-    glowGeometry.center();
+    // 4. 🔥 MARCO 3D REAL (ExtrudeGeometry)
+    // Usamos la misma forma (un poco más grande) pero le damos profundidad
+    const frameShape = this.createRoundedRectShape(width + 0.4, height + 0.4, radius + 0.1);
+    
+    const extrudeSettings = {
+      steps: 1,
+      depth: this.thickness,
+      bevelEnabled: true,
+      bevelThickness: 0.1,
+      bevelSize: 0.1,
+      bevelOffset: 0,
+      bevelSegments: 3
+    };
+
+    const frameGeometry = new THREE.ExtrudeGeometry(frameShape, extrudeSettings);
+    frameGeometry.center();
 
     this.glowMaterial = new THREE.MeshStandardMaterial({
-      color: 0x66c0f4,
-      emissive: 0x66c0f4,
-      emissiveIntensity: 6,
-      transparent: true,
-      opacity: 0.5,
-      side: THREE.DoubleSide,
+      color: 0x1a1a1a, // Color base oscuro metálico
+      emissive: 0x66c0f4, // Brillo del borde
+      emissiveIntensity: 2,
+      roughness: 0.2,
+      metalness: 0.8
     });
 
-    this.glow = new THREE.Mesh(glowGeometry, this.glowMaterial);
-    this.glow.position.z = -0.05;
+    this.glow = new THREE.Mesh(frameGeometry, this.glowMaterial);
+    this.glow.position.z = -this.thickness / 2; // Centrar el bloque
 
     this.mesh.add(this.glow);
     this.mesh.add(this.poster);

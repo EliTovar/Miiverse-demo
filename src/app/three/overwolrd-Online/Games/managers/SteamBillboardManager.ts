@@ -69,35 +69,40 @@ export class SteamBillboardManager {
     });
   }
 
+  private lastMouseX = -1;
+  private lastMouseY = -1;
+
   async init() {
     const p = this.config.position;
     this.billboard.setPosition(p.x, p.y, p.z);
     this.scene.add(this.billboard.mesh);
 
     await this.updateData();
-    this.startRotation();
+    
+    // 🔥 SOLUCIÓN AL LAG (Escalonamiento)
+    // En lugar de rotar todos a la vez, esperamos un tiempo aleatorio entre 0 y 8 segundos
+    const initialDelay = Math.random() * 8000;
+    setTimeout(() => {
+      this.startRotation();
+    }, initialDelay);
 
+    // Actualizar datos cada 10 minutos (600s) para reducir carga de red
     this.updateInterval = window.setInterval(() => {
       this.updateData();
-    }, 60000);
+    }, 600000);
   }
 
   private startRotation() {
     if (this.rotationInterval) clearInterval(this.rotationInterval);
     
-    // -------------------------------------------------------------------------
-    // ⏱️ TIEMPO DE ROTACIÓN (MODIFICA AQUÍ)
-    // El valor está en milisegundos (10000 = 10 segundos).
-    // -------------------------------------------------------------------------
     const rotationTime = 10000; 
-    // -------------------------------------------------------------------------
 
     this.rotationInterval = window.setInterval(() => {
       if (this.games.length > 0) {
-        // Rotar entre todos los juegos disponibles (ahora son 5)
         this.currentIndex = (this.currentIndex + 1) % this.games.length;
         const nextGame = this.games[this.currentIndex];
         this.billboard.setImage(nextGame.image);
+        this.updateLabelContent();
       }
     }, rotationTime);
   }
@@ -121,32 +126,46 @@ export class SteamBillboardManager {
   private updateLabelContent() {
     if (!this.label) return;
 
-    // -------------------------------------------------------------------------
-    // 📋 LISTA DE JUEGOS EN EL LABEL (MODIFICA AQUÍ)
-    // .slice(0, 5) muestra los 5 mejores juegos en el panel flotante.
-    // -------------------------------------------------------------------------
     const topGames = this.games.slice(0, 5);
-    // -------------------------------------------------------------------------
+    const currentGame = this.games[this.currentIndex];
 
     this.label.innerHTML = `
-      <div style="font-weight: bold; font-size: 14px; margin-bottom: 10px; color: ${this.config.color}; letter-spacing: 1px; text-transform: uppercase;">
+      <div style="font-weight: bold; font-size: 14px; margin-bottom: 6px; color: ${this.config.color}; letter-spacing: 1px; text-transform: uppercase;">
         ${this.config.icon} ${this.config.title}
       </div>
+      ${currentGame ? `
+        <div style="font-size: 13px; color: #fff; margin-bottom: 15px; padding: 10px; background: rgba(255,255,255,0.07); border-radius: 6px; border-left: 3px solid ${this.config.color};">
+           <div style="font-weight: bold; margin-bottom: 2px;">${currentGame.name}</div>
+           <div style="color: ${this.config.color}; opacity: 0.8; font-size: 11px; font-style: italic;">por ${currentGame.author || 'Artista Desconocido'}</div>
+        </div>
+      ` : ''}
       <div style="display: flex; flex-direction: column; gap: 8px;">
         ${topGames.map((g, i) => `
-          <div style="display: flex; align-items: center; gap: 10px; opacity: ${this.currentIndex === i ? '1' : '0.6'}">
-            <span style="color: ${this.config.color}; font-weight: bold;">#${i+1}</span>
-            <span style="${this.currentIndex === i ? 'text-decoration: underline; color: #fff;' : 'color: #ccc;'}">${g.name}</span>
+          <div style="display: flex; align-items: center; gap: 10px; opacity: ${this.currentIndex === i ? '1' : '0.4'}">
+            <span style="color: ${this.config.color}; font-weight: bold; font-size: 10px;">#${i+1}</span>
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-size: 11px; font-weight: 500; ${this.currentIndex === i ? 'color: #fff;' : 'color: #aaa;'}">${g.name}</span>
+                <span style="font-size: 9px; color: #666;">${g.author || ''}</span>
+            </div>
           </div>
         `).join('')}
       </div>
-      <div style="margin-top: 12px; font-size: 10px; color: #888; text-align: right;">${this.config.subtitle}</div>
+      <div style="margin-top: 15px; font-size: 10px; color: #555; text-align: right; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;">${this.config.subtitle}</div>
     `;
   }
 
   update(dt: number, time: number) {
     this.billboard.lookAt(this.camera);
     this.billboard.update(time);
+
+    // ⚡ OPTIMIZACIÓN: Solo lanzar rayos si el mouse se ha movido
+    if (this.mouse.x === this.lastMouseX && this.mouse.y === this.lastMouseY) {
+       // Mantener el estado actual (si estaba hovered, sigue hovered)
+       return;
+    }
+    
+    this.lastMouseX = this.mouse.x;
+    this.lastMouseY = this.mouse.y;
 
     this.raycaster.setFromCamera(this.mouse, this.camera);
     const intersects = this.raycaster.intersectObject(this.billboard.mesh, true);

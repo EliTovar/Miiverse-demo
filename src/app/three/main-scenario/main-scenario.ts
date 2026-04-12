@@ -13,6 +13,10 @@ import { LightsManager } from '../../three/lighting/LightsManager';
 import { SteamBillboardManager } from '../../three/overwolrd-Online/Games/managers/SteamBillboardManager';
 import { SteamService } from '../../three/overwolrd-Online/Games/services/SteamService.service';
 import { DiscordService } from '../../three/overwolrd-Online/Games/services/DiscordService.service';
+import { SpotifyService } from '../overwolrd-Online/Games/services/SpotifyService.service';
+import { AnimeService } from '../overwolrd-Online/Games/services/AnimeService.service';
+import { MangaService } from '../overwolrd-Online/Games/services/MangaService.service';
+import { PixivService } from '../overwolrd-Online/Games/services/PixivService.service';
 
 import { FloorManager } from '../../three/environment/FloorManager';
 import { SocketService } from '../../SocialMedia/services/socket.service';
@@ -290,9 +294,9 @@ export class MainScenario implements AfterViewInit, OnDestroy {
       this.sceneManager.scene,
       this.cameraManager.camera,
       {
-        title: 'Top Discord Bots',
+        title: 'Top Discord Channels',
         subtitle: 'Most Voted on Top.gg',
-        icon: '🤖',
+        icon: '🚪',
         color: '#7289da', // Color Discord Blurple
         position: { x: -40, y: 16.27, z: -20 },
         size: { w: 16.4, h: 16.4, r: 2.0 },
@@ -308,7 +312,84 @@ export class MainScenario implements AfterViewInit, OnDestroy {
       }
     );
 
-    this.steamManagers = [trendingManager, recentManager, discordManager];
+    /* =========================
+       SPOTIFY TOP 5
+    ========================= */
+    const spotifyService = new SpotifyService();
+    const spotifyManager = new SteamBillboardManager(
+      this.sceneManager.scene,
+      this.cameraManager.camera,
+      {
+        title: 'Spotify Top 5',
+        subtitle: 'Global Daily Charts',
+        icon: '🎵',
+        color: '#1DB954', // Spotify Green
+        position: { x: 15.00, y: 16.27, z: 40 }, 
+        size: { w: 18, h: 18, r: 2.5 },
+        fetchMethod: () => spotifyService.getTopSongs()
+      }
+    );
+
+    /* =========================
+       ANIME & MANGA (MAL)
+    ========================= */
+    const animeService = new AnimeService();
+    const animeManager = new SteamBillboardManager(
+      this.sceneManager.scene,
+      this.cameraManager.camera,
+      {
+        title: 'Top Anime',
+        subtitle: 'Most Popular on MAL',
+        icon: '📺',
+        color: '#ffc107',
+        position: { x: -40, y: 16.27, z: 20 },
+        size: { w: 16.4, h: 16.4, r: 2.0 },
+        fetchMethod: () => animeService.getTopAnime()
+      }
+    );
+
+    const mangaService = new MangaService();
+    const mangaManager = new SteamBillboardManager(
+      this.sceneManager.scene,
+      this.cameraManager.camera,
+      {
+        title: 'Top Manga',
+        subtitle: 'Top Rated on MAL',
+        icon: '📚',
+        color: '#9c27b0',
+        position: { x: 40, y: 16.27, z: -20 },
+        size: { w: 16.4, h: 16.4, r: 2.0 },
+        fetchMethod: () => mangaService.getTopManga()
+      }
+    );
+
+    /* =========================
+       PIXIV RANKINGS
+    ========================= */
+    const pixivService = new PixivService();
+    const pixivManager = new SteamBillboardManager(
+      this.sceneManager.scene,
+      this.cameraManager.camera,
+      {
+        title: 'Pixiv Daily',
+        subtitle: 'Top Daily Illustrations',
+        icon: '🎨',
+        color: '#0096fa',
+        position: { x: 40, y: 16.27, z: 20 },
+        size: { w: 16.4, h: 16.4, r: 2.0 },
+        fetchMethod: () => pixivService.getDailyRanking()
+      }
+    );
+
+    this.steamManagers = [
+      trendingManager, 
+      recentManager, 
+      discordManager, 
+      spotifyManager,
+      animeManager,
+      mangaManager,
+      pixivManager
+    ];
 
     // Inicializar todos
     await Promise.all(this.steamManagers.map(m => m.init()));
