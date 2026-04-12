@@ -1,0 +1,181 @@
+<div class="miiverse-root">
+
+  <!-- ═══ HEADER ═════════════════════════════════════════════════════════ -->
+  <header class="mv-header">
+    <div class="mv-header-inner">
+      <div class="mv-logo">
+        <span class="mv-logo-icon">🌐</span>
+        <span class="mv-logo-text">Miiverse</span>
+        <span class="mv-logo-badge">Downtown</span>
+      </div>
+      <div class="mv-header-actions">
+        @if (!isGuest) {
+          <button class="mv-btn mv-btn-primary" (click)="openComposer()">
+            <span>✏️</span> Publicar
+          </button>
+        } @else {
+          <span class="mv-guest-hint">Inicia sesión para publicar</span>
+        }
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ COMPOSER MODAL ══════════════════════════════════════════════════ -->
+  @if (showComposer) {
+    <div class="mv-overlay" (click)="closeComposer()"></div>
+    <div class="mv-composer">
+      <div class="mv-composer-header">
+        <h3>Nueva publicación</h3>
+        <button class="mv-close-btn" (click)="closeComposer()">✕</button>
+      </div>
+
+      <!-- Mode tabs -->
+      <div class="mv-tabs">
+        <button class="mv-tab" [class.active]="composerMode === 'text'" (click)="setMode('text')">
+          💬 Texto
+        </button>
+        <button class="mv-tab" [class.active]="composerMode === 'draw'" (click)="setMode('draw')">
+          🎨 Dibujar
+        </button>
+      </div>
+
+      @if (composerMode === 'text') {
+        <textarea
+          class="mv-textarea"
+          [(ngModel)]="composerText"
+          placeholder="¿Qué está pasando en tu aventura?"
+          maxlength="500"
+          rows="5"
+        ></textarea>
+        <div class="mv-char-count">{{ composerText.length }}/500</div>
+      } @else {
+        <div class="mv-canvas-wrap">
+          <canvas #drawingCanvas class="mv-canvas"></canvas>
+        </div>
+        <div class="mv-draw-tools">
+          <div class="mv-color-group">
+            @for (color of ['#1a1a2e','#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#ffffff']; track color) {
+              <button
+                class="mv-color-dot"
+                [style.background]="color"
+                [class.selected]="drawColor === color"
+                (click)="drawColor = color"
+              ></button>
+            }
+          </div>
+          <div class="mv-size-group">
+            <label>Grosor</label>
+            <input type="range" min="1" max="20" [(ngModel)]="drawSize" />
+          </div>
+          <button class="mv-btn mv-btn-ghost mv-btn-sm" (click)="clearCanvas()">🗑 Limpiar</button>
+        </div>
+      }
+
+      <input
+        class="mv-game-input"
+        [(ngModel)]="composerGame"
+        placeholder="🎮 Comunidad / Juego (opcional)"
+      />
+
+      <div class="mv-composer-footer">
+        <button class="mv-btn mv-btn-ghost" (click)="closeComposer()">Cancelar</button>
+        <button
+          class="mv-btn mv-btn-primary"
+          [disabled]="isPosting"
+          (click)="submitPost()"
+        >
+          {{ isPosting ? 'Publicando…' : '🚀 Publicar' }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ═══ FEED ════════════════════════════════════════════════════════════ -->
+  <main class="mv-feed">
+
+    @if (loading()) {
+      <div class="mv-skeletons">
+        @for (n of [1,2,3,4,5]; track n) {
+          <div class="mv-skeleton-card">
+            <div class="sk-avatar"></div>
+            <div class="sk-lines">
+              <div class="sk-line sk-short"></div>
+              <div class="sk-line sk-long"></div>
+              <div class="sk-line sk-medium"></div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="mv-posts">
+        @for (post of posts(); track post.id) {
+          <article class="mv-post">
+
+            <!-- Avatar + meta -->
+            <div class="mv-post-left">
+              <img class="mv-avatar" [src]="post.mii_avatar_url" [alt]="post.username" />
+            </div>
+
+            <div class="mv-post-body">
+              <div class="mv-post-meta">
+                <span class="mv-username">{{ post.username }}</span>
+                @if (post.game_title) {
+                  <span class="mv-community">🎮 {{ post.game_title }}</span>
+                }
+                <span class="mv-time">{{ timeAgo(post.created_at) }}</span>
+              </div>
+
+              @if (post.content_text) {
+                <p class="mv-post-text">{{ post.content_text }}</p>
+              }
+
+              @if (post.drawing_url) {
+                <div class="mv-post-image">
+                  <img [src]="post.drawing_url" alt="Dibujo de {{ post.username }}" loading="lazy" />
+                </div>
+              }
+
+              @if (post.screenshot_url) {
+                <div class="mv-post-image mv-screenshot">
+                  <img [src]="post.screenshot_url" alt="Captura de {{ post.username }}" loading="lazy" />
+                </div>
+              }
+
+              <!-- Actions -->
+              <div class="mv-post-actions">
+                <button
+                  class="mv-yeah-btn"
+                  [class.guest]="isGuest"
+                  [title]="isGuest ? 'Inicia sesión para dar Yeah!' : 'Yeah!'"
+                  (click)="toggleYeah(post)"
+                >
+                  <span class="mv-yeah-icon">★</span>
+                  <span class="mv-yeah-label">Yeah!</span>
+                  <span class="mv-yeah-count">{{ post.yeahs }}</span>
+                </button>
+              </div>
+            </div>
+
+          </article>
+        }
+      </div>
+
+      <!-- Load more -->
+      @if (hasMore) {
+        <div class="mv-load-more">
+          <button class="mv-btn mv-btn-ghost" (click)="loadMore()" [disabled]="loadingMore">
+            {{ loadingMore ? 'Cargando…' : 'Ver más publicaciones' }}
+          </button>
+        </div>
+      }
+
+      @if (posts().length === 0) {
+        <div class="mv-empty">
+          <span class="mv-empty-icon">🌐</span>
+          <p>No hay publicaciones aún.<br>¡Sé el primero en compartir!</p>
+        </div>
+      }
+    }
+  </main>
+
+</div>
