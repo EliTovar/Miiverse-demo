@@ -192,29 +192,85 @@ export class MainScenario implements AfterViewInit, OnDestroy {
     this.loopManager.addUpdateCallback(() => orbitControls.update());
 
     // -------------------------------------------------------------------------
-    // 🛠️ DEBUG HUD (Coordenadas en pantalla)
+    // 🛠️ DEBUG HUD (Coordenadas en pantalla + FPS + Draggable)
     // -------------------------------------------------------------------------
-    const debugHud = document.createElement('div');
+    const HUD_ID = 'camera-debug-hud';
+    let debugHud = document.getElementById(HUD_ID) as HTMLDivElement;
+    
+    // 🔥 SOLUCIÓN A DUPLICADOS: Si ya existe (ej: por re-render), lo eliminamos
+    if (debugHud) {
+      debugHud.remove();
+    }
+
+    debugHud = document.createElement('div');
+    debugHud.id = HUD_ID;
     debugHud.style.position = 'absolute';
     debugHud.style.top = '10px';
     debugHud.style.left = '10px';
-    debugHud.style.padding = '10px';
-    debugHud.style.background = 'rgba(0, 0, 0, 0.7)';
-    debugHud.style.color = '#00ff00';
-    debugHud.style.fontFamily = 'monospace';
+    debugHud.style.padding = '12px';
+    debugHud.style.background = 'rgba(10, 15, 23, 0.9)';
+    debugHud.style.color = '#00ff88';
+    debugHud.style.fontFamily = 'JetBrains Mono, monospace';
     debugHud.style.fontSize = '12px';
-    debugHud.style.borderRadius = '5px';
-    debugHud.style.pointerEvents = 'none';
-    debugHud.style.zIndex = '1000';
+    debugHud.style.borderRadius = '8px';
+    debugHud.style.border = '1px solid rgba(0, 255, 136, 0.3)';
+    debugHud.style.pointerEvents = 'auto';
+    debugHud.style.cursor = 'grab';
+    debugHud.style.zIndex = '10000';
+    debugHud.style.boxShadow = '0 4px 20px rgba(0,0,0,0.5)';
+    debugHud.style.backdropFilter = 'blur(4px)';
     document.body.appendChild(debugHud);
 
-    this.loopManager.addUpdateCallback(() => {
+    // Lógica para arrastrar (Drag)
+    let isDragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    debugHud.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      offsetX = e.clientX - debugHud.offsetLeft;
+      offsetY = e.clientY - debugHud.offsetTop;
+      debugHud.style.cursor = 'grabbing';
+      debugHud.style.borderColor = 'rgba(0, 255, 136, 0.8)';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      debugHud.style.left = (e.clientX - offsetX) + 'px';
+      debugHud.style.top = (e.clientY - offsetY) + 'px';
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+      debugHud.style.cursor = 'grab';
+      debugHud.style.borderColor = 'rgba(0, 255, 136, 0.3)';
+    });
+
+    let fps = 0;
+    let frameCount = 0;
+    let lastTime = performance.now();
+
+    this.loopManager.addUpdateCallback((dt, time) => {
+      // Cálculo de FPS
+      frameCount++;
+      const now = performance.now();
+      if (now - lastTime >= 1000) {
+        fps = Math.round((frameCount * 1000) / (now - lastTime));
+        frameCount = 0;
+        lastTime = now;
+      }
+
       const pos = this.cameraManager.camera.position;
       const target = orbitControls.controls.target;
       debugHud.innerHTML = `
-        <div style="color: #ffaa00; font-weight: bold; margin-bottom: 5px;">🎥 CAMERA DEBUG</div>
-        Cam Pos: ${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)}<br>
-        Target: ${target.x.toFixed(2)}, ${target.y.toFixed(2)}, ${target.z.toFixed(2)}
+        <div style="color: #ffaa00; font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+          <span>🎥 CAMERA DEBUG</span>
+          <span style="background: rgba(0,255,136,0.1); color: #00ff88; padding: 2px 6px; border-radius: 4px; font-size: 10px;">${fps} FPS</span>
+        </div>
+        <div style="opacity: 0.8;">
+          <span style="color: #66c0f4;">POS:</span> ${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)}<br>
+          <span style="color: #66c0f4;">TGT:</span> ${target.x.toFixed(2)}, ${target.y.toFixed(2)}, ${target.z.toFixed(2)}
+        </div>
       `;
     });
 
@@ -381,6 +437,23 @@ export class MainScenario implements AfterViewInit, OnDestroy {
       }
     );
 
+    // -------------------------------------------------------------------------
+    // 🏆 TOP 5 PLAYERS (NUEVO)
+    // -------------------------------------------------------------------------
+    const topPlayersManager = new SteamBillboardManager(
+      this.sceneManager.scene,
+      this.cameraManager.camera,
+      {
+        title: 'Top 5 Players',
+        subtitle: 'Most Active Users',
+        icon: '👑',
+        color: '#ff4444', 
+        position: { x: 0, y: 16.27, z: 60 }, // En el muro frontal/centro
+        size: { w: 20, h: 20, r: 2.5 },
+        fetchMethod: async () => [] // Vacío por ahora
+      }
+    );
+
     this.steamManagers = [
       trendingManager, 
       recentManager, 
@@ -388,14 +461,52 @@ export class MainScenario implements AfterViewInit, OnDestroy {
       spotifyManager,
       animeManager,
       mangaManager,
-      pixivManager
+      pixivManager,
+      topPlayersManager
     ];
 
     // Inicializar todos
     await Promise.all(this.steamManagers.map(m => m.init()));
 
     // Añadir al loop de actualización
+    const occlusionRaycaster = new THREE.Raycaster();
+
     this.loopManager.addUpdateCallback((dt, time) => {
+      // 1. Resetear estados de oclusión al inicio del frame
+      this.steamManagers.forEach(m => m.setOccluded(false));
+
+      // 2. Obtener lista de objetivos (Jugador local + Remotos)
+      const targets: THREE.Object3D[] = [];
+      if (this.multiplayer?.localPlayer) targets.push(this.multiplayer.localPlayer);
+      this.multiplayer?.remotePlayers.forEach(p => targets.push(p.mesh));
+
+      // 3. Detectar oclusión para cada jugador
+      const camPos = this.cameraManager.camera.position;
+      
+      targets.forEach(player => {
+        const direction = player.position.clone().sub(camPos).normalize();
+        const distanceToPlayer = player.position.distanceTo(camPos);
+        
+        occlusionRaycaster.set(camPos, direction);
+        
+        // Intersectamos con todos los billoards
+        const billMeshes = this.steamManagers.map(m => (m as any).billboard.mesh);
+        const intersects = occlusionRaycaster.intersectObjects(billMeshes, true);
+
+        for (const intersect of intersects) {
+          // Si el objeto está más cerca que el jugador, lo marcamos como oclusor
+          if (intersect.distance < distanceToPlayer - 1) {
+            this.steamManagers.forEach(m => {
+              if ((m as any).billboard.mesh === intersect.object || 
+                  (m as any).billboard.mesh.children.includes(intersect.object)) {
+                m.setOccluded(true);
+              }
+            });
+          }
+        }
+      });
+
+      // 4. Update de managers
       this.steamManagers.forEach(m => m.update(dt, time));
     });
   }

@@ -154,8 +154,22 @@ export class SteamBillboardManager {
     `;
   }
 
+  private isOccluded = false;
+  private currentOpacity = 1.0;
+
+  setOccluded(val: boolean) {
+    this.isOccluded = val;
+  }
+
   update(dt: number, time: number) {
     this.billboard.lookAt(this.camera);
+
+    // ⚡ INTERPOLACIÓN DE OPACIDAD (X-Ray Effect)
+    // Si está ocluido, bajar a 0.3. Si no, volver a 1.0.
+    const targetOpacity = this.isOccluded ? 0.3 : 1.0;
+    this.currentOpacity = THREE.MathUtils.lerp(this.currentOpacity, targetOpacity, 0.1);
+    this.billboard.setOpacity(this.currentOpacity);
+
     this.billboard.update(time);
 
     // ⚡ OPTIMIZACIÓN: Solo lanzar rayos si el mouse se ha movido
@@ -192,5 +206,6 @@ export class SteamBillboardManager {
     if (this.updateInterval) clearInterval(this.updateInterval);
     if (this.rotationInterval) clearInterval(this.rotationInterval);
     if (this.label) this.label.remove();
+    this.billboard.dispose();
   }
 }
