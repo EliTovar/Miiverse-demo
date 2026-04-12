@@ -16,7 +16,7 @@ export class SocketService {
       return;
     }
 
-    this.socket = io('http://localhost:3000', {
+    this.socket = io('http://192.168.100.15:3000', {
       transports: ['websocket'],
       auth: token ? { token } : undefined,
     });
@@ -45,6 +45,14 @@ export class SocketService {
   getSocket(): Socket {
     if (!this.socket) throw new Error('Socket no conectado');
     return this.socket;
+  }
+
+  authenticate(token: string): void {
+    if (!this.socket) {
+      this.connect(token);
+      return;
+    }
+    this.socket.emit('authenticate', { token });
   }
 
   disconnect(): void {

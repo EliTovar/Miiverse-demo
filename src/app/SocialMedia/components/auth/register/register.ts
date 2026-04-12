@@ -16,7 +16,7 @@ export class RegisterComponent {
   password = '';
 
   register() {
-    this.http.post('http://localhost:3000/auth/register', {
+    this.http.post('http://192.168.100.15:3000/auth/register', {
       username: this.username,
       email: this.email,
       password: this.password,

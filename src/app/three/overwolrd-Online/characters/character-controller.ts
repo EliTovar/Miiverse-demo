@@ -19,19 +19,19 @@ private enabled = true;
   mixer: THREE.AnimationMixer;
   actions: Record<string, THREE.AnimationAction> = {};
   currentAction?: THREE.AnimationAction;
-  currentAnimationName: AnimationName = 'idle';
+  currentAnimationName: string = '';
 
   // movimiento
   velocity = new THREE.Vector3();
   direction = new THREE.Vector3();
-  speed = 0.2;
+  speed = 10; // unidades por segundo
   rotationSpeed = 3;
 
   // salto
   isJumping = false;
   jumpVelocity = 0;
-  jumpForce = 0.3;
-  gravity = -0.02;
+  jumpForce = 15;
+  gravity = -40;
 
   // input
   keys: KeyState = {
@@ -41,6 +41,9 @@ private enabled = true;
     d: false,
     space: false,
   };
+
+  // persistent math objects to avoid GC pressure
+  private tempVector = new THREE.Vector3();
 
   constructor(
     personaje: THREE.Group,
@@ -64,16 +67,17 @@ private enabled = true;
   ========================= */
 
   private initAnimations(clips: THREE.AnimationClip[]) {
+    if (!clips || clips.length === 0) {
+      console.warn('⚠️ No se recibieron animaciones para el personaje');
+      return;
+    }
     clips.forEach((clip) => {
-      clip.tracks = clip.tracks.filter(
-        (t) => !t.name.toLowerCase().includes('.position')
-      );
-
       const name = clip.name.toLowerCase();
       this.actions[name] = this.mixer.clipAction(clip);
     });
 
     this.play('idle');
+    this.mixer.update(0); // 🔥 ARRANQUE FORZADO: Evita T-pose al aparecer
   }
 
   play(name: AnimationName) {
@@ -162,12 +166,10 @@ private enabled = true;
   }
 
   update(delta: number) {
-    if (!this.enabled) return;       // ⬅️ CLAVE
-    // console.log('🎮 controller update', this.enabled);
-
-    if (!InputGate.enabled) return; // ⛔ BLOQUEO TOTAL
-
     this.mixer.update(delta);
+    if (!this.enabled) return;       // ⬅️ CLAVE
+    if (!InputGate.enabled && this.isLocal) return; // ⛔ Solo bloquea local
+
 
     if (!this.isLocal) return;
 
@@ -192,18 +194,27 @@ private enabled = true;
     if (this.keys.s) dir = -1;
 
     if (dir !== 0) {
-      const forward = new THREE.Vector3(0, 0, 1);
-      forward.applyQuaternion(this.personaje.quaternion);
-      forward.y = 0;
-      forward.normalize();
-      forward.multiplyScalar(this.speed * dir);
-      this.personaje.position.add(forward);
+      this.tempVector.set(0, 0, 1);
+      this.tempVector.applyQuaternion(this.personaje.quaternion);
+      this.tempVector.y = 0;
+      this.tempVector.normalize();
+      // Multiplicar por delta para independencia de FPS
+      this.tempVector.multiplyScalar(this.speed * dir * delta);
+      this.personaje.position.add(this.tempVector);
     }
+
+    // -------------------------------------------------------------------------
+    // 🧱 LÍMITES DEL MAPA (MUROS INVISIBLES)
+    // -------------------------------------------------------------------------
+    const mapLimit = 40; // El suelo mide 80frenamos un poco antes
+    this.personaje.position.x = Math.max(-mapLimit, Math.min(mapLimit, this.personaje.position.x));
+    this.personaje.position.z = Math.max(-mapLimit, Math.min(mapLimit, this.personaje.position.z));
+    // -------------------------------------------------------------------------
 
     // salto + gravedad
     if (this.isJumping) {
-      this.personaje.position.y += this.jumpVelocity;
-      this.jumpVelocity += this.gravity;
+      this.personaje.position.y += this.jumpVelocity * delta;
+      this.jumpVelocity += this.gravity * delta;
 
       if (this.personaje.position.y <= 0) {
         this.personaje.position.y = 0;

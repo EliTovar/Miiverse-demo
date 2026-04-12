@@ -29,7 +29,7 @@ export class LoginComponent {
 
   login() {
     this.http
-      .post<{ access_token: string }>('http://localhost:3000/auth/login', {
+      .post<{ access_token: string }>('http://192.168.100.15:3000/auth/login', {
         email: this.email,
         password: this.password,
       })
@@ -40,7 +40,8 @@ export class LoginComponent {
 
           this.auth.login(res.access_token, role);
 
-          this.socketService.connect(); //conectar al socket
+          this.socketService.connect(); // Asegurar conexión
+          this.socketService.authenticate(res.access_token); // 🔥 Re-identificar jugador
 
           this.router.navigate([role === 'admin' ? '/social/admin' : '']);
         },
