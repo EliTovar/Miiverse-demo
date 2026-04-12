@@ -86,10 +86,11 @@ export class SteamBillboardManager {
       this.startRotation();
     }, initialDelay);
 
-    // Actualizar datos cada 10 minutos (600s) para reducir carga de red
+    // Actualizar datos cada 3 minutos (180s) para mostrar actualizaciones más rápido.
+    // El backend ya tiene caché, por lo que esto es muy ligero.
     this.updateInterval = window.setInterval(() => {
       this.updateData();
-    }, 600000);
+    }, 180000);
   }
 
   private startRotation() {

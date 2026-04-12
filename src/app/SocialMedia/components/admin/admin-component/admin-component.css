@@ -1,7 +1,10 @@
+
 :host {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100vh; /* 🔥 clave */
+  min-height: 0;
+  width: 100%;
 }
 
 :host ::ng-deep router-outlet + * {
