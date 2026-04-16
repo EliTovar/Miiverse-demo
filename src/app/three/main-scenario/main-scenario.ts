@@ -53,7 +53,15 @@ export class MainScenario implements AfterViewInit, OnDestroy {
     if (socket.connected) return Promise.resolve();
 
     return new Promise((resolve) => {
+      // Timeout de seguridad: si en 3 segundos no conecta, procedemos igual
+      // para no bloquear la carga de la escena principal.
+      const timeout = setTimeout(() => {
+        console.warn('⚠️ Timeout esperando socket. La escena cargará en modo offline/espectador.');
+        resolve();
+      }, 3000);
+
       socket.once('connect', () => {
+        clearTimeout(timeout);
         console.log('🟢 Socket listo para multiplayer');
         resolve();
       })

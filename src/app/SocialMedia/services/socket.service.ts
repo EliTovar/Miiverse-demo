@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
+import { API_CONFIG } from '../../config/api.config';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +17,7 @@ export class SocketService {
       return;
     }
 
-    this.socket = io('http://192.168.100.15:3000', {
+    this.socket = io(API_CONFIG.SOCKET_URL, {
       transports: ['websocket'],
       auth: token ? { token } : undefined,
     });

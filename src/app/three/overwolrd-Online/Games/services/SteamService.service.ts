@@ -1,4 +1,5 @@
 // three/Games/services/SteamService.ts
+import { API_CONFIG } from '../../../../config/api.config';
 
 export interface SteamGame {
     appid: number;
@@ -11,7 +12,7 @@ export class SteamService {
 
     async getTrendingGames(): Promise<SteamGame[]> {
         try {
-            const res = await fetch('http://192.168.100.15:3000/games/trending');
+            const res = await fetch(`${API_CONFIG.BASE_URL}/games/trending`);
             return await res.json();
         } catch (e) {
             console.error('❌ Error fetching trending games:', e);
@@ -21,7 +22,7 @@ export class SteamService {
 
     async getRecentGames(): Promise<SteamGame[]> {
         try {
-            const res = await fetch('http://192.168.100.15:3000/games/recent');
+            const res = await fetch(`${API_CONFIG.BASE_URL}/games/recent`);
             return await res.json();
         } catch (e) {
             console.error('❌ Error fetching recent games:', e);

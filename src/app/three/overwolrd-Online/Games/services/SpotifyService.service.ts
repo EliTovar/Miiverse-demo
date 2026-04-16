@@ -1,4 +1,5 @@
 // three/Games/services/SpotifyService.service.ts
+import { API_CONFIG } from '../../../../config/api.config';
 
 export interface SpotifySong {
     appid: number;
@@ -10,9 +11,7 @@ export class SpotifyService {
 
     async getTopSongs(): Promise<SpotifySong[]> {
         try {
-            // Usamos localhost o la IP configurada si es necesario. 
-            // En este entorno parece usarse 192.168.100.15 para el backend.
-            const res = await fetch('http://192.168.100.15:3000/spotify/top5');
+            const res = await fetch(`${API_CONFIG.BASE_URL}/spotify/top5`);
             return await res.json();
         } catch (e) {
             console.error('❌ Error fetching Spotify top songs:', e);

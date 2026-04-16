@@ -118,9 +118,15 @@ export class SteamBillboardManager {
           this.billboard.setImage(topGame.image);
         }
         this.updateLabelContent();
+      } else {
+        // ⚠️ Si la lista está vacía (error de red o API), mostramos el aviso visual
+        this.billboard.setErrorMessage('⚠️ Error de Carga');
       }
     } catch (e) {
       console.error(`❌ Billboard Update Error [${this.config.title}]`, e);
+      // ⚠️ También mostramos el error si la petición falló por completo
+      this.billboard.setErrorMessage('⚠️ Error de Red');
+      this.updateLabelContent();
     }
   }
 
@@ -141,7 +147,7 @@ export class SteamBillboardManager {
         </div>
       ` : ''}
       <div style="display: flex; flex-direction: column; gap: 8px;">
-        ${topGames.map((g, i) => `
+        ${topGames.length > 0 ? topGames.map((g, i) => `
           <div style="display: flex; align-items: center; gap: 10px; opacity: ${this.currentIndex === i ? '1' : '0.4'}">
             <span style="color: ${this.config.color}; font-weight: bold; font-size: 10px;">#${i+1}</span>
             <div style="display: flex; flex-direction: column;">
@@ -149,7 +155,11 @@ export class SteamBillboardManager {
                 <span style="font-size: 9px; color: #666;">${g.author || ''}</span>
             </div>
           </div>
-        `).join('')}
+        `).join('') : `
+          <div style="color: #666; font-size: 11px; font-style: italic; padding: 10px; text-align: center;">
+            No se pudieron cargar los datos.<br>Verifica tu conexión.
+          </div>
+        `}
       </div>
       <div style="margin-top: 15px; font-size: 10px; color: #555; text-align: right; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;">${this.config.subtitle}</div>
     `;

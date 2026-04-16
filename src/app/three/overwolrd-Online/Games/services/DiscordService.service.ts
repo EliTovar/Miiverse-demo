@@ -1,4 +1,5 @@
 // three/Discord/services/DiscordService.ts
+import { API_CONFIG } from '../../../../config/api.config';
 
 export interface DiscordBot {
     id: string;
@@ -13,7 +14,7 @@ export class DiscordService {
 
     async getTopBots(): Promise<DiscordBot[]> {
         try {
-            const res = await fetch('http://192.168.100.15:3000/discord/top-bots');
+            const res = await fetch(`${API_CONFIG.BASE_URL}/discord/top-bots`);
             return await res.json();
         } catch (e) {
             console.error('❌ Error fetching top Discord bots:', e);
@@ -23,7 +24,7 @@ export class DiscordService {
 
     async getTrendingBots(): Promise<DiscordBot[]> {
         try {
-            const res = await fetch('http://192.168.100.15:3000/discord/trending-bots');
+            const res = await fetch(`${API_CONFIG.BASE_URL}/discord/trending-bots`);
             return await res.json();
         } catch (e) {
             console.error('❌ Error fetching trending Discord bots:', e);

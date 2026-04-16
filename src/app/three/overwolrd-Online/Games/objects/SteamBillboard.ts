@@ -77,8 +77,8 @@ export class SteamBillboard {
     // 3. Material del póster con Shader Personalizado (GPU-side transitions)
     this.material = new THREE.ShaderMaterial({
       uniforms: {
-        tex1: { value: this.blackTex.clone() },
-        tex2: { value: this.blackTex.clone() },
+        tex1: { value: this.blackTex },
+        tex2: { value: this.blackTex },
         transition: { value: 1.0 },
         uOpacity: { value: 1.0 },
         emissiveIntensity: { value: 1.2 }
@@ -174,14 +174,66 @@ export class SteamBillboard {
         // Rotar texturas
         this.material.uniforms['tex1'].value = this.material.uniforms['tex2'].value;
         this.material.uniforms['tex2'].value = texture;
-        
         this.transitionAlpha = 0; 
       },
       undefined,
       () => {
-        this.setFallback();
+        this.setErrorMessage('⚠️ Error de Carga');
       }
     );
+  }
+
+  public setErrorMessage(text: string) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Fondo oscuro con gradiente
+    const grad = ctx.createLinearGradient(0, 0, 0, 512);
+    grad.addColorStop(0, '#1a1a1a');
+    grad.addColorStop(1, '#000000');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Borde rojo de advertencia
+    ctx.strokeStyle = '#ff4444';
+    ctx.lineWidth = 20;
+    ctx.strokeRect(10, 10, 492, 492);
+
+    // Texto de error
+    ctx.fillStyle = '#ff4444';
+    ctx.font = 'bold 48px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 256, 256);
+    
+    // Subtexto interactivo
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '24px Arial';
+    ctx.fillText('Reintentando en unos minutos...', 256, 320);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.needsUpdate = true;
+
+    // Rotar texturas
+    const oldTex = this.material.uniforms['tex1'].value;
+    if (oldTex && oldTex !== this.blackTex && !(oldTex instanceof THREE.CanvasTexture)) {
+        oldTex.dispose();
+    }
+
+    this.material.uniforms['tex1'].value = this.material.uniforms['tex2'].value;
+    this.material.uniforms['tex2'].value = texture;
+    
+    // Si la textura anterior era negra, mostramos el error instantáneamente
+    if (this.material.uniforms['tex1'].value === this.blackTex) {
+        this.transitionAlpha = 1.0;
+        this.material.uniforms['transition'].value = 1.0;
+    } else {
+        this.transitionAlpha = 0;
+    }
   }
 
   private setFallback() {

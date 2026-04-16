@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_CONFIG } from '../../config/api.config';
 
 export interface MiiversePost {
   id: number;
@@ -18,7 +19,7 @@ export interface MiiversePost {
 
 @Injectable({ providedIn: 'root' })
 export class MiiverseApiService {
-  private readonly base = 'http://192.168.100.15:3000/miiverse';
+  private readonly base = API_CONFIG.MIIVERSE_URL;
   private http = inject(HttpClient);
 
   getFeed(page = 1, limit = 20): Observable<MiiversePost[]> {

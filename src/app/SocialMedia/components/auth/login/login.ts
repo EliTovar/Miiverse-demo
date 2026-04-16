@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SocialMediaServicie, Role } from '../../../services/social-media.service';
 import { SocketService } from '../../../services/socket.service';
+import { API_CONFIG } from '../../../../config/api.config';
 
 
 @Component({
@@ -29,7 +30,7 @@ export class LoginComponent {
 
   login() {
     this.http
-      .post<{ access_token: string }>('http://192.168.100.15:3000/auth/login', {
+      .post<{ access_token: string }>(`${API_CONFIG.BASE_URL}/auth/login`, {
         email: this.email,
         password: this.password,
       })
