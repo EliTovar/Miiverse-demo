@@ -13,12 +13,6 @@ export const SOCIAL_MEDIA_ROUTES: Routes = [
         component: MiiverseFeed 
     },
     {
-    path: 'create-post',
-    component: CreatePost,
-    canActivate: [AuthGuard],
-    data: { roles: ['user', 'admin'] },
-    },
-    {
     path: 'admin',
     component: AdminComponent,
     canActivate: [AuthGuard],

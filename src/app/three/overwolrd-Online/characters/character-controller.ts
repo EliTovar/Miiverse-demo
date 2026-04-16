@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { InputGate } from './InputGate';
+import { SocialBubble } from './SocialBubble';
 
 export type AnimationName = 'idle' | 'walk' | 'back' | 'jump';
 
@@ -20,6 +21,9 @@ private enabled = true;
   actions: Record<string, THREE.AnimationAction> = {};
   currentAction?: THREE.AnimationAction;
   currentAnimationName: string = '';
+  
+  // 🟢 Social Bubble (Burbuja de dibujo)
+  public socialBubble?: SocialBubble;
 
   // movimiento
   velocity = new THREE.Vector3();
@@ -60,6 +64,10 @@ private enabled = true;
     if (this.isLocal) {
       this.initListeners();
     }
+
+    // Inicializar burbuja (pero no mostrarla aún)
+    this.socialBubble = new SocialBubble();
+    this.personaje.parent?.add(this.socialBubble.mesh); // Agregar a la escena (parent del model)
   }
 
   /* =========================
@@ -154,15 +162,22 @@ private enabled = true;
     }
   }
 
-  /* =========================
-     MOVIMIENTO
-  ========================= */
-
   private jump() {
     if (this.isJumping) return;
     this.isJumping = true;
     this.jumpVelocity = this.jumpForce;
     this.play('jump');
+  }
+
+  setSocialBubble(url: string) {
+    if (!this.socialBubble) return;
+    
+    // Asegurarnos que está en la escena principal
+    if (this.personaje.parent && !this.socialBubble.mesh.parent) {
+        this.personaje.parent.add(this.socialBubble.mesh);
+    }
+    
+    this.socialBubble.show(url);
   }
 
   update(delta: number) {
@@ -221,6 +236,18 @@ private enabled = true;
         this.isJumping = false;
         this.play(this.keys.w ? 'walk' : 'idle');
       }
+    }
+
+    // Actualizar burbuja social
+    if (this.socialBubble && this.personaje.parent) {
+      // Necesitamos acceso a la cámara. Como el controlador no la tiene, 
+      // la pasaremos desde el update global o usaremos una referencia global de Three.
+      // Opción B: Si no hay cámara, solo actualizamos posición y MainScenario maneja el lookAt.
+      this.socialBubble.mesh.position.set(
+        this.personaje.position.x,
+        this.personaje.position.y + 11,
+        this.personaje.position.z
+      );
     }
   } 
 }

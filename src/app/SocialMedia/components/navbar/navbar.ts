@@ -3,6 +3,7 @@ import { MenuItem } from 'primeng/api';
 import { MenubarModule } from 'primeng/menubar';
 import { SocialMediaServicie } from '../../services/social-media.service';
 import { Router } from '@angular/router';
+import { ComposerService } from '../../services/composer.service';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 
@@ -15,6 +16,7 @@ import { ButtonModule } from 'primeng/button';
 export class Navbar {
   auth = inject(SocialMediaServicie);
   router = inject(Router);
+  private composerService = inject(ComposerService);
 
   items: MenuItem[] = [];
 
@@ -35,7 +37,9 @@ export class Navbar {
       this.items.push({
         label: 'Crear Post',
         icon: 'pi pi-plus',
-        routerLink: '/create-post',
+        command: () => {
+          this.composerService.open({ mode: 'draw-only' });
+        }
       });
     }
 

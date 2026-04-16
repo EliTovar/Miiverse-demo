@@ -22,6 +22,7 @@ import { FloorManager } from '../../three/environment/FloorManager';
 import { SocketService } from '../../SocialMedia/services/socket.service';
 import { MultiplayerManager } from '../overwolrd-Online/multiplayer/MultiplayerManager';
 import { SocialMediaServicie } from '../../SocialMedia/services/social-media.service';
+import { ComposerService } from '../../SocialMedia/services/composer.service';
 import { effect } from '@angular/core';
 
 // let loopManager: LoopManager | null = null;
@@ -104,8 +105,8 @@ export class MainScenario implements AfterViewInit, OnDestroy {
 
   constructor(
     private socketService: SocketService,
-    private auth: SocialMediaServicie
-
+    private auth: SocialMediaServicie,
+    private composerService: ComposerService
   ) {
     effect(() => {
       const role = this.auth.role();
@@ -302,6 +303,19 @@ export class MainScenario implements AfterViewInit, OnDestroy {
 
     // 🔥 Crear multiplayer inicial una vez que la escena ya existe
     await this.setupMultiplayer();
+
+    // 🎨 CONEXIÓN COMPOSER -> 3D BUBBLE
+    this.composerService.postCreated.subscribe((post) => {
+      if (post.drawing_url && this.multiplayer?.localController) {
+        // 1. Mostrar localmente
+        this.multiplayer.localController.setSocialBubble(post.drawing_url);
+        
+        // 2. Notificar al servidor para que otros lo vean
+        this.socketService.getSocket().emit('show-post-bubble', { 
+            drawing_url: post.drawing_url 
+        });
+      }
+    });
 
     /* =========================
        START LOOP
@@ -515,7 +529,21 @@ export class MainScenario implements AfterViewInit, OnDestroy {
         }
       });
 
-      // 4. Update de managers
+      // 5. Billboard logic para las burbujas sociales (Mirar cámara)
+      if (this.multiplayer) {
+          // Local
+          const localPos = this.multiplayer.localPlayer?.position;
+          if (localPos) {
+            this.multiplayer.localController?.socialBubble?.update(this.cameraManager.camera, localPos);
+          }
+          
+          // Remotos
+          this.multiplayer.remotePlayers.forEach(p => {
+              p.controller.socialBubble?.update(this.cameraManager.camera, p.mesh.position);
+          });
+      }
+
+      // 6. Update de managers
       this.steamManagers.forEach(m => m.update(dt, time));
     });
   }

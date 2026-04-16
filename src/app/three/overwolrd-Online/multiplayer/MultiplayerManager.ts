@@ -103,6 +103,16 @@ export class MultiplayerManager {
       if (data.id === this.socket.id) return;
       this.updateRemotePlayer(data);
     });
+
+    this.socket.on('player-posted', (data: { id: string, drawing_url: string }) => {
+      console.log('📡 Jugador publicó dibujo:', data.id);
+      if (data.id === this.socket.id) return;
+      
+      const remote = this.remotePlayers.get(data.id);
+      if (remote) {
+        remote.controller.setSocialBubble(data.drawing_url);
+      }
+    });
   }
 
   setMode(mode: ClientMode) {
