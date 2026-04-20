@@ -1,9 +1,9 @@
 :host ::ng-deep .p-menubar {
-    border: none !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    padding: 0.5rem 1rem !important;
-    width: 100%;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.05); /* Sutil separación */
+    border-radius: 0;
+    padding: 0.25rem 1.5rem;
+    background: transparent !important; /* Mantenemos fondo transparente si el padre ya es oscuro */
 }
 
 :host {

@@ -1,8 +1,7 @@
-/* Tailwind */
+@layer primeng, tailwind-utilities;
+
+/* Tailwind 4 — Importación simplificada */
 @import "tailwindcss";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 @import "primeicons/primeicons.css";
 

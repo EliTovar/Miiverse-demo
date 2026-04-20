@@ -1,4 +1,11 @@
 <p-menubar [model]="items">
+  <ng-template pTemplate="start">
+    <div class="flex items-center gap-2 mr-6">
+      <span class="text-2xl">🌐</span>
+      <span class="font-bold text-xl tracking-tight text-white hidden md:block">Miiverse</span>
+    </div>
+  </ng-template>
+
   <ng-template pTemplate="end">
     <button
       *ngIf="auth.isGuest()"

@@ -5,6 +5,8 @@ import {
   ElementRef,
   inject,
   OnInit,
+  AfterViewInit,
+  OnDestroy,
   signal,
   ViewChild,
 } from '@angular/core';
@@ -23,11 +25,15 @@ import { ComposerService } from '../../services/composer.service';
   styleUrl: './miiverse-feed.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MiiverseFeed implements OnInit {
+export class MiiverseFeed implements OnInit, AfterViewInit, OnDestroy {
   private api = inject(MiiverseApiService);
   private auth = inject(SocialMediaServicie);
   private cdr = inject(ChangeDetectorRef);
   private composerService = inject(ComposerService);
+
+  @ViewChild('scrollAnchor') scrollAnchor?: ElementRef;
+  @ViewChild('scrollContainer') scrollContainer?: ElementRef;
+  private observer?: IntersectionObserver;
 
   posts = signal<MiiversePost[]>([]);
   loading = signal(true);
@@ -40,6 +46,37 @@ export class MiiverseFeed implements OnInit {
   ngOnInit() {
     this.loadFeed();
     this.setupComposerListener();
+  }
+
+  ngAfterViewInit() {
+    this.initInfiniteScroll();
+  }
+
+  ngOnDestroy() {
+    if (this.observer) {
+      this.observer.disconnect();
+    }
+  }
+
+  private initInfiniteScroll() {
+    if (typeof IntersectionObserver === 'undefined') return;
+
+    // 💡 Usamos el contenedor .mv-feed como root para mayor precisión en scroll anidado
+    const options: IntersectionObserverInit = {
+      root: this.scrollContainer?.nativeElement || null,
+      rootMargin: '400px', // Aumentamos el margen para una carga más fluida
+      threshold: 0
+    };
+
+    this.observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && this.hasMore && !this.loadingMore && !this.loading()) {
+        this.loadMore();
+      }
+    }, options);
+
+    if (this.scrollAnchor) {
+      this.observer.observe(this.scrollAnchor.nativeElement);
+    }
   }
 
   setupComposerListener() {

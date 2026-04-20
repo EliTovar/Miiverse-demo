@@ -17,7 +17,14 @@ export const appConfig: ApplicationConfig = {
 
     providePrimeNG({
       theme: {
-        preset: Aura
+        preset: Aura,
+        options: {
+          darkModeSelector: '.dark', // Sincronizado con Tailwind
+          cssLayer: {
+            name: 'primeng',
+            order: 'primeng, tailwind-utilities'
+          }
+        }
       }
     }),
 

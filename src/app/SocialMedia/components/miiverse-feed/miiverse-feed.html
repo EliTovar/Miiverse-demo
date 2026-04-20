@@ -21,7 +21,7 @@
   </header>
 
   <!-- ═══ FEED ════════════════════════════════════════════════════════════ -->
-  <main class="mv-feed">
+  <main class="mv-feed" #scrollContainer>
 
     @if (loading()) {
       <div class="mv-skeletons">
@@ -90,12 +90,19 @@
         }
       </div>
 
-      <!-- Load more -->
-      @if (hasMore) {
-        <div class="mv-load-more">
-          <button class="mv-btn mv-btn-ghost" (click)="loadMore()" [disabled]="loadingMore">
-            {{ loadingMore ? 'Cargando…' : 'Ver más publicaciones' }}
-          </button>
+      <div #scrollAnchor class="mv-scroll-anchor"></div>
+
+      <!-- Loading More Indicator -->
+      @if (loadingMore) {
+        <div class="mv-load-more-status">
+          <span class="mv-spinner"></span>
+          Cargando más publicaciones...
+        </div>
+      }
+
+      @if (!hasMore && posts().length > 0) {
+        <div class="mv-end-message">
+          ✨ Has llegado al final del feed histórico.
         </div>
       }
 

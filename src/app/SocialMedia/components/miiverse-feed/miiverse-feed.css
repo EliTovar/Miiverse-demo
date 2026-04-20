@@ -1,6 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* ══════════════════════════════════════════════
+   HOST — Asegurar que el componente ocupe el alto
+   total dado por el flex parent (.app-content)
+══════════════════════════════════════════════ */
+:host {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  min-height: 0; /* Importante para flexbox scroll */
+}
+
+/* ══════════════════════════════════════════════
    ROOT — Pantalla completa, sin scroll externo
 ══════════════════════════════════════════════ */
 .miiverse-root {
@@ -106,8 +117,13 @@
   scrollbar-width: thin;
   scrollbar-color: #1e3050 transparent;
 }
-.mv-feed::-webkit-scrollbar { width: 5px; }
-.mv-feed::-webkit-scrollbar-thumb { background: #1e3050; border-radius: 10px; }
+.mv-feed::-webkit-scrollbar { width: 8px; }
+.mv-feed::-webkit-scrollbar-thumb { 
+  background: #2a3d5e; 
+  border-radius: 10px;
+  border: 2px solid #0b0e1a;
+}
+.mv-feed::-webkit-scrollbar-thumb:hover { background: #3a4d7e; }
 
 .mv-posts {
   display: flex;
@@ -276,3 +292,42 @@
 }
 .mv-empty-icon { font-size: 48px; display: block; margin-bottom: 16px; }
 .mv-empty p { font-size: 14px; line-height: 1.7; }
+
+/* Infinite Scroll UI */
+.mv-scroll-anchor {
+  height: 20px;
+  width: 100%;
+}
+
+.mv-load-more-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 30px 0;
+  color: #0096fa;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.mv-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0, 150, 250, 0.2);
+  border-top-color: #0096fa;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.mv-end-message {
+  text-align: center;
+  padding: 40px 0;
+  color: #556;
+  font-size: 13px;
+  font-style: italic;
+  border-top: 1px dashed rgba(255,255,255,0.05);
+}
