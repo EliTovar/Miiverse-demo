@@ -1,21 +1,16 @@
-/* Tarjeta de login/registro estilo Miiverse (Wii U). Compartida por ambos componentes. */
+/* Formulario de login/registro dentro del panel central. Compartido por ambos componentes. */
 
 :host {
   display: block;
-  padding: 40px 16px;
+  padding: 32px 20px 36px;
 }
 
 .mv-auth-card {
-  max-width: 400px;
+  max-width: 380px;
   margin: 0 auto;
-  padding: 28px 28px 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: #fff;
-  border: 1px solid var(--mv-border);
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .mv-auth-card h2 {

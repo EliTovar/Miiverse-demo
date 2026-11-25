@@ -5,7 +5,6 @@ import {
   ElementRef,
   inject,
   OnInit,
-  AfterViewInit,
   OnDestroy,
   signal,
   ViewChild,
@@ -25,15 +24,23 @@ import { ComposerService } from '../../services/composer.service';
   styleUrl: './miiverse-feed.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MiiverseFeed implements OnInit, AfterViewInit, OnDestroy {
+export class MiiverseFeed implements OnInit, OnDestroy {
   private api = inject(MiiverseApiService);
   private auth = inject(SocialMediaServicie);
   private cdr = inject(ChangeDetectorRef);
   private composerService = inject(ComposerService);
 
-  @ViewChild('scrollAnchor') scrollAnchor?: ElementRef;
-  @ViewChild('scrollContainer') scrollContainer?: ElementRef;
   private observer?: IntersectionObserver;
+
+  /**
+   * El ancla está dentro del bloque que solo se pinta cuando termina la carga
+   * inicial, así que no existe en ngAfterViewInit. Con un setter la observamos
+   * en cuanto Angular la crea.
+   */
+  @ViewChild('scrollAnchor') set scrollAnchor(anchor: ElementRef | undefined) {
+    this.observer?.disconnect();
+    if (anchor) this.observer?.observe(anchor.nativeElement);
+  }
 
   posts = signal<MiiversePost[]>([]);
   loading = signal(true);
@@ -44,12 +51,9 @@ export class MiiverseFeed implements OnInit, AfterViewInit, OnDestroy {
   get isGuest() { return this.auth.isGuest(); }
 
   ngOnInit() {
+    this.initInfiniteScroll();
     this.loadFeed();
     this.setupComposerListener();
-  }
-
-  ngAfterViewInit() {
-    this.initInfiniteScroll();
   }
 
   ngOnDestroy() {
@@ -61,9 +65,10 @@ export class MiiverseFeed implements OnInit, AfterViewInit, OnDestroy {
   private initInfiniteScroll() {
     if (typeof IntersectionObserver === 'undefined') return;
 
-    // 💡 Usamos el contenedor .mv-feed como root para mayor precisión en scroll anidado
+    // root null = viewport. El observer tiene en cuenta el recorte del contenedor
+    // con scroll del marco (.mv-shell), así que no hace falta referenciarlo.
     const options: IntersectionObserverInit = {
-      root: this.scrollContainer?.nativeElement || null,
+      root: null,
       rootMargin: '400px', // Aumentamos el margen para una carga más fluida
       threshold: 0
     };
@@ -73,10 +78,6 @@ export class MiiverseFeed implements OnInit, AfterViewInit, OnDestroy {
         this.loadMore();
       }
     }, options);
-
-    if (this.scrollAnchor) {
-      this.observer.observe(this.scrollAnchor.nativeElement);
-    }
   }
 
   setupComposerListener() {

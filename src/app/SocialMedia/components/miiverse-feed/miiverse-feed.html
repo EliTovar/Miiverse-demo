@@ -1,4 +1,4 @@
-<main class="mv-feed" #scrollContainer>
+<section class="mv-feed">
 
   @if (isGuest) {
     <p class="mv-guest-hint">
@@ -8,78 +8,72 @@
   }
 
   @if (loading()) {
-    <div class="mv-posts">
-      @for (n of [1,2,3,4]; track n) {
-        <div class="mv-post mv-skeleton">
-          <div class="mv-post-author"><div class="sk-avatar"></div></div>
-          <div class="mv-post-card sk-card">
-            <div class="sk-line sk-short"></div>
-            <div class="sk-line sk-long"></div>
-            <div class="sk-line sk-medium"></div>
-          </div>
+    @for (n of [1,2,3,4]; track n) {
+      <div class="mv-post mv-skeleton">
+        <div class="sk-avatar"></div>
+        <div class="sk-lines">
+          <div class="sk-line sk-short"></div>
+          <div class="sk-line sk-long"></div>
+          <div class="sk-line sk-medium"></div>
         </div>
-      }
-    </div>
+      </div>
+    }
   } @else {
-    <div class="mv-posts">
-      @for (post of posts(); track post.id) {
-        <article class="mv-post">
+    @for (post of posts(); track post.id) {
+      <article class="mv-post">
 
-          <!-- Autor: avatar cuadrado fuera de la tarjeta con su etiqueta de nombre -->
+        <header class="mv-post-header">
+          <img class="mv-avatar" [src]="post.mii_avatar_url" [alt]="post.username" />
+
           <div class="mv-post-author">
-            <img class="mv-avatar" [src]="post.mii_avatar_url" [alt]="post.username" />
-            <span class="mv-name-tag">{{ post.username }}</span>
-          </div>
-
-          <div class="mv-post-card">
-            <header class="mv-post-header">
-              @if (post.game_title) {
-                <span class="mv-community">
-                  <i class="pi pi-tag"></i>
-                  {{ post.game_title }}
-                </span>
-              }
-              <time class="mv-time" [attr.datetime]="post.created_at">{{ timeAgo(post.created_at) }}</time>
-            </header>
-
-            @if (post.content_text) {
-              <p class="mv-post-text">{{ post.content_text }}</p>
-            }
-
-            @if (post.drawing_url) {
-              <div class="mv-post-image mv-drawing">
-                <img [src]="post.drawing_url" alt="Dibujo de {{ post.username }}" loading="lazy" />
-              </div>
-            }
-
-            @if (post.screenshot_url) {
-              <div class="mv-post-image">
-                <img [src]="post.screenshot_url" alt="Captura de {{ post.username }}" loading="lazy" />
-              </div>
-            }
-
-            <footer class="mv-post-footer">
-              <button
-                type="button"
-                class="mv-yeah-btn"
-                [disabled]="isGuest"
-                [title]="isGuest ? 'Inicia sesión para dar Yeah!' : 'Yeah!'"
-                (click)="toggleYeah(post)"
-              >
-                <i class="pi pi-face-smile"></i>
-                Yeah!
-              </button>
-
-              <span class="mv-counter" title="Yeahs">
-                <i class="pi pi-face-smile"></i>
-                {{ post.yeahs }}
+            <span class="mv-username">{{ post.username }}</span>
+            @if (post.game_title) {
+              <span class="mv-community">
+                <i class="pi pi-tag"></i>
+                {{ post.game_title }}
               </span>
-            </footer>
+            }
           </div>
 
-        </article>
-      }
-    </div>
+          <time class="mv-time" [attr.datetime]="post.created_at">{{ timeAgo(post.created_at) }}</time>
+        </header>
+
+        @if (post.content_text) {
+          <p class="mv-post-text">{{ post.content_text }}</p>
+        }
+
+        @if (post.drawing_url) {
+          <div class="mv-post-image">
+            <img [src]="post.drawing_url" alt="Dibujo de {{ post.username }}" loading="lazy" />
+          </div>
+        }
+
+        @if (post.screenshot_url) {
+          <div class="mv-post-image">
+            <img [src]="post.screenshot_url" alt="Captura de {{ post.username }}" loading="lazy" />
+          </div>
+        }
+
+        <footer class="mv-post-footer">
+          <button
+            type="button"
+            class="mv-yeah-btn"
+            [disabled]="isGuest"
+            [title]="isGuest ? 'Inicia sesión para dar Yeah!' : 'Yeah!'"
+            (click)="toggleYeah(post)"
+          >
+            <i class="pi pi-face-smile"></i>
+            Yeah!
+          </button>
+
+          <span class="mv-counter" title="Yeahs">
+            <i class="pi pi-face-smile"></i>
+            {{ post.yeahs }}
+          </span>
+        </footer>
+
+      </article>
+    }
 
     <div #scrollAnchor class="mv-scroll-anchor"></div>
 
@@ -101,4 +95,4 @@
       </div>
     }
   }
-</main>
+</section>
