@@ -9,6 +9,7 @@ import { Communities } from './components/communities/communities';
 import { Community } from './components/community/community';
 import { PostDetail } from './components/post-detail/post-detail';
 import { UserProfile } from './components/user-profile/user-profile';
+import { Search } from './components/search/search';
 
 export const SOCIAL_MEDIA_ROUTES: Routes = [
   {
@@ -17,6 +18,7 @@ export const SOCIAL_MEDIA_ROUTES: Routes = [
     component: MiiverseLayout,
     children: [
       { path: '', component: MiiverseFeed, data: { title: 'Actividad', showPostButton: true } },
+      { path: 'search', component: Search, data: { title: 'Buscar' } },
       { path: 'communities', component: Communities, data: { title: 'Comunidades' } },
       { path: 'communities/:name', component: Community, data: { title: 'Comunidad' } },
       { path: 'posts/:id', component: PostDetail, data: { title: 'Publicación' } },

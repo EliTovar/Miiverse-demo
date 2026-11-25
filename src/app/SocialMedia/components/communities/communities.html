@@ -14,14 +14,14 @@
     <p>No hay comunidades{{ search.trim() ? ' con ese nombre' : ' todavía' }}.</p>
   </div>
 } @else {
-  <ul class="mv-community-list">
+  <ul class="mv-result-list">
     @for (community of communities(); track community.name) {
       <li>
         <a [routerLink]="['/social/communities', community.name]">
           <app-community-icon [name]="community.name" [size]="56" />
-          <span class="mv-community-info">
-            <span class="mv-community-name">{{ community.name }}</span>
-            <span class="mv-community-meta">
+          <span class="mv-result-info">
+            <span class="mv-result-name">{{ community.name }}</span>
+            <span class="mv-result-meta">
               <i class="pi pi-comments"></i>
               {{ community.posts_count }} {{ community.posts_count === 1 ? 'publicación' : 'publicaciones' }}
             </span>

@@ -10,7 +10,7 @@ import { CommunityIcon } from '../shared/community-icon/community-icon';
   standalone: true,
   imports: [FormsModule, RouterLink, CommunityIcon],
   templateUrl: './communities.html',
-  styleUrl: './communities.css',
+  styleUrl: '../shared/result-list.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Communities implements OnInit {

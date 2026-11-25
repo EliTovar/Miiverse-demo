@@ -44,6 +44,13 @@ export interface MiiverseUserProfile {
   posts: MiiversePost[];
 }
 
+/** Resultado de la búsqueda de usuarios. */
+export interface MiiverseUserSummary {
+  username: string;
+  avatar_url: string | null;
+  posts_count: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class MiiverseApiService {
   private readonly base = API_CONFIG.MIIVERSE_URL;
@@ -67,6 +74,11 @@ export class MiiverseApiService {
 
   getPost(id: number): Observable<MiiversePost> {
     return this.http.get<MiiversePost>(`${this.base}/posts/${id}`);
+  }
+
+  searchUsers(search = ''): Observable<MiiverseUserSummary[]> {
+    const params = search.trim() ? { q: search.trim() } : undefined;
+    return this.http.get<MiiverseUserSummary[]>(`${this.base}/users`, { params });
   }
 
   getUserProfile(username: string, sort: PostSort, page = 1, limit = 20): Observable<MiiverseUserProfile> {
