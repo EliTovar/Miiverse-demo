@@ -1,333 +1,255 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* Feed de Actividad estilo Miiverse (Wii U). Variables --mv-* en styles.scss. */
 
-/* ══════════════════════════════════════════════
-   HOST — Asegurar que el componente ocupe el alto
-   total dado por el flex parent (.app-content)
-══════════════════════════════════════════════ */
+/* El componente ocupa todo el alto que le da el marco (.mv-page). */
 :host {
   display: flex;
   flex: 1;
   width: 100%;
-  min-height: 0; /* Importante para flexbox scroll */
+  min-height: 0;
 }
 
-/* ══════════════════════════════════════════════
-   ROOT — Pantalla completa, sin scroll externo
-══════════════════════════════════════════════ */
-.miiverse-root {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-  background: #0b0e1a;
-  font-family: 'Inter', system-ui, sans-serif;
-  color: #e8eaf0;
-}
-
-/* ══════════════════════════════════════════════
-   HEADER
-══════════════════════════════════════════════ */
-.mv-header {
-  flex-shrink: 0;
-  background: linear-gradient(135deg, #0d1b2a 0%, #1a2744 100%);
-  border-bottom: 1px solid rgba(0, 160, 255, 0.2);
-  padding: 0 24px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-}
-.mv-header-inner {
-  width: 100%;
-  max-width: 760px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.mv-logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.mv-logo-icon { font-size: 22px; }
-.mv-logo-text {
-  font-size: 20px;
-  font-weight: 700;
-  color: #ffffff;
-  letter-spacing: 0.5px;
-}
-.mv-logo-badge {
-  font-size: 10px;
-  font-weight: 600;
-  background: linear-gradient(90deg, #00a0ff, #0060e0);
-  color: white;
-  padding: 2px 8px;
-  border-radius: 20px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-.mv-guest-hint {
-  font-size: 12px;
-  color: #556;
-  font-style: italic;
-}
-
-/* ══════════════════════════════════════════════
-   BUTTONS
-══════════════════════════════════════════════ */
-.mv-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: none;
-  border-radius: 24px;
-  padding: 8px 20px;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.mv-btn-primary {
-  background: linear-gradient(135deg, #0096fa, #0050d8);
-  color: white;
-  box-shadow: 0 4px 15px rgba(0, 150, 250, 0.35);
-}
-.mv-btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 150, 250, 0.5);
-}
-.mv-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-.mv-btn-ghost {
-  background: rgba(255,255,255,0.07);
-  color: #aab;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-.mv-btn-ghost:hover:not(:disabled) { background: rgba(255,255,255,0.12); color: #fff; }
-.mv-btn-sm { padding: 5px 14px; font-size: 12px; }
-
-/* ══════════════════════════════════════════════
-   FEED (scrollable)
-══════════════════════════════════════════════ */
+/* Contenedor con scroll propio: el IntersectionObserver lo usa como raíz. */
 .mv-feed {
   flex: 1;
   overflow-y: auto;
-  padding: 20px 16px 40px;
-  scrollbar-width: thin;
-  scrollbar-color: #1e3050 transparent;
+  padding: 24px 24px 120px;
 }
-.mv-feed::-webkit-scrollbar { width: 8px; }
-.mv-feed::-webkit-scrollbar-thumb { 
-  background: #2a3d5e; 
-  border-radius: 10px;
-  border: 2px solid #0b0e1a;
+
+.mv-guest-hint {
+  max-width: 720px;
+  margin: 0 auto 16px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: var(--mv-green-pale);
+  color: var(--mv-green-dark);
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.mv-feed::-webkit-scrollbar-thumb:hover { background: #3a4d7e; }
 
 .mv-posts {
+  max-width: 720px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  max-width: 760px;
-  margin: 0 auto;
+  gap: 20px;
 }
 
-/* ══════════════════════════════════════════════
-   POST CARD
-══════════════════════════════════════════════ */
+/* ── Post ─────────────────────────────────────────────────────── */
 .mv-post {
   display: flex;
+  align-items: flex-start;
   gap: 14px;
-  background: linear-gradient(135deg, #111828 0%, #0d1520 100%);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 16px;
-  padding: 16px;
-  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-  animation: fadeUp 0.3s ease both;
-}
-.mv-post:hover {
-  transform: translateY(-2px);
-  border-color: rgba(0,150,250,0.2);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
-}
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
 }
 
-.mv-post-left { flex-shrink: 0; }
+.mv-post-author {
+  flex-shrink: 0;
+  width: 88px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
 .mv-avatar {
-  width: 46px; height: 46px;
-  border-radius: 50%;
-  border: 2px solid rgba(0,150,250,0.3);
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  border: 3px solid #fff;
+  background: var(--mv-surface-soft);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
   object-fit: cover;
 }
 
-.mv-post-body { flex: 1; min-width: 0; }
-.mv-post-meta {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
-.mv-username {
-  font-size: 14px;
-  font-weight: 700;
-  color: #ffffff;
-}
-.mv-community {
-  font-size: 11px;
-  color: #0096fa;
-  background: rgba(0,150,250,0.1);
+.mv-name-tag {
+  max-width: 100%;
   padding: 2px 8px;
-  border-radius: 20px;
-  white-space: nowrap;
+  border-radius: 8px;
+  background: #8c8c8c;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
-}
-.mv-time {
-  font-size: 11px;
-  color: #445;
-  margin-left: auto;
   white-space: nowrap;
 }
 
+.mv-post-card {
+  flex: 1;
+  min-width: 0;
+  background: #fff;
+  border: 1px solid var(--mv-border);
+  border-radius: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.mv-post-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px 0;
+  font-size: 13px;
+}
+
+.mv-community {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mv-green-dark);
+  font-weight: 800;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mv-time {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--mv-text-soft);
+}
+
 .mv-post-text {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #ccd;
-  margin-bottom: 10px;
+  padding: 10px 16px 14px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--mv-text);
+  white-space: pre-wrap;
   word-break: break-word;
 }
 
 .mv-post-image {
-  border-radius: 12px;
+  margin: 10px 16px 14px;
+  border-radius: 8px;
   overflow: hidden;
-  margin-bottom: 10px;
-  border: 1px solid rgba(255,255,255,0.08);
-  max-height: 320px;
+  border: 1px solid var(--mv-border);
+  background: #fff;
+}
+
+.mv-post-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Los dibujos de Miiverse eran en blanco y negro sobre papel blanco. */
+.mv-drawing img { image-rendering: pixelated; }
+
+.mv-post-footer {
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: #0a0f1a;
+  gap: 16px;
+  padding: 8px 12px;
+  background: var(--mv-surface-soft);
+  border-top: 1px solid var(--mv-border);
 }
-.mv-post-image img {
-  max-width: 100%;
-  max-height: 320px;
-  object-fit: contain;
-  display: block;
-}
-.mv-screenshot { background: #000; }
 
-/* Yeah button */
-.mv-post-actions { display: flex; gap: 10px; margin-top: 4px; }
 .mv-yeah-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  background: rgba(255,200,0,0.07);
-  border: 1px solid rgba(255,200,0,0.15);
-  border-radius: 20px;
-  color: #f8c94f;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 5px 14px;
+  gap: 6px;
+  padding: 6px 16px;
+  border: 1px solid var(--mv-border);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, #ececec 100%);
+  color: var(--mv-text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
   cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-.mv-yeah-btn:hover:not(.guest) {
-  background: rgba(255,200,0,0.18);
-  border-color: rgba(255,200,0,0.4);
-  transform: scale(1.04);
-}
-.mv-yeah-btn.guest { cursor: default; opacity: 0.5; }
-.mv-yeah-icon { font-size: 14px; }
-.mv-yeah-count { color: #aaa; font-size: 11px; }
 
-/* ══════════════════════════════════════════════
-   SKELETONS
-══════════════════════════════════════════════ */
-.mv-skeletons {
-  display: flex; flex-direction: column; gap: 14px;
-  max-width: 760px; margin: 0 auto;
+.mv-yeah-btn:hover:not(:disabled) {
+  border-color: var(--mv-green);
+  color: var(--mv-green-dark);
 }
-.mv-skeleton-card {
-  display: flex; gap: 14px;
-  background: #111828;
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 16px;
-  padding: 16px;
+
+.mv-yeah-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.mv-yeah-btn:focus-visible {
+  outline: 3px solid var(--mv-green);
+  outline-offset: 2px;
 }
+
+.mv-counter {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mv-green-dark);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+/* ── Esqueleto de carga ───────────────────────────────────────── */
 .sk-avatar {
-  width: 46px; height: 46px; border-radius: 50%;
-  background: linear-gradient(90deg,#1e2d44 25%,#263550 50%,#1e2d44 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
-  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  background: #e8e8e8;
 }
-.sk-lines { flex:1; display:flex; flex-direction:column; gap:10px; padding-top:4px; }
+.sk-card {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 .sk-line {
-  border-radius: 6px; height: 12px;
-  background: linear-gradient(90deg,#1e2d44 25%,#263550 50%,#1e2d44 75%);
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #eeeeee 25%, #f7f7f7 50%, #eeeeee 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
 }
-.sk-short { width: 35%; }
+.sk-short  { width: 35%; }
 .sk-medium { width: 60%; }
-.sk-long { width: 90%; }
+.sk-long   { width: 90%; }
 @keyframes shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
 }
 
-/* Load more + Empty */
-.mv-load-more { text-align: center; padding: 20px 0; }
-.mv-empty {
-  text-align: center; padding: 60px 20px;
-  color: #445;
-}
-.mv-empty-icon { font-size: 48px; display: block; margin-bottom: 16px; }
-.mv-empty p { font-size: 14px; line-height: 1.7; }
+/* ── Estados ──────────────────────────────────────────────────── */
+.mv-scroll-anchor { height: 1px; }
 
-/* Infinite Scroll UI */
-.mv-scroll-anchor {
-  height: 20px;
-  width: 100%;
-}
-
-.mv-load-more-status {
+.mv-status {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 30px 0;
-  color: #0096fa;
+  gap: 10px;
+  padding: 24px 0;
+  color: var(--mv-text-soft);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .mv-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(0, 150, 250, 0.2);
-  border-top-color: #0096fa;
+  width: 18px;
+  height: 18px;
+  border: 3px solid var(--mv-green-pale);
+  border-top-color: var(--mv-green);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.mv-end-message {
+.mv-empty {
   text-align: center;
-  padding: 40px 0;
-  color: #556;
-  font-size: 13px;
-  font-style: italic;
-  border-top: 1px dashed rgba(255,255,255,0.05);
+  padding: 60px 20px;
+  color: var(--mv-text-soft);
+}
+.mv-empty i { font-size: 44px; color: var(--mv-green); margin-bottom: 12px; }
+.mv-empty p { font-size: 15px; line-height: 1.7; font-weight: 700; }
+
+/* ── Móvil ────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .mv-feed { padding: 16px 12px 120px; }
+  .mv-post { gap: 8px; }
+  .mv-post-author { width: 56px; }
+  .mv-avatar, .sk-avatar { width: 52px; height: 52px; }
+  .mv-name-tag { font-size: 10px; padding: 1px 4px; }
 }

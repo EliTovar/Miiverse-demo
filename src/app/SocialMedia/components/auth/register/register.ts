@@ -1,14 +1,14 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { API_CONFIG } from '../../../../config/api.config';
 
 @Component({
   selector: 'app-register',
-  imports: [FormsModule], // Necesario para [(ngModel)]
+  imports: [FormsModule, RouterLink], // Necesario para [(ngModel)]
   templateUrl: './register.html',
-  styleUrl: './register.css',
+  styleUrl: '../auth-card.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterComponent {

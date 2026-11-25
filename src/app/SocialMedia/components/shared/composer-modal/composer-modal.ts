@@ -66,7 +66,7 @@ import { MiiverseApiService } from '../../../services/miiverse-api.service';
               [disabled]="isPosting"
               (click)="submitPost()"
             >
-              {{ isPosting ? 'Publicando…' : '🚀 Publicar' }}
+              {{ isPosting ? 'Publicando…' : 'Publicar' }}
             </button>
           </div>
         </div>
@@ -77,8 +77,8 @@ import { MiiverseApiService } from '../../../services/miiverse-api.service';
     .mv-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(10, 15, 23, 0.85);
-      backdrop-filter: blur(8px);
+      background: rgba(40, 40, 40, 0.45);
+      backdrop-filter: blur(2px);
       z-index: 2000;
       animation: fadeIn 0.3s ease-out;
     }
@@ -91,11 +91,13 @@ import { MiiverseApiService } from '../../../services/miiverse-api.service';
       width: 90%;
       max-width: 600px;
       background: white;
-      border-radius: 24px;
+      border-radius: 16px;
       z-index: 2001;
+      font-family: var(--mv-font);
+      color: var(--mv-text);
       padding: 24px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      border: 1px solid var(--mv-border);
       animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       flex-direction: column;
@@ -116,8 +118,8 @@ import { MiiverseApiService } from '../../../services/miiverse-api.service';
 
     .mv-composer-header h3 {
       font-size: 1.25rem;
-      font-weight: 700;
-      color: #1a1a2e;
+      font-weight: 800;
+      color: var(--mv-text);
     }
 
     .mv-close-btn {
@@ -151,7 +153,7 @@ import { MiiverseApiService } from '../../../services/miiverse-api.service';
 
     .mv-tab.active {
       background: white;
-      color: #3498db;
+      color: var(--mv-green-dark);
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
 
@@ -195,7 +197,7 @@ import { MiiverseApiService } from '../../../services/miiverse-api.service';
     }
 
     .mv-game-input:focus {
-      border-color: #3498db;
+      border-color: var(--mv-green);
       background: white;
       outline: none;
     }
@@ -210,7 +212,8 @@ import { MiiverseApiService } from '../../../services/miiverse-api.service';
     .mv-btn {
       padding: 12px 24px;
       border-radius: 12px;
-      font-weight: 700;
+      font-weight: 800;
+      font-family: inherit;
       cursor: pointer;
       transition: all 0.2s;
       font-size: 1rem;
@@ -225,15 +228,15 @@ import { MiiverseApiService } from '../../../services/miiverse-api.service';
     .mv-btn-ghost:hover { background: #edeff2; }
 
     .mv-btn-primary {
-      background: #3498db;
+      background: linear-gradient(180deg, var(--mv-green-light) 0%, var(--mv-green) 100%);
       color: white;
-      border: none;
-      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+      border: 1px solid var(--mv-green-dark);
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
     }
 
     .mv-btn-primary:hover:not(:disabled) {
-      background: #2980b9;
-      transform: translateY(-2px);
+      filter: brightness(1.05);
+      transform: translateY(-1px);
     }
 
     .mv-btn-primary:disabled { opacity: 0.6; cursor: wait; }

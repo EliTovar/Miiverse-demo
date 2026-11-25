@@ -121,7 +121,7 @@ export class MiiverseFeed implements OnInit, AfterViewInit, OnDestroy {
   timeAgo(dateStr: string): string {
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'ahora';
+    if (mins < 1) return 'Hace menos de un minuto';
     if (mins < 60) return `hace ${mins} min`;
     const hrs = Math.floor(mins / 60);
     if (hrs < 24) return `hace ${hrs} h`;
@@ -140,11 +140,6 @@ export class MiiverseFeed implements OnInit, AfterViewInit, OnDestroy {
         this.cdr.markForCheck();
       }
     });
-  }
-
-  // ── Composer ────────────────────────────────────────────────────────────────
-  openComposer() {
-    this.composerService.open();
   }
 
 }

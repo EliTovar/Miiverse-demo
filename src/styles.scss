@@ -27,3 +27,20 @@ app-root {
   height: 100% !important;
   overflow: hidden !important;
 }
+
+/* ── Tema Miiverse (Wii U) ───────────────────────────────────────
+   Variables compartidas por el marco de la red social, el feed,
+   el compositor y las pantallas de login/registro. */
+:root {
+  --mv-font: 'Nunito', system-ui, sans-serif;
+  --mv-bg: #ffffff;
+  --mv-text: #323232;
+  --mv-text-soft: #6e6e6e;
+  --mv-border: #dcdcdc;
+  --mv-surface-soft: #f2f2f2;
+  --mv-green: #5ac800;
+  --mv-green-light: #8ee03c;
+  --mv-green-dark: #3c9600;
+  --mv-green-pale: #ecf9e0;
+  --mv-orange: #ff8a00;
+}

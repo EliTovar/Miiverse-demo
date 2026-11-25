@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { SocialMediaServicie, Role } from '../../../services/social-media.service';
 import { SocketService } from '../../../services/socket.service';
 import { API_CONFIG } from '../../../../config/api.config';
@@ -14,8 +14,10 @@ import { API_CONFIG } from '../../../../config/api.config';
   imports: [
     CommonModule,
     FormsModule, // 🔥 OBLIGATORIO para ngModel
+    RouterLink,
   ],
   templateUrl: './login.html',
+  styleUrl: '../auth-card.css',
 })
 export class LoginComponent {
   private http = inject(HttpClient);

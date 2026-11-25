@@ -1,118 +1,104 @@
-<div class="miiverse-root">
+<main class="mv-feed" #scrollContainer>
 
-  <!-- ═══ HEADER ═════════════════════════════════════════════════════════ -->
-  <header class="mv-header">
-    <div class="mv-header-inner">
-      <div class="mv-logo">
-        <span class="mv-logo-icon">🌐</span>
-        <span class="mv-logo-text">Miiverse</span>
-        <span class="mv-logo-badge">Downtown</span>
-      </div>
-      <div class="mv-header-actions">
-        @if (!isGuest) {
-          <button class="mv-btn mv-btn-primary" (click)="openComposer()">
-            <span>✏️</span> Publicar
-          </button>
-        } @else {
-          <span class="mv-guest-hint">Inicia sesión para publicar</span>
-        }
-      </div>
-    </div>
-  </header>
+  @if (isGuest) {
+    <p class="mv-guest-hint">
+      <i class="pi pi-info-circle"></i>
+      Inicia sesión para publicar y dar Yeah!
+    </p>
+  }
 
-  <!-- ═══ FEED ════════════════════════════════════════════════════════════ -->
-  <main class="mv-feed" #scrollContainer>
-
-    @if (loading()) {
-      <div class="mv-skeletons">
-        @for (n of [1,2,3,4,5]; track n) {
-          <div class="mv-skeleton-card">
-            <div class="sk-avatar"></div>
-            <div class="sk-lines">
-              <div class="sk-line sk-short"></div>
-              <div class="sk-line sk-long"></div>
-              <div class="sk-line sk-medium"></div>
-            </div>
+  @if (loading()) {
+    <div class="mv-posts">
+      @for (n of [1,2,3,4]; track n) {
+        <div class="mv-post mv-skeleton">
+          <div class="mv-post-author"><div class="sk-avatar"></div></div>
+          <div class="mv-post-card sk-card">
+            <div class="sk-line sk-short"></div>
+            <div class="sk-line sk-long"></div>
+            <div class="sk-line sk-medium"></div>
           </div>
-        }
-      </div>
-    } @else {
-      <div class="mv-posts">
-        @for (post of posts(); track post.id) {
-          <article class="mv-post">
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="mv-posts">
+      @for (post of posts(); track post.id) {
+        <article class="mv-post">
 
-            <!-- Avatar + meta -->
-            <div class="mv-post-left">
-              <img class="mv-avatar" [src]="post.mii_avatar_url" [alt]="post.username" />
-            </div>
+          <!-- Autor: avatar cuadrado fuera de la tarjeta con su etiqueta de nombre -->
+          <div class="mv-post-author">
+            <img class="mv-avatar" [src]="post.mii_avatar_url" [alt]="post.username" />
+            <span class="mv-name-tag">{{ post.username }}</span>
+          </div>
 
-            <div class="mv-post-body">
-              <div class="mv-post-meta">
-                <span class="mv-username">{{ post.username }}</span>
-                @if (post.game_title) {
-                  <span class="mv-community">🎮 {{ post.game_title }}</span>
-                }
-                <span class="mv-time">{{ timeAgo(post.created_at) }}</span>
+          <div class="mv-post-card">
+            <header class="mv-post-header">
+              @if (post.game_title) {
+                <span class="mv-community">
+                  <i class="pi pi-tag"></i>
+                  {{ post.game_title }}
+                </span>
+              }
+              <time class="mv-time" [attr.datetime]="post.created_at">{{ timeAgo(post.created_at) }}</time>
+            </header>
+
+            @if (post.content_text) {
+              <p class="mv-post-text">{{ post.content_text }}</p>
+            }
+
+            @if (post.drawing_url) {
+              <div class="mv-post-image mv-drawing">
+                <img [src]="post.drawing_url" alt="Dibujo de {{ post.username }}" loading="lazy" />
               </div>
+            }
 
-              @if (post.content_text) {
-                <p class="mv-post-text">{{ post.content_text }}</p>
-              }
-
-              @if (post.drawing_url) {
-                <div class="mv-post-image">
-                  <img [src]="post.drawing_url" alt="Dibujo de {{ post.username }}" loading="lazy" />
-                </div>
-              }
-
-              @if (post.screenshot_url) {
-                <div class="mv-post-image mv-screenshot">
-                  <img [src]="post.screenshot_url" alt="Captura de {{ post.username }}" loading="lazy" />
-                </div>
-              }
-
-              <!-- Actions -->
-              <div class="mv-post-actions">
-                <button
-                  class="mv-yeah-btn"
-                  [class.guest]="isGuest"
-                  [title]="isGuest ? 'Inicia sesión para dar Yeah!' : 'Yeah!'"
-                  (click)="toggleYeah(post)"
-                >
-                  <span class="mv-yeah-icon">★</span>
-                  <span class="mv-yeah-label">Yeah!</span>
-                  <span class="mv-yeah-count">{{ post.yeahs }}</span>
-                </button>
+            @if (post.screenshot_url) {
+              <div class="mv-post-image">
+                <img [src]="post.screenshot_url" alt="Captura de {{ post.username }}" loading="lazy" />
               </div>
-            </div>
+            }
 
-          </article>
-        }
+            <footer class="mv-post-footer">
+              <button
+                type="button"
+                class="mv-yeah-btn"
+                [disabled]="isGuest"
+                [title]="isGuest ? 'Inicia sesión para dar Yeah!' : 'Yeah!'"
+                (click)="toggleYeah(post)"
+              >
+                <i class="pi pi-face-smile"></i>
+                Yeah!
+              </button>
+
+              <span class="mv-counter" title="Yeahs">
+                <i class="pi pi-face-smile"></i>
+                {{ post.yeahs }}
+              </span>
+            </footer>
+          </div>
+
+        </article>
+      }
+    </div>
+
+    <div #scrollAnchor class="mv-scroll-anchor"></div>
+
+    @if (loadingMore) {
+      <div class="mv-status">
+        <span class="mv-spinner"></span>
+        Cargando más publicaciones...
       </div>
-
-      <div #scrollAnchor class="mv-scroll-anchor"></div>
-
-      <!-- Loading More Indicator -->
-      @if (loadingMore) {
-        <div class="mv-load-more-status">
-          <span class="mv-spinner"></span>
-          Cargando más publicaciones...
-        </div>
-      }
-
-      @if (!hasMore && posts().length > 0) {
-        <div class="mv-end-message">
-          ✨ Has llegado al final del feed histórico.
-        </div>
-      }
-
-      @if (posts().length === 0) {
-        <div class="mv-empty">
-          <span class="mv-empty-icon">🌐</span>
-          <p>No hay publicaciones aún.<br>¡Sé el primero en compartir!</p>
-        </div>
-      }
     }
-  </main>
 
-</div>
+    @if (!hasMore && posts().length > 0) {
+      <div class="mv-status">No hay más publicaciones.</div>
+    }
+
+    @if (posts().length === 0) {
+      <div class="mv-empty">
+        <i class="pi pi-comments"></i>
+        <p>No hay publicaciones aún.<br>¡Sé el primero en compartir algo!</p>
+      </div>
+    }
+  }
+</main>
