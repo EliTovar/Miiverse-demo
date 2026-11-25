@@ -15,10 +15,13 @@
             <span>Iniciar sesión</span>
           </a>
         } @else {
-          <div class="mv-nav-item mv-nav-user" [title]="auth.username() ?? 'Usuario'">
-            <span class="mv-user-initial">{{ (auth.username() ?? '?').charAt(0).toUpperCase() }}</span>
-            <span>{{ auth.username() ?? 'Usuario' }}</span>
-          </div>
+          @if (auth.username(); as username) {
+            <a class="mv-nav-item" [routerLink]="['/social/users', username]" routerLinkActive="active"
+               [title]="'Mi perfil: ' + username">
+              <span class="mv-user-initial">{{ username.charAt(0).toUpperCase() }}</span>
+              <span>{{ username }}</span>
+            </a>
+          }
         }
 
         <a class="mv-nav-item" routerLink="/social" routerLinkActive="active"
@@ -27,10 +30,10 @@
           <span>Actividad</span>
         </a>
 
-        <span class="mv-nav-item disabled" title="Disponible en la siguiente fase">
+        <a class="mv-nav-item" routerLink="/social/communities" routerLinkActive="active">
           <i class="pi pi-th-large"></i>
           <span>Comunidades</span>
-        </span>
+        </a>
 
         @if (auth.role() === 'admin') {
           <a class="mv-nav-item" routerLink="/social/admin">

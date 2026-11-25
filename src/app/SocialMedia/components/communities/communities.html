@@ -1,0 +1,34 @@
+<form class="mv-search" role="search" (ngSubmit)="load()">
+  <input name="q" type="search" [(ngModel)]="search"
+         placeholder="Buscar comunidades" aria-label="Buscar comunidades" />
+  <button type="submit" aria-label="Buscar"><i class="pi pi-search"></i></button>
+</form>
+
+@if (loading()) {
+  <div class="mv-status"><span class="mv-spinner"></span> Cargando comunidades...</div>
+} @else if (error()) {
+  <div class="mv-status">No se pudieron cargar las comunidades.</div>
+} @else if (communities().length === 0) {
+  <div class="mv-empty">
+    <i class="pi pi-th-large"></i>
+    <p>No hay comunidades{{ search.trim() ? ' con ese nombre' : ' todavía' }}.</p>
+  </div>
+} @else {
+  <ul class="mv-community-list">
+    @for (community of communities(); track community.name) {
+      <li>
+        <a [routerLink]="['/social/communities', community.name]">
+          <app-community-icon [name]="community.name" [size]="56" />
+          <span class="mv-community-info">
+            <span class="mv-community-name">{{ community.name }}</span>
+            <span class="mv-community-meta">
+              <i class="pi pi-comments"></i>
+              {{ community.posts_count }} {{ community.posts_count === 1 ? 'publicación' : 'publicaciones' }}
+            </span>
+          </span>
+          <i class="pi pi-chevron-right mv-chevron"></i>
+        </a>
+      </li>
+    }
+  </ul>
+}

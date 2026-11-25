@@ -1,0 +1,32 @@
+@if (notFound()) {
+  <div class="mv-empty">
+    <i class="pi pi-user"></i>
+    <p>{{ username() }} todavía no ha publicado nada.<br><a routerLink="/social">Volver a Actividad</a></p>
+  </div>
+} @else {
+  @if (profile(); as user) {
+    <section class="mv-page-header">
+      <div class="mv-banner" aria-hidden="true"></div>
+      <div class="mv-header-body">
+        @if (user.avatar_url) {
+          <img class="mv-header-avatar" [src]="user.avatar_url" [alt]="user.username" />
+        }
+        <div class="mv-header-text">
+          <h2>{{ user.username }}</h2>
+          <p class="mv-header-meta">
+            <span><i class="pi pi-calendar"></i> Publica desde el {{ formatDate(user.first_post_at) }}</span>
+          </p>
+        </div>
+      </div>
+      <div class="mv-stats">
+        <div><strong>{{ user.posts_count }}</strong><span>Publicaciones</span></div>
+        <div><strong>{{ user.yeahs_received }}</strong><span>Yeahs recibidos</span></div>
+        <div><strong>{{ user.communities_count }}</strong><span>Comunidades</span></div>
+      </div>
+    </section>
+  }
+
+  @if (fetchPage(); as fetch) {
+    <app-post-list [fetchPage]="fetch" [sorts]="sorts" />
+  }
+}

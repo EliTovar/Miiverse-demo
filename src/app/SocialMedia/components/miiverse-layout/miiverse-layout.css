@@ -109,7 +109,7 @@
   white-space: nowrap;
 }
 
-.mv-nav-item:hover:not(.disabled):not(.mv-nav-user) {
+.mv-nav-item:hover:not(.disabled) {
   transform: translateY(-1px);
   border-color: var(--mv-green);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
@@ -122,10 +122,10 @@
   color: #fff;
 }
 .mv-nav-item.active > i { color: #fff; }
+.mv-nav-item.active .mv-user-initial { background: rgba(255, 255, 255, 0.25); color: #fff; }
 
 .mv-nav-item.disabled { opacity: 0.45; cursor: not-allowed; }
 
-.mv-nav-user { cursor: default; background: #fff; }
 .mv-user-initial {
   display: grid;
   place-items: center;

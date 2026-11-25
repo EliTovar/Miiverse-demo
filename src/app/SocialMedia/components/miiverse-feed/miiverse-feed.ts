@@ -15,11 +15,12 @@ import { HttpClientModule } from '@angular/common/http';
 import { MiiverseApiService, MiiversePost } from '../../services/miiverse-api.service';
 import { SocialMediaServicie } from '../../services/social-media.service';
 import { ComposerService } from '../../services/composer.service';
+import { PostItem } from '../shared/post-item/post-item';
 
 @Component({
   selector: 'app-miiverse-feed',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, PostItem],
   templateUrl: './miiverse-feed.html',
   styleUrl: './miiverse-feed.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -118,29 +119,4 @@ export class MiiverseFeed implements OnInit, OnDestroy {
       error: () => { this.loadingMore = false; }
     });
   }
-
-  timeAgo(dateStr: string): string {
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'Hace menos de un minuto';
-    if (mins < 60) return `hace ${mins} min`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `hace ${hrs} h`;
-    const days = Math.floor(hrs / 24);
-    if (days < 7) return `hace ${days} día${days > 1 ? 's' : ''}`;
-    return new Date(dateStr).toLocaleDateString('es-MX');
-  }
-
-  toggleYeah(post: MiiversePost) {
-    if (this.isGuest) return;
-    this.api.toggleYeah(post.id).subscribe({
-      next: ({ yeahs }) => {
-        this.posts.update(ps =>
-          ps.map(p => p.id === post.id ? { ...p, yeahs } : p)
-        );
-        this.cdr.markForCheck();
-      }
-    });
-  }
-
 }

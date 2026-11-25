@@ -20,59 +20,7 @@
     }
   } @else {
     @for (post of posts(); track post.id) {
-      <article class="mv-post">
-
-        <header class="mv-post-header">
-          <img class="mv-avatar" [src]="post.mii_avatar_url" [alt]="post.username" />
-
-          <div class="mv-post-author">
-            <span class="mv-username">{{ post.username }}</span>
-            @if (post.game_title) {
-              <span class="mv-community">
-                <i class="pi pi-tag"></i>
-                {{ post.game_title }}
-              </span>
-            }
-          </div>
-
-          <time class="mv-time" [attr.datetime]="post.created_at">{{ timeAgo(post.created_at) }}</time>
-        </header>
-
-        @if (post.content_text) {
-          <p class="mv-post-text">{{ post.content_text }}</p>
-        }
-
-        @if (post.drawing_url) {
-          <div class="mv-post-image">
-            <img [src]="post.drawing_url" alt="Dibujo de {{ post.username }}" loading="lazy" />
-          </div>
-        }
-
-        @if (post.screenshot_url) {
-          <div class="mv-post-image">
-            <img [src]="post.screenshot_url" alt="Captura de {{ post.username }}" loading="lazy" />
-          </div>
-        }
-
-        <footer class="mv-post-footer">
-          <button
-            type="button"
-            class="mv-yeah-btn"
-            [disabled]="isGuest"
-            [title]="isGuest ? 'Inicia sesión para dar Yeah!' : 'Yeah!'"
-            (click)="toggleYeah(post)"
-          >
-            <i class="pi pi-face-smile"></i>
-            Yeah!
-          </button>
-
-          <span class="mv-counter" title="Yeahs">
-            <i class="pi pi-face-smile"></i>
-            {{ post.yeahs }}
-          </span>
-        </footer>
-
-      </article>
+      <app-post-item [post]="post" />
     }
 
     <div #scrollAnchor class="mv-scroll-anchor"></div>

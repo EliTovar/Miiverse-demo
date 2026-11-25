@@ -1,0 +1,29 @@
+@if (notFound()) {
+  <div class="mv-empty">
+    <i class="pi pi-th-large"></i>
+    <p>Esta comunidad no existe.<br><a routerLink="/social/communities">Ver todas las comunidades</a></p>
+  </div>
+} @else {
+  @if (summary(); as community) {
+    <section class="mv-page-header">
+      <div class="mv-banner" aria-hidden="true"></div>
+      <div class="mv-header-body">
+        <app-community-icon class="mv-header-icon" [name]="community.name" [size]="84" />
+        <div class="mv-header-text">
+          <h2>{{ community.name }}</h2>
+          <p class="mv-header-meta">
+            <span><i class="pi pi-comments"></i> {{ community.posts_count }} {{ community.posts_count === 1 ? 'publicación' : 'publicaciones' }}</span>
+            <span><i class="pi pi-face-smile"></i> {{ community.yeahs_count }} Yeahs</span>
+          </p>
+        </div>
+      </div>
+      <a class="mv-header-link" routerLink="/social/communities">
+        Otras comunidades <i class="pi pi-chevron-right"></i>
+      </a>
+    </section>
+  }
+
+  @if (fetchPage(); as fetch) {
+    <app-post-list [fetchPage]="fetch" />
+  }
+}

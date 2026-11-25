@@ -5,6 +5,10 @@ import { IAAdministrator } from './components/admin/admin-component/IA-administr
 import { AdministratorPanel } from './components/admin/admin-component/Administrator-panel/Administrator-panel';
 import { MiiverseFeed } from './components/miiverse-feed/miiverse-feed';
 import { MiiverseLayout } from './components/miiverse-layout/miiverse-layout';
+import { Communities } from './components/communities/communities';
+import { Community } from './components/community/community';
+import { PostDetail } from './components/post-detail/post-detail';
+import { UserProfile } from './components/user-profile/user-profile';
 
 export const SOCIAL_MEDIA_ROUTES: Routes = [
   {
@@ -13,6 +17,10 @@ export const SOCIAL_MEDIA_ROUTES: Routes = [
     component: MiiverseLayout,
     children: [
       { path: '', component: MiiverseFeed, data: { title: 'Actividad', showPostButton: true } },
+      { path: 'communities', component: Communities, data: { title: 'Comunidades' } },
+      { path: 'communities/:name', component: Community, data: { title: 'Comunidad' } },
+      { path: 'posts/:id', component: PostDetail, data: { title: 'Publicación' } },
+      { path: 'users/:username', component: UserProfile, data: { title: 'Perfil' } },
     ],
   },
   {

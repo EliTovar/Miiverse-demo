@@ -1,0 +1,22 @@
+@if (loading()) {
+  <div class="mv-status"><span class="mv-spinner"></span> Cargando publicación...</div>
+} @else if (error() === 'not-found') {
+  <div class="mv-empty">
+    <i class="pi pi-comment"></i>
+    <p>Esta publicación no existe.<br><a routerLink="/social">Volver a Actividad</a></p>
+  </div>
+} @else if (error()) {
+  <div class="mv-status">No se pudo cargar la publicación.</div>
+} @else {
+  @if (post(); as current) {
+    @if (current.game_title) {
+      <a class="mv-community-bar" [routerLink]="['/social/communities', current.game_title]">
+        <app-community-icon [name]="current.game_title" [size]="28" />
+        {{ current.game_title }}
+        <i class="pi pi-chevron-right"></i>
+      </a>
+    }
+
+    <app-post-item [post]="current" [detail]="true" />
+  }
+}
