@@ -1,7 +1,11 @@
+// Dirección del backend.
+// Se usa el mismo host desde el que se abrió la página: con `localhost:4200`
+// apunta a `localhost:3000`, y desde otro equipo de la red (`192.168.x.x:4200`)
+// apunta a esa misma IP. Así no hay que editar este archivo al cambiar de red.
+const API_HOST = `http://${window.location.hostname}:3000`;
+
 export const API_CONFIG = {
-  // Configuración centralizada de la IP del servidor
-  // Cada vez que cambie tu red o IP, solo debes actualizar este valor
-  BASE_URL: 'http://192.168.20.64:3000', 
-  SOCKET_URL: 'http://192.168.20.64:3000',
-  MIIVERSE_URL: 'http://192.168.20.64:3000/miiverse',
+  BASE_URL: API_HOST,
+  SOCKET_URL: API_HOST,
+  MIIVERSE_URL: `${API_HOST}/miiverse`,
 };
