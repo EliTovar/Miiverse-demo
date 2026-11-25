@@ -4,6 +4,20 @@ import * as THREE from 'three';
 import { SteamGame, SteamService } from '../services/SteamService.service';
 import { SteamBillboard } from '../objects/SteamBillboard';
 
+/**
+ * Escapa los caracteres especiales de HTML.
+ * Los nombres y autores vienen de APIs externas (Pixiv, Top.gg, Steam, MAL):
+ * sin escapar, un título como `<img src=x onerror=...>` ejecutaría código (XSS).
+ */
+function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export interface BillboardConfig {
   title: string;
   subtitle: string;
@@ -142,8 +156,8 @@ export class SteamBillboardManager {
       </div>
       ${currentGame ? `
         <div style="font-size: 13px; color: #fff; margin-bottom: 15px; padding: 10px; background: rgba(255,255,255,0.07); border-radius: 6px; border-left: 3px solid ${this.config.color};">
-           <div style="font-weight: bold; margin-bottom: 2px;">${currentGame.name}</div>
-           <div style="color: ${this.config.color}; opacity: 0.8; font-size: 11px; font-style: italic;">por ${currentGame.author || 'Artista Desconocido'}</div>
+           <div style="font-weight: bold; margin-bottom: 2px;">${escapeHtml(currentGame.name)}</div>
+           <div style="color: ${this.config.color}; opacity: 0.8; font-size: 11px; font-style: italic;">por ${escapeHtml(currentGame.author || 'Artista Desconocido')}</div>
         </div>
       ` : ''}
       <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -151,8 +165,8 @@ export class SteamBillboardManager {
           <div style="display: flex; align-items: center; gap: 10px; opacity: ${this.currentIndex === i ? '1' : '0.4'}">
             <span style="color: ${this.config.color}; font-weight: bold; font-size: 10px;">#${i+1}</span>
             <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 11px; font-weight: 500; ${this.currentIndex === i ? 'color: #fff;' : 'color: #aaa;'}">${g.name}</span>
-                <span style="font-size: 9px; color: #666;">${g.author || ''}</span>
+                <span style="font-size: 11px; font-weight: 500; ${this.currentIndex === i ? 'color: #fff;' : 'color: #aaa;'}">${escapeHtml(g.name)}</span>
+                <span style="font-size: 9px; color: #666;">${escapeHtml(g.author || '')}</span>
             </div>
           </div>
         `).join('') : `
