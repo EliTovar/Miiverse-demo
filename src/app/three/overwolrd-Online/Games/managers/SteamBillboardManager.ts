@@ -26,6 +26,8 @@ export interface BillboardConfig {
   position: { x: number; y: number; z: number };
   size?: { w: number; h: number; r: number };
   fetchMethod: () => Promise<SteamGame[]>;
+  /** Texto antes del autor en la etiqueta. Por defecto 'por ' (Discord usa '' porque muestra miembros). */
+  authorPrefix?: string;
 }
 
 export class SteamBillboardManager {
@@ -158,7 +160,7 @@ export class SteamBillboardManager {
       ${currentGame ? `
         <div style="font-size: 13px; color: #fff; margin-bottom: 15px; padding: 10px; background: rgba(255,255,255,0.07); border-radius: 6px; border-left: 3px solid ${this.config.color};">
            <div style="font-weight: bold; margin-bottom: 2px;">${escapeHtml(currentGame.name)}</div>
-           <div style="color: ${this.config.color}; opacity: 0.8; font-size: 11px; font-style: italic;">por ${escapeHtml(currentGame.author || 'Artista Desconocido')}</div>
+           <div style="color: ${this.config.color}; opacity: 0.8; font-size: 11px; font-style: italic;">${this.config.authorPrefix ?? 'por '}${escapeHtml(currentGame.author || 'Artista Desconocido')}</div>
         </div>
       ` : ''}
       <div style="display: flex; flex-direction: column; gap: 8px;">

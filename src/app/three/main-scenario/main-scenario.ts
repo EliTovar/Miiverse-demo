@@ -372,8 +372,9 @@ export class MainScenario implements AfterViewInit, OnDestroy {
       this.sceneManager.scene,
       this.cameraManager.camera,
       {
-        title: 'Top Discord Channels',
-        subtitle: 'Most Voted on Top.gg',
+        title: 'Top Discord Servers',
+        subtitle: 'Most Members on Discord',
+        authorPrefix: '',
         icon: '🚪',
         color: '#7289da', // Color Discord Blurple
         position: { x: -40, y: 16.27, z: -20 },
@@ -384,7 +385,8 @@ export class MainScenario implements AfterViewInit, OnDestroy {
           return bots.map(bot => ({
             appid: parseInt(bot.id) || 0,
             name: bot.name,
-            image: bot.image // Widget PNG de Top.gg
+            author: bot.description, // "4.3M miembros · 409K en línea"
+            image: bot.image // Icono del servidor (CDN de Discord)
           }));
         }
       }
