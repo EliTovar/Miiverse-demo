@@ -417,7 +417,7 @@ export class MainScenario implements AfterViewInit, OnDestroy {
       this.cameraManager.camera,
       {
         title: 'Top Anime',
-        subtitle: 'Most Popular on AniList',
+        subtitle: 'Trending now on AniList',
         icon: '📺',
         color: '#ffc107',
         position: { x: -40, y: 16.27, z: 20 },
@@ -432,7 +432,7 @@ export class MainScenario implements AfterViewInit, OnDestroy {
       this.cameraManager.camera,
       {
         title: 'Top Manga',
-        subtitle: 'Top Rated on AniList',
+        subtitle: 'Trending now on AniList',
         icon: '📚',
         color: '#9c27b0',
         position: { x: 40, y: 16.27, z: -20 },
