@@ -100,8 +100,9 @@ export class SteamBillboardManager {
       this.startRotation();
     }, initialDelay);
 
-    // Actualizar datos cada 3 minutos (180s) para mostrar actualizaciones más rápido.
-    // El backend ya tiene caché, por lo que esto es muy ligero.
+    // Los datos se renuevan cada 1 hora en el backend (caché de cada servicio).
+    // Aquí solo preguntamos cada 3 min para mostrar el dato nuevo poco después
+    // de que el backend lo renueve; mientras tanto responde desde su caché.
     this.updateInterval = window.setInterval(() => {
       this.updateData();
     }, 180000);
