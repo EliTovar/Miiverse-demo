@@ -42,8 +42,15 @@ export class CommunityIcon {
   });
 
   color = computed(() => {
+    // Misma normalización que el backend: "Splatoon 3" y "splatoon-3" son la
+    // misma comunidad, así que deben tener el mismo color.
+    const key = this.name()
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quita los acentos
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
     let hash = 0;
-    for (const char of this.name()) hash = (hash * 31 + char.charCodeAt(0)) | 0;
+    for (const char of key) hash = (hash * 31 + char.charCodeAt(0)) | 0;
     return PALETTE[Math.abs(hash) % PALETTE.length];
   });
 }
