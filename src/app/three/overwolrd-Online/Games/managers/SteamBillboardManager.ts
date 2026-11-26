@@ -236,6 +236,11 @@ export class SteamBillboardManager {
     }
   }
 
+  /** Malla 3D del cartel (para calcular si tapa a un jugador). */
+  get mesh(): THREE.Object3D {
+    return this.billboard.mesh;
+  }
+
   dispose() {
     if (this.updateInterval) clearInterval(this.updateInterval);
     if (this.rotationInterval) clearInterval(this.rotationInterval);
