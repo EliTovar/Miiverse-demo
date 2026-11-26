@@ -2,8 +2,8 @@ import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
-import { Navbar } from "./SocialMedia/components/navbar/navbar";
-import { ComposerModalComponent } from './SocialMedia/components/shared/composer-modal/composer-modal';
+import { Navbar } from "./social/components/navbar/navbar";
+import { ComposerModalComponent } from './social/components/shared/composer-modal/composer-modal';
 
 @Component({
   selector: 'app-root',

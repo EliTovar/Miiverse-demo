@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter, Router } from '@angular/router';
 import { AppComponent } from './app.component';
-import { SocialMediaServicie } from './SocialMedia/services/social-media.service';
+import { AuthStateService } from './core/auth/auth-state.service';
 
 @Component({ standalone: true, template: '' })
 class EmptyPage {}
@@ -28,7 +28,7 @@ describe('AppComponent', () => {
       providers: [
         provideHttpClient(),
         provideRouter([{ path: '**', component: EmptyPage }]),
-        { provide: SocialMediaServicie, useValue: fakeAuth },
+        { provide: AuthStateService, useValue: fakeAuth },
       ],
     }).compileComponents();
   });

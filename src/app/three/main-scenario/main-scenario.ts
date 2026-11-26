@@ -2,22 +2,22 @@ import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy, effect } fr
 import * as THREE from 'three';
 import { Subscription } from 'rxjs';
 
-import { SceneManager } from '../../three/core/SceneManager';
-import { RendererManager } from '../../three/core/RendererManager';
-import { CameraManager } from '../../three/core/CameraManager';
-import { CameraBoundaryManager } from '../../three/controls/CameraBoundaryManager';
-import { LoopManager } from '../../three/core/LoopManager';
-import { ResizeManager } from '../../three/core/ResizeManager';
-import { OrbitControlManager } from '../../three/controls/OrbitControlManager';
-import { LightsManager } from '../../three/lighting/LightsManager';
+import { SceneManager } from '../core/SceneManager';
+import { RendererManager } from '../core/RendererManager';
+import { CameraManager } from '../core/CameraManager';
+import { CameraBoundaryManager } from '../controls/CameraBoundaryManager';
+import { LoopManager } from '../core/LoopManager';
+import { ResizeManager } from '../core/ResizeManager';
+import { OrbitControlManager } from '../controls/OrbitControlManager';
+import { LightsManager } from '../lighting/LightsManager';
 import { DebugHud } from '../debug/DebugHud';
-import { WorldBillboards } from '../overwolrd-Online/Games/managers/WorldBillboards';
+import { WorldBillboards } from '../online/Games/managers/WorldBillboards';
 
-import { FloorManager } from '../../three/environment/FloorManager';
-import { SocketService } from '../../SocialMedia/services/socket.service';
-import { MultiplayerManager } from '../overwolrd-Online/multiplayer/MultiplayerManager';
-import { SocialMediaServicie } from '../../SocialMedia/services/social-media.service';
-import { ComposerService } from '../../SocialMedia/services/composer.service';
+import { FloorManager } from '../environment/FloorManager';
+import { SocketService } from '../../core/socket/socket.service';
+import { MultiplayerManager } from '../online/multiplayer/MultiplayerManager';
+import { AuthStateService } from '../../core/auth/auth-state.service';
+import { ComposerService } from '../../social/services/composer.service';
 
 @Component({
   selector: 'main-scenario',
@@ -95,7 +95,7 @@ export class MainScenario implements AfterViewInit, OnDestroy {
 
   constructor(
     private socketService: SocketService,
-    private auth: SocialMediaServicie,
+    private auth: AuthStateService,
     private composerService: ComposerService
   ) {
     effect(() => {

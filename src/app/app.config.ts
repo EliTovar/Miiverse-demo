@@ -6,7 +6,7 @@ import Aura from '@primeuix/themes/aura';
 
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { jwtInterceptor } from './SocialMedia/interceptor/jwt-interceptor';
+import { jwtInterceptor } from './core/auth/jwt-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
