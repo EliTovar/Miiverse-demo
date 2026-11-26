@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 
 /** Tamaño (en unidades del mundo) de cada rombo de la malla del suelo. */
-const CELL_SIZE = 1.6;
+const CELL_SIZE = 2.6;
 
 /**
  * Suelo de la plaza de Wii U: malla fina de rombos blancos acolchados con
