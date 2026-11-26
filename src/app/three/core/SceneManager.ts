@@ -15,7 +15,7 @@ export class SceneManager {
   constructor() {
     this.scene = new THREE.Scene();
     this.scene.background = this.createSkyTexture();
-    this.scene.fog = new THREE.Fog(HORIZON_COLOR, 130, 300);
+    this.scene.fog = new THREE.Fog(HORIZON_COLOR, 160, 340);
   }
 
   /**

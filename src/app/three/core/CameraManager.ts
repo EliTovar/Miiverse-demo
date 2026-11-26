@@ -13,7 +13,7 @@ export class CameraManager {
     // -------------------------------------------------------------------------
     // Plaza de Wii U: cámara lejana y alta con un ángulo de visión estrecho (40°),
     // así los iconos de delante y de atrás se ven de tamaño parecido.
-    this.camera.position.set(0, 72, 84);
+    this.camera.position.set(0, 86, 122);
     // -------------------------------------------------------------------------
   }
 }

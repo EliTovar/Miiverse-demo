@@ -171,8 +171,8 @@ export class MainScenario implements AfterViewInit, OnDestroy {
     // -------------------------------------------------------------------------
     // 🔧 PUNTO DE ENFOQUE INICIAL (Donde mira la cámara al empezar)
     // -------------------------------------------------------------------------
-    // Centro de la plaza, un poco por detrás del origen para encuadrar las dos filas de iconos.
-    orbitControls.controls.target.set(0, 6, -10);
+    // Centro de la plaza, para encuadrar el óvalo de iconos.
+    orbitControls.controls.target.set(0, 6, 6);
     // -------------------------------------------------------------------------
 
     this.loopManager.addUpdateCallback(() => orbitControls.update());

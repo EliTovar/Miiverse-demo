@@ -12,8 +12,8 @@ import { TopPlayersService } from '../services/TopPlayersService.service';
 
 /**
  * Los 8 carteles del mundo 3D: qué muestran y dónde están.
- * Colocados como los iconos de la plaza de Wii U: dos filas de 4, la de delante
- * desplazada medio hueco, dejando libre el centro donde aparecen los jugadores.
+ * En óvalo alrededor del centro (las posiciones originales del proyecto),
+ * flotando alto como los iconos de la plaza de Wii U.
  * x: Izquierda(-) / Derecha(+)  |  y: Altura  |  z: Profundidad
  */
 function billboardConfigs(): BillboardConfig[] {
@@ -32,7 +32,7 @@ function billboardConfigs(): BillboardConfig[] {
       subtitle: 'Top by Concurrent Players',
       icon: '🔥',
       color: '#66c0f4',
-      position: { x: -12, y: 12, z: -30 },
+      position: { x: -15, y: 18, z: -40 },
       size: { w: 14, h: 14, r: 3.0 },
       fetchMethod: () => steamService.getTrendingGames(),
     },
@@ -42,7 +42,7 @@ function billboardConfigs(): BillboardConfig[] {
       subtitle: 'Latest on Steam Store',
       icon: '✨',
       color: '#00ff88',
-      position: { x: 12, y: 12, z: -30 },
+      position: { x: 15, y: 18, z: -40 },
       size: { w: 14, h: 14, r: 3.0 },
       fetchMethod: () => steamService.getRecentGames(),
     },
@@ -53,7 +53,7 @@ function billboardConfigs(): BillboardConfig[] {
       authorPrefix: '',
       icon: '🚪',
       color: '#7289da', // Color Discord Blurple
-      position: { x: -36, y: 12, z: -30 },
+      position: { x: -40, y: 18, z: -20 },
       size: { w: 14, h: 14, r: 3.0 },
       fetchMethod: async () => {
         const bots = await discordService.getTopBots();
@@ -72,7 +72,7 @@ function billboardConfigs(): BillboardConfig[] {
       subtitle: 'Global Daily Charts',
       icon: '🎵',
       color: '#1DB954', // Spotify Green
-      position: { x: 17, y: 12, z: 10 },
+      position: { x: 15, y: 18, z: 40 },
       size: { w: 14, h: 14, r: 3.0 },
       fetchMethod: () => spotifyService.getTopSongs(),
     },
@@ -82,7 +82,7 @@ function billboardConfigs(): BillboardConfig[] {
       subtitle: 'Trending now on AniList',
       icon: '📺',
       color: '#ffc107',
-      position: { x: -51, y: 12, z: 10 },
+      position: { x: -40, y: 18, z: 20 },
       size: { w: 14, h: 14, r: 3.0 },
       fetchMethod: () => animeService.getTopAnime(),
     },
@@ -92,7 +92,7 @@ function billboardConfigs(): BillboardConfig[] {
       subtitle: 'Trending now on AniList',
       icon: '📚',
       color: '#9c27b0',
-      position: { x: 36, y: 12, z: -30 },
+      position: { x: 40, y: 18, z: -20 },
       size: { w: 14, h: 14, r: 3.0 },
       fetchMethod: () => mangaService.getTopManga(),
     },
@@ -102,7 +102,7 @@ function billboardConfigs(): BillboardConfig[] {
       subtitle: 'Top Daily Illustrations',
       icon: '🎨',
       color: '#0096fa',
-      position: { x: 51, y: 12, z: 10 },
+      position: { x: 40, y: 18, z: 20 },
       size: { w: 14, h: 14, r: 3.0 },
       fetchMethod: () => pixivService.getDailyRanking(),
     },
@@ -114,7 +114,7 @@ function billboardConfigs(): BillboardConfig[] {
       emptyMessage: 'Aún sin Yeahs',
       icon: '👑',
       color: '#ff4444',
-      position: { x: -17, y: 12, z: 10 },
+      position: { x: -15, y: 18, z: 40 },
       size: { w: 14, h: 14, r: 3.0 },
       fetchMethod: () => topPlayersService.getWeeklyTopPlayers(),
     },

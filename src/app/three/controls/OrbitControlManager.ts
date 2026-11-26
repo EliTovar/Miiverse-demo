@@ -11,7 +11,7 @@ export class OrbitControlManager {
     
     // 🔧 CONFIGURACIÓN DEL ZOOM MÁXIMO (MODIFICA AQUÍ)
     // Este número controla qué tan lejos se puede alejar la cámara.
-    this.controls.maxDistance = 150; // la vista inicial está a ~120
+    this.controls.maxDistance = 160; // la vista inicial está a ~135
   }
 
   update() {

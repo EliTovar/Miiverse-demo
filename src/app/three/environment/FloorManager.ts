@@ -37,7 +37,7 @@ export class FloorManager {
       new THREE.MeshBasicMaterial({ map: glowTexture, transparent: true, depthWrite: false }),
     );
     this.glow.rotation.x = -Math.PI / 2;
-    this.glow.position.set(0, 0.02, -15);
+    this.glow.position.set(0, 0.02, 0);
     this.glow.renderOrder = -2; // antes que los iconos de cristal (que no escriben profundidad)
     scene.add(this.glow);
   }
