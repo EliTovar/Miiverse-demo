@@ -34,6 +34,7 @@ export class MainScenario implements AfterViewInit, OnDestroy {
   private rendererManager!: RendererManager;
 
   private billboards?: WorldBillboards;
+  private floorManager?: FloorManager;
   private debugHud?: DebugHud;
   private postCreatedSub?: Subscription;
 
@@ -139,9 +140,11 @@ export class MainScenario implements AfterViewInit, OnDestroy {
        ENVIRONMENT
     ========================= */
 
-    // 🔧 CONFIGURACIÓN DEL TAMAÑO DEL SUELO (Piso)
-    new FloorManager(this.sceneManager.scene, 80);
+    // Plaza estilo Wii U: el suelo visual es grande y se funde con la niebla;
+    // la zona por la que se camina sigue siendo de 80x80 (CharacterController).
+    this.floorManager = new FloorManager(this.sceneManager.scene, 600);
     new LightsManager(this.sceneManager.scene);
+    this.sceneManager.setupEnvironment(this.rendererManager.renderer);
 
     this.loopManager = new LoopManager(
       this.rendererManager.renderer,
@@ -168,7 +171,8 @@ export class MainScenario implements AfterViewInit, OnDestroy {
     // -------------------------------------------------------------------------
     // 🔧 PUNTO DE ENFOQUE INICIAL (Donde mira la cámara al empezar)
     // -------------------------------------------------------------------------
-    // orbitControls.controls.target.set(0, 0, 0); // Apunta al centro (0,0,0)
+    // Centro de la plaza, un poco por detrás del origen para encuadrar las dos filas de iconos.
+    orbitControls.controls.target.set(0, 6, -10);
     // -------------------------------------------------------------------------
 
     this.loopManager.addUpdateCallback(() => orbitControls.update());
@@ -183,17 +187,6 @@ export class MainScenario implements AfterViewInit, OnDestroy {
       this.cameraManager.camera,
       this.rendererManager.renderer
     );
-
-    /* =========================
-       DEMO CUBE
-    ========================= */
-
-    const cube = new THREE.Mesh(
-      new THREE.BoxGeometry(),
-      new THREE.MeshStandardMaterial({ color: 0x00ff88 })
-    );
-    cube.position.y = 1;
-    this.sceneManager.add(cube);
 
     // 🔥 Crear multiplayer inicial una vez que la escena ya existe
     await this.setupMultiplayer();
@@ -264,5 +257,7 @@ export class MainScenario implements AfterViewInit, OnDestroy {
     this.postCreatedSub?.unsubscribe();
     this.billboards?.dispose();
     this.debugHud?.dispose();
+    this.floorManager?.dispose();
+    this.sceneManager?.dispose();
   }
 }

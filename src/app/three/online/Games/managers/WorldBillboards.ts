@@ -12,6 +12,8 @@ import { TopPlayersService } from '../services/TopPlayersService.service';
 
 /**
  * Los 8 carteles del mundo 3D: qué muestran y dónde están.
+ * Colocados como los iconos de la plaza de Wii U: dos filas de 4, la de delante
+ * desplazada medio hueco, dejando libre el centro donde aparecen los jugadores.
  * x: Izquierda(-) / Derecha(+)  |  y: Altura  |  z: Profundidad
  */
 function billboardConfigs(): BillboardConfig[] {
@@ -30,8 +32,8 @@ function billboardConfigs(): BillboardConfig[] {
       subtitle: 'Top by Concurrent Players',
       icon: '🔥',
       color: '#66c0f4',
-      position: { x: -15.0, y: 16.27, z: -40 },
-      size: { w: 16.4, h: 16.4, r: 2.0 },
+      position: { x: -12, y: 12, z: -30 },
+      size: { w: 14, h: 14, r: 3.0 },
       fetchMethod: () => steamService.getTrendingGames(),
     },
     // 2. Cartel de Novedades (Recent) - Derecha
@@ -40,8 +42,8 @@ function billboardConfigs(): BillboardConfig[] {
       subtitle: 'Latest on Steam Store',
       icon: '✨',
       color: '#00ff88',
-      position: { x: 15.0, y: 16.27, z: -40 },
-      size: { w: 16.4, h: 16.4, r: 2.0 },
+      position: { x: 12, y: 12, z: -30 },
+      size: { w: 14, h: 14, r: 3.0 },
       fetchMethod: () => steamService.getRecentGames(),
     },
     // 3. Top Discord Servers
@@ -51,8 +53,8 @@ function billboardConfigs(): BillboardConfig[] {
       authorPrefix: '',
       icon: '🚪',
       color: '#7289da', // Color Discord Blurple
-      position: { x: -40, y: 16.27, z: -20 },
-      size: { w: 16.4, h: 16.4, r: 2.0 },
+      position: { x: -36, y: 12, z: -30 },
+      size: { w: 14, h: 14, r: 3.0 },
       fetchMethod: async () => {
         const bots = await discordService.getTopBots();
         // Mapear a la interfaz SteamGame para compatibilidad con el billboard
@@ -70,8 +72,8 @@ function billboardConfigs(): BillboardConfig[] {
       subtitle: 'Global Daily Charts',
       icon: '🎵',
       color: '#1DB954', // Spotify Green
-      position: { x: 15.0, y: 16.27, z: 40 },
-      size: { w: 18, h: 18, r: 2.5 },
+      position: { x: 17, y: 12, z: 10 },
+      size: { w: 14, h: 14, r: 3.0 },
       fetchMethod: () => spotifyService.getTopSongs(),
     },
     // 5. Anime (AniList)
@@ -80,8 +82,8 @@ function billboardConfigs(): BillboardConfig[] {
       subtitle: 'Trending now on AniList',
       icon: '📺',
       color: '#ffc107',
-      position: { x: -40, y: 16.27, z: 20 },
-      size: { w: 16.4, h: 16.4, r: 2.0 },
+      position: { x: -51, y: 12, z: 10 },
+      size: { w: 14, h: 14, r: 3.0 },
       fetchMethod: () => animeService.getTopAnime(),
     },
     // 6. Manga (AniList)
@@ -90,8 +92,8 @@ function billboardConfigs(): BillboardConfig[] {
       subtitle: 'Trending now on AniList',
       icon: '📚',
       color: '#9c27b0',
-      position: { x: 40, y: 16.27, z: -20 },
-      size: { w: 16.4, h: 16.4, r: 2.0 },
+      position: { x: 36, y: 12, z: -30 },
+      size: { w: 14, h: 14, r: 3.0 },
       fetchMethod: () => mangaService.getTopManga(),
     },
     // 7. Pixiv
@@ -100,8 +102,8 @@ function billboardConfigs(): BillboardConfig[] {
       subtitle: 'Top Daily Illustrations',
       icon: '🎨',
       color: '#0096fa',
-      position: { x: 40, y: 16.27, z: 20 },
-      size: { w: 16.4, h: 16.4, r: 2.0 },
+      position: { x: 51, y: 12, z: 10 },
+      size: { w: 14, h: 14, r: 3.0 },
       fetchMethod: () => pixivService.getDailyRanking(),
     },
     // 8. Top 5 Players: usuarios con más Yeahs recibidos esta semana
@@ -112,8 +114,8 @@ function billboardConfigs(): BillboardConfig[] {
       emptyMessage: 'Aún sin Yeahs',
       icon: '👑',
       color: '#ff4444',
-      position: { x: -15.0, y: 16.27, z: 40 }, // En el muro frontal/centro
-      size: { w: 20, h: 20, r: 2.5 },
+      position: { x: -17, y: 12, z: 10 },
+      size: { w: 14, h: 14, r: 3.0 },
       fetchMethod: () => topPlayersService.getWeeklyTopPlayers(),
     },
   ];
