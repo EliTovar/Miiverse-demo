@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, effect, inject, input, output, sign
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { MiiverseApiService, MiiverseComment } from '../../../services/miiverse-api.service';
+import { MiiverseApiService } from '../../../services/miiverse-api.service';
+import { MiiverseComment } from '../../../models/miiverse.models';
 import { SocialMediaServicie } from '../../../services/social-media.service';
 import { Spoiler } from '../spoiler/spoiler';
 

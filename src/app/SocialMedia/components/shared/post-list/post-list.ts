@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, effect, input, signal, untracked } from '@angular/core';
 import { Observable } from 'rxjs';
-import { MiiversePost, PostSort } from '../../../services/miiverse-api.service';
+import { MiiversePost, PostSort } from '../../../models/miiverse.models';
 import { PostItem } from '../post-item/post-item';
 
 /** Función que trae una página de posts; la pone la página que usa la lista. */

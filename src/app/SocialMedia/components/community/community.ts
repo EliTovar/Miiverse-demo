@@ -3,7 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, map, tap, throwError } from 'rxjs';
-import { MiiverseApiService, MiiverseCommunityDetail } from '../../services/miiverse-api.service';
+import { MiiverseApiService } from '../../services/miiverse-api.service';
+import { MiiverseCommunityDetail } from '../../models/miiverse.models';
 import { CommunityIcon } from '../shared/community-icon/community-icon';
 import { FetchPostsPage, PostList } from '../shared/post-list/post-list';
 

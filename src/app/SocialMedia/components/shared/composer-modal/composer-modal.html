@@ -1,0 +1,64 @@
+@if (service.isOpen()) {
+  <div class="mv-overlay" (click)="close()"></div>
+  <div class="mv-composer" [class.draw-only]="service.mode() === 'draw-only'">
+    <div class="mv-composer-header">
+      <h3>{{ service.mode() === 'draw-only' ? 'Nuevo dibujo' : 'Nueva publicación' }}</h3>
+      <button class="mv-close-btn" (click)="close()">✕</button>
+    </div>
+
+    <!-- Mode tabs (ocultas si es draw-only) -->
+    @if (service.mode() !== 'draw-only') {
+      <div class="mv-tabs">
+        <button class="mv-tab" [class.active]="service.mode() === 'text'" (click)="service.mode.set('text')">
+          💬 Texto
+        </button>
+        <button class="mv-tab" [class.active]="service.mode() === 'draw'" (click)="service.mode.set('draw')">
+          🎨 Dibujar
+        </button>
+      </div>
+    }
+
+    <div class="mv-composer-content">
+      @if (service.mode() === 'text') {
+        <textarea
+          class="mv-textarea"
+          [(ngModel)]="composerText"
+          placeholder="¿Qué está pasando en tu aventura?"
+          maxlength="500"
+          rows="5"
+        ></textarea>
+        <div class="mv-char-count">{{ composerText().length }}/500</div>
+      } @else {
+        <app-drawing-canvas #canvas></app-drawing-canvas>
+      }
+    </div>
+
+    <div class="mv-composer-form">
+      <input
+        class="mv-game-input"
+        [(ngModel)]="composerGame"
+        placeholder="🎮 Comunidad / Juego (opcional)"
+      />
+
+      <label class="mv-spoiler-check">
+        <input type="checkbox" [(ngModel)]="composerSpoiler" />
+        Contiene spoilers
+      </label>
+
+      @if (postError()) {
+        <p class="mv-post-error" role="alert">{{ postError() }}</p>
+      }
+
+      <div class="mv-composer-footer">
+        <button class="mv-btn mv-btn-ghost" (click)="close()">Cancelar</button>
+        <button
+          class="mv-btn mv-btn-primary"
+          [disabled]="isPosting()"
+          (click)="submitPost()"
+        >
+          {{ isPosting() ? 'Publicando…' : 'Publicar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

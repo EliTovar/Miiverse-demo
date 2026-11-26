@@ -3,11 +3,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
-import {
-  MiiverseApiService,
-  MiiverseModerationItem,
-  ModerationFilters,
-} from '../../services/miiverse-api.service';
+import { MiiverseApiService } from '../../services/miiverse-api.service';
+import { MiiverseModerationItem, ModerationFilters } from '../../models/miiverse.models';
 
 const PAGE_SIZE = 30;
 

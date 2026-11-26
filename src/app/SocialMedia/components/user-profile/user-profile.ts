@@ -3,7 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, map, tap, throwError } from 'rxjs';
-import { MiiverseApiService, MiiverseUserProfile } from '../../services/miiverse-api.service';
+import { MiiverseApiService } from '../../services/miiverse-api.service';
+import { MiiverseUserProfile } from '../../models/miiverse.models';
 import { FetchPostsPage, PostList, SortOption } from '../shared/post-list/post-list';
 
 /** Perfil público de un usuario: cabecera, contadores y sus posts. */

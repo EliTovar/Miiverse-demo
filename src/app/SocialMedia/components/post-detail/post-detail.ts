@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { MiiverseApiService, MiiversePost } from '../../services/miiverse-api.service';
+import { MiiverseApiService } from '../../services/miiverse-api.service';
+import { MiiversePost } from '../../models/miiverse.models';
 import { SocialMediaServicie } from '../../services/social-media.service';
 import { CommunityIcon } from '../shared/community-icon/community-icon';
 import { PostItem } from '../shared/post-item/post-item';

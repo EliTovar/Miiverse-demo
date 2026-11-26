@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { MiiverseApiService, MiiversePost } from '../../../services/miiverse-api.service';
+import { MiiverseApiService } from '../../../services/miiverse-api.service';
+import { MiiversePost } from '../../../models/miiverse.models';
 import { SocialMediaServicie } from '../../../services/social-media.service';
 import { CommunityIcon } from '../community-icon/community-icon';
 import { Spoiler } from '../spoiler/spoiler';

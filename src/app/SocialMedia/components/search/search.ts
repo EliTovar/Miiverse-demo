@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { MiiverseApiService, MiiverseCommunity, MiiverseUserSummary } from '../../services/miiverse-api.service';
+import { MiiverseApiService } from '../../services/miiverse-api.service';
+import { MiiverseCommunity, MiiverseUserSummary } from '../../models/miiverse.models';
 import { CommunityIcon } from '../shared/community-icon/community-icon';
 
 type SearchTab = 'users' | 'communities';

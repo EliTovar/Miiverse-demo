@@ -12,7 +12,8 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { MiiverseApiService, MiiversePost } from '../../services/miiverse-api.service';
+import { MiiverseApiService } from '../../services/miiverse-api.service';
+import { MiiversePost } from '../../models/miiverse.models';
 import { SocialMediaServicie } from '../../services/social-media.service';
 import { ComposerService } from '../../services/composer.service';
 import { PostItem } from '../shared/post-item/post-item';

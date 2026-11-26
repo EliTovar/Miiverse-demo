@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { MiiverseApiService, MiiverseCommunity } from '../../services/miiverse-api.service';
+import { MiiverseApiService } from '../../services/miiverse-api.service';
+import { MiiverseCommunity } from '../../models/miiverse.models';
 import { CommunityIcon } from '../shared/community-icon/community-icon';
 
 /** Lista de comunidades con buscador (como "Search > Communities" en Archiverse). */
