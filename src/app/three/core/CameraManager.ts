@@ -11,7 +11,7 @@ export class CameraManager {
     // 🔧 POSICIÓN INICIAL DE LA CÁMARA (MODIFICA AQUÍ)
     // Parámetros: (X, Y, Z) - Determina dónde empieza la cámara al cargar.
     // -------------------------------------------------------------------------
-    this.camera.position.set(0, 50, 40); // vista alta y en picado, como la plaza de Wii U
+    this.camera.position.set(0, 34, 58); // vista alta, como la plaza de Wii U
     // -------------------------------------------------------------------------
   }
 }
