@@ -183,7 +183,8 @@ export class SteamBillboard {
     );
   }
 
-  public setErrorMessage(text: string) {
+  /** Muestra un texto en vez de imagen. `color`: rojo para errores, el del cartel para avisos. */
+  public setErrorMessage(text: string, color = '#ff4444') {
     const canvas = document.createElement('canvas');
     canvas.width = 512;
     canvas.height = 512;
@@ -198,12 +199,12 @@ export class SteamBillboard {
     ctx.fillRect(0, 0, 512, 512);
 
     // Borde rojo de advertencia
-    ctx.strokeStyle = '#ff4444';
+    ctx.strokeStyle = color;
     ctx.lineWidth = 20;
     ctx.strokeRect(10, 10, 492, 492);
 
     // Texto de error
-    ctx.fillStyle = '#ff4444';
+    ctx.fillStyle = color;
     ctx.font = 'bold 48px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

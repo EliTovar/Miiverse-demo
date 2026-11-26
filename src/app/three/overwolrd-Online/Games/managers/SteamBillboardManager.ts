@@ -28,6 +28,8 @@ export interface BillboardConfig {
   fetchMethod: () => Promise<SteamGame[]>;
   /** Texto antes del autor en la etiqueta. Por defecto 'por ' (Discord usa '' porque muestra miembros). */
   authorPrefix?: string;
+  /** Texto si la lista llega vacía sin error (p. ej. nadie recibió Yeahs esta semana). */
+  emptyMessage?: string;
 }
 
 export class SteamBillboardManager {
@@ -135,6 +137,10 @@ export class SteamBillboardManager {
           this.billboard.setImage(topGame.image);
         }
         this.updateLabelContent();
+      } else if (this.config.emptyMessage) {
+        // Lista vacía pero sin error: es un dato válido, no un fallo.
+        this.billboard.setErrorMessage(this.config.emptyMessage, this.config.color);
+        this.updateLabelContent();
       } else {
         // ⚠️ Si la lista está vacía (error de red o API), mostramos el aviso visual
         this.billboard.setErrorMessage('⚠️ Error de Carga');
@@ -174,7 +180,7 @@ export class SteamBillboardManager {
           </div>
         `).join('') : `
           <div style="color: #666; font-size: 11px; font-style: italic; padding: 10px; text-align: center;">
-            No se pudieron cargar los datos.<br>Verifica tu conexión.
+            ${this.config.emptyMessage ? escapeHtml(this.config.emptyMessage) : 'No se pudieron cargar los datos.<br>Verifica tu conexión.'}
           </div>
         `}
       </div>

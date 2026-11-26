@@ -7,6 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ComposerService } from '../../../services/composer.service';
 import { DrawingCanvasComponent } from '../drawing-canvas/drawing-canvas';
@@ -64,14 +65,18 @@ import { MiiverseApiService } from '../../../services/miiverse-api.service';
             Contiene spoilers
           </label>
 
+          @if (postError()) {
+            <p class="mv-post-error" role="alert">{{ postError() }}</p>
+          }
+
           <div class="mv-composer-footer">
             <button class="mv-btn mv-btn-ghost" (click)="close()">Cancelar</button>
             <button
               class="mv-btn mv-btn-primary"
-              [disabled]="isPosting"
+              [disabled]="isPosting()"
               (click)="submitPost()"
             >
-              {{ isPosting ? 'Publicando…' : 'Publicar' }}
+              {{ isPosting() ? 'Publicando…' : 'Publicar' }}
             </button>
           </div>
         </div>
@@ -219,6 +224,13 @@ import { MiiverseApiService } from '../../../services/miiverse-api.service';
     }
     .mv-spoiler-check input { accent-color: var(--mv-orange); width: 16px; height: 16px; }
 
+    .mv-post-error {
+      margin-top: 12px;
+      color: #d23c3c;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
     .mv-composer-footer {
       display: flex;
       gap: 12px;
@@ -275,7 +287,9 @@ export class ComposerModalComponent {
   composerText = signal('');
   composerGame = signal('');
   composerSpoiler = signal(false);
-  isPosting = false;
+  // Signals: con OnPush, cambiarlos desde la respuesta HTTP sí refresca la vista.
+  isPosting = signal(false);
+  postError = signal('');
 
   constructor() {
     // Sincronizar con el estado inicial del servicio
@@ -288,6 +302,7 @@ export class ComposerModalComponent {
     this.composerText.set('');
     this.composerGame.set('');
     this.composerSpoiler.set(false);
+    this.postError.set('');
   }
 
   submitPost() {
@@ -298,7 +313,8 @@ export class ComposerModalComponent {
     const text = this.composerText();
     
     if (!text.trim() && !drawingUrl) return;
-    this.isPosting = true;
+    this.isPosting.set(true);
+    this.postError.set('');
 
     this.api.createPost({
       content_text: text || undefined,
@@ -308,11 +324,17 @@ export class ComposerModalComponent {
     }).subscribe({
       next: (post) => {
         this.service.notifyPostCreated(post);
-        this.isPosting = false;
+        this.isPosting.set(false);
         this.close();
       },
-      error: () => {
-        this.isPosting = false;
+      error: (err: HttpErrorResponse) => {
+        // El backend explica qué falló (texto demasiado largo, sin sesión…).
+        this.postError.set(
+          err.status === 401 ? 'Tu sesión caducó. Vuelve a iniciar sesión.'
+            : err.status === 413 ? 'El dibujo es demasiado grande.'
+            : err.error?.message ?? 'No se pudo publicar. Inténtalo de nuevo.',
+        );
+        this.isPosting.set(false);
       }
     });
   }

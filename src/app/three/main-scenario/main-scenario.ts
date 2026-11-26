@@ -17,6 +17,7 @@ import { SpotifyService } from '../overwolrd-Online/Games/services/SpotifyServic
 import { AnimeService } from '../overwolrd-Online/Games/services/AnimeService.service';
 import { MangaService } from '../overwolrd-Online/Games/services/MangaService.service';
 import { PixivService } from '../overwolrd-Online/Games/services/PixivService.service';
+import { TopPlayersService } from '../overwolrd-Online/Games/services/TopPlayersService.service';
 
 import { FloorManager } from '../../three/environment/FloorManager';
 import { SocketService } from '../../SocialMedia/services/socket.service';
@@ -462,20 +463,23 @@ export class MainScenario implements AfterViewInit, OnDestroy {
     );
 
     // -------------------------------------------------------------------------
-    // 🏆 TOP 5 PLAYERS (NUEVO)
+    // 🏆 TOP 5 PLAYERS: usuarios con más Yeahs recibidos esta semana
     // -------------------------------------------------------------------------
+    const topPlayersService = new TopPlayersService();
     const topPlayersManager = new SteamBillboardManager(
       this.sceneManager.scene,
       this.cameraManager.camera,
       {
         title: 'Top 5 Players',
-        subtitle: 'Most Active Users',
+        subtitle: 'Most Yeahs this week (Mon–Sun)',
+        authorPrefix: '',
+        emptyMessage: 'Aún sin Yeahs',
         icon: '👑',
         color: '#ff4444', 
         position: { x: -15.00, y: 16.27, z: 40 }, // En el muro frontal/centro
         //position: { x: -15.00, y: 16.27, z: -40 }, 
         size: { w: 20, h: 20, r: 2.5 },
-        fetchMethod: async () => [] // Vacío por ahora
+        fetchMethod: () => topPlayersService.getWeeklyTopPlayers()
       }
     );
 
