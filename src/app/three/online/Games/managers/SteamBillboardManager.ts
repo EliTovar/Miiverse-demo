@@ -18,32 +18,6 @@ function escapeHtml(value: unknown): string {
     .replace(/'/g, '&#39;');
 }
 
-/** Disco plano con borde gris suave y centro casi transparente. */
-function createFloorRing(radius: number): THREE.Mesh {
-  const s = 256;
-  const canvas = document.createElement('canvas');
-  canvas.width = s;
-  canvas.height = s;
-  const ctx = canvas.getContext('2d')!;
-  const grad = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
-  grad.addColorStop(0, 'rgba(150, 156, 165, 0.10)');
-  grad.addColorStop(0.78, 'rgba(150, 156, 165, 0.16)');
-  grad.addColorStop(0.86, 'rgba(120, 126, 135, 0.45)');
-  grad.addColorStop(0.93, 'rgba(255, 255, 255, 0.9)');
-  grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, s, s);
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  const ring = new THREE.Mesh(
-    new THREE.PlaneGeometry(radius * 2, radius * 2),
-    new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false }),
-  );
-  ring.rotation.x = -Math.PI / 2;
-  return ring;
-}
-
 export interface BillboardConfig {
   title: string;
   subtitle: string;
@@ -61,8 +35,6 @@ export interface BillboardConfig {
 export class SteamBillboardManager {
 
   private billboard: SteamBillboard;
-  /** Círculo en el suelo bajo el icono, como en la plaza de Wii U. */
-  private floorRing?: THREE.Mesh;
   private updateInterval?: number;
   private rotationInterval?: number;
   private currentIndex = 0;
@@ -90,19 +62,16 @@ export class SteamBillboardManager {
     this.label.className = 'steam-billboard-label';
     this.label.style.position = 'absolute';
     this.label.style.display = 'none';
-    // Tarjeta blanca como los bocadillos de la plaza de Wii U (tema --mv-* de styles.scss).
-    this.label.style.minWidth = '240px';
-    this.label.style.maxWidth = '320px';
-    this.label.style.padding = '14px 16px';
-    this.label.style.background = 'rgba(255, 255, 255, 0.97)';
-    this.label.style.color = 'var(--mv-text)';
-    this.label.style.borderRadius = '16px';
-    this.label.style.border = '1px solid var(--mv-border)';
-    this.label.style.borderTop = `4px solid ${this.config.color}`;
+    this.label.style.padding = '14px';
+    this.label.style.background = 'rgba(10, 15, 23, 0.95)';
+    this.label.style.color = 'white';
+    this.label.style.borderRadius = '12px';
+    this.label.style.border = `2px solid ${this.config.color}`;
     this.label.style.pointerEvents = 'none';
     this.label.style.zIndex = '1000';
-    this.label.style.fontFamily = 'var(--mv-font)';
-    this.label.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.18)';
+    this.label.style.fontFamily = 'Inter, Segoe UI, sans-serif';
+    this.label.style.boxShadow = `0 8px 32px rgba(0,0,0,0.8), 0 0 15px ${this.config.color}66`;
+    this.label.style.backdropFilter = 'blur(4px)';
     document.body.appendChild(this.label);
   }
 
@@ -125,9 +94,6 @@ export class SteamBillboardManager {
     const p = this.config.position;
     this.billboard.setPosition(p.x, p.y, p.z);
     this.scene.add(this.billboard.mesh);
-    this.floorRing = createFloorRing((this.config.size?.w ?? 20) * 0.55);
-    this.floorRing.position.set(p.x, 0.03, p.z);
-    this.scene.add(this.floorRing);
 
     await this.updateData();
     
@@ -194,31 +160,31 @@ export class SteamBillboardManager {
     const currentGame = this.games[this.currentIndex];
 
     this.label.innerHTML = `
-      <div style="font-weight: 800; font-size: 15px; margin-bottom: 8px; color: #333;">
+      <div style="font-weight: bold; font-size: 14px; margin-bottom: 6px; color: ${this.config.color}; letter-spacing: 1px; text-transform: uppercase;">
         ${this.config.icon} ${this.config.title}
       </div>
       ${currentGame ? `
-        <div style="font-size: 14px; margin-bottom: 12px; padding: 10px 12px; background: #f6f6f6; border-radius: 10px; border-left: 4px solid ${this.config.color};">
-           <div style="font-weight: 800; margin-bottom: 2px;">${escapeHtml(currentGame.name)}</div>
-           <div style="color: #777; font-size: 12px; font-weight: 700;">${this.config.authorPrefix ?? 'por '}${escapeHtml(currentGame.author || 'Artista Desconocido')}</div>
+        <div style="font-size: 13px; color: #fff; margin-bottom: 15px; padding: 10px; background: rgba(255,255,255,0.07); border-radius: 6px; border-left: 3px solid ${this.config.color};">
+           <div style="font-weight: bold; margin-bottom: 2px;">${escapeHtml(currentGame.name)}</div>
+           <div style="color: ${this.config.color}; opacity: 0.8; font-size: 11px; font-style: italic;">${this.config.authorPrefix ?? 'por '}${escapeHtml(currentGame.author || 'Artista Desconocido')}</div>
         </div>
       ` : ''}
-      <div style="display: flex; flex-direction: column; gap: 7px;">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
         ${topGames.length > 0 ? topGames.map((g, i) => `
-          <div style="display: flex; align-items: center; gap: 10px; opacity: ${this.currentIndex === i ? '1' : '0.55'}">
-            <span style="flex-shrink: 0; min-width: 26px; padding: 1px 0; border-radius: 999px; background: ${this.currentIndex === i ? this.config.color : '#e9e9e9'}; color: ${this.currentIndex === i ? '#fff' : '#555'}; font-weight: 800; font-size: 11px; text-align: center;">${i + 1}</span>
-            <div style="display: flex; flex-direction: column; min-width: 0;">
-                <span style="font-size: 12px; font-weight: 800; color: #333;">${escapeHtml(g.name)}</span>
-                <span style="font-size: 11px; font-weight: 600; color: #888;">${escapeHtml(g.author || '')}</span>
+          <div style="display: flex; align-items: center; gap: 10px; opacity: ${this.currentIndex === i ? '1' : '0.4'}">
+            <span style="color: ${this.config.color}; font-weight: bold; font-size: 10px;">#${i+1}</span>
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-size: 11px; font-weight: 500; ${this.currentIndex === i ? 'color: #fff;' : 'color: #aaa;'}">${escapeHtml(g.name)}</span>
+                <span style="font-size: 9px; color: #666;">${escapeHtml(g.author || '')}</span>
             </div>
           </div>
         `).join('') : `
-          <div style="color: #888; font-size: 12px; font-weight: 700; padding: 10px; text-align: center;">
+          <div style="color: #666; font-size: 11px; font-style: italic; padding: 10px; text-align: center;">
             ${this.config.emptyMessage ? escapeHtml(this.config.emptyMessage) : 'No se pudieron cargar los datos.<br>Verifica tu conexión.'}
           </div>
         `}
       </div>
-      <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #ececec; font-size: 11px; font-weight: 700; color: #999; text-align: right;">${this.config.subtitle}</div>
+      <div style="margin-top: 15px; font-size: 10px; color: #555; text-align: right; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;">${this.config.subtitle}</div>
     `;
   }
 
@@ -280,12 +246,5 @@ export class SteamBillboardManager {
     if (this.rotationInterval) clearInterval(this.rotationInterval);
     if (this.label) this.label.remove();
     this.billboard.dispose();
-    if (this.floorRing) {
-      this.scene.remove(this.floorRing);
-      this.floorRing.geometry.dispose();
-      const mat = this.floorRing.material as THREE.MeshBasicMaterial;
-      mat.map?.dispose();
-      mat.dispose();
-    }
   }
 }

@@ -26,21 +26,14 @@ const fragmentShader = `
     
     // Multiplicar por intensidad de emisión y por opacidad externa
     gl_FragColor = vec4(finalColor.rgb * emissiveIntensity, finalColor.a * uOpacity);
-
-    // Pasa el color de espacio lineal a sRGB: sin esto las imágenes se ven apagadas.
-    #include <colorspace_fragment>
   }
 `;
-
-/** Opacidad del borde de cristal sin oclusión. */
-const GLASS_OPACITY = 0.6;
 
 export class SteamBillboard {
   public mesh: THREE.Group;
 
   private material: THREE.ShaderMaterial;
-  /** Bloque de cristal que rodea la imagen (icono de la plaza de Wii U). */
-  private glassMaterial: THREE.MeshPhysicalMaterial;
+  private glowMaterial: THREE.MeshStandardMaterial;
   
   private bitmapLoader = new THREE.ImageBitmapLoader().setOptions({ imageOrientation: 'flipY' });
   private blackTex: THREE.Texture;
@@ -88,7 +81,7 @@ export class SteamBillboard {
         tex2: { value: this.blackTex },
         transition: { value: 1.0 },
         uOpacity: { value: 1.0 },
-        emissiveIntensity: { value: 1.0 }
+        emissiveIntensity: { value: 1.2 }
       },
       vertexShader,
       fragmentShader,
@@ -97,52 +90,43 @@ export class SteamBillboard {
     });
 
     this.poster = new THREE.Mesh(geometry, this.material);
+    this.poster.position.z = (this.thickness / 2) + 0.01;
 
-    // 4. BLOQUE DE CRISTAL: borde grueso, redondeado y translúcido alrededor de la imagen.
-    const rim = Math.max(width, height) * 0.06;
-    const bevel = rim * 0.6;
-    const frameShape = this.createRoundedRectShape(
-      width + rim * 2 - bevel * 2,
-      height + rim * 2 - bevel * 2,
-      Math.max(radius + rim - bevel, 0.1),
-    );
-
-    const frameGeometry = new THREE.ExtrudeGeometry(frameShape, {
+    // 4. MARCO 3D REAL
+    const frameShape = this.createRoundedRectShape(width + 0.4, height + 0.4, radius + 0.1);
+    
+    const extrudeSettings = {
       steps: 1,
       depth: this.thickness,
       bevelEnabled: true,
-      bevelThickness: bevel,
-      bevelSize: bevel,
+      bevelThickness: 0.1,
+      bevelSize: 0.1,
       bevelOffset: 0,
-      bevelSegments: 6,
-    });
+      bevelSegments: 3
+    };
+
+    const frameGeometry = new THREE.ExtrudeGeometry(frameShape, extrudeSettings);
     frameGeometry.center();
 
-    this.glassMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0xf4f8fb,
-      roughness: 0.08,
-      metalness: 0,
-      clearcoat: 1,
-      clearcoatRoughness: 0.05,
-      transparent: true,
-      opacity: GLASS_OPACITY,
-      depthWrite: false,
+    this.glowMaterial = new THREE.MeshStandardMaterial({
+      color: 0x1a1a1a,
+      emissive: 0x66c0f4,
+      emissiveIntensity: 2,
+      roughness: 0.2,
+      metalness: 0.8,
+      transparent: true, // Habilitar transparencia para el marco
+      opacity: 1.0
     });
 
-    this.glass = new THREE.Mesh(frameGeometry, this.glassMaterial);
+    this.glow = new THREE.Mesh(frameGeometry, this.glowMaterial);
+    this.glow.position.z = -this.thickness / 2;
 
-    // La imagen va justo delante de la cara frontal del cristal.
-    this.poster.position.z = this.thickness / 2 + bevel + 0.02;
-    this.poster.renderOrder = 1;
-
-    this.mesh.add(this.glass);
+    this.mesh.add(this.glow);
     this.mesh.add(this.poster);
   }
 
   private poster: THREE.Mesh;
-  private glass: THREE.Mesh;
-  private hoverScale = 1;
-  private targetHoverScale = 1;
+  private glow: THREE.Mesh;
 
   private createRoundedRectShape(width: number, height: number, radius: number): THREE.Shape {
     const shape = new THREE.Shape();
@@ -207,27 +191,29 @@ export class SteamBillboard {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Fondo claro, como el resto de la plaza
+    // Fondo oscuro con gradiente
     const grad = ctx.createLinearGradient(0, 0, 0, 512);
-    grad.addColorStop(0, '#ffffff');
-    grad.addColorStop(1, '#eceff3');
+    grad.addColorStop(0, '#1a1a1a');
+    grad.addColorStop(1, '#000000');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 512, 512);
 
-    // Franja de color arriba (rojo para errores, el del cartel para avisos)
-    ctx.fillStyle = color;
-    ctx.fillRect(0, 0, 512, 24);
+    // Borde rojo de advertencia
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 20;
+    ctx.strokeRect(10, 10, 492, 492);
 
-    // Texto
+    // Texto de error
     ctx.fillStyle = color;
-    ctx.font = '800 46px Nunito, Arial, sans-serif';
+    ctx.font = 'bold 48px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(text, 256, 246);
-
-    ctx.fillStyle = '#777777';
-    ctx.font = '700 24px Nunito, Arial, sans-serif';
-    ctx.fillText('Reintentando en unos minutos...', 256, 310);
+    ctx.fillText(text, 256, 256);
+    
+    // Subtexto interactivo
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '24px Arial';
+    ctx.fillText('Reintentando en unos minutos...', 256, 320);
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
@@ -255,9 +241,9 @@ export class SteamBillboard {
     this.setImage('https://cdn.cloudflare.steamstatic.com/steam/apps/570/library_600x900_2x.jpg');
   }
 
-  /** Al pasar el ratón el icono crece un poco, como al señalar un icono en Wii U. */
   onHover(active: boolean) {
-    this.targetHoverScale = active ? 1.06 : 1;
+    this.glowMaterial.emissiveIntensity = active ? 4 : 2;
+    this.glowMaterial.opacity = active ? 0.8 : 0.5;
   }
 
   update(time: number) {
@@ -267,9 +253,10 @@ export class SteamBillboard {
       this.material.uniforms['transition'].value = this.transitionAlpha;
     }
 
-    // 2. Escala suave al pasar el ratón
-    this.hoverScale = THREE.MathUtils.lerp(this.hoverScale, this.targetHoverScale, 0.2);
-    this.mesh.scale.setScalar(this.hoverScale);
+    // 2. Animación de pulso del brillo
+    const pulse = Math.sin(time * 0.003) * 0.5 + 1.5;
+    const baseGlow = this.glowMaterial.opacity > 0.6 ? 4 : 2; 
+    this.glowMaterial.emissiveIntensity = baseGlow * (pulse * 0.5 + 0.5);
   }
 
   lookAt(camera: THREE.Camera) {
@@ -278,7 +265,7 @@ export class SteamBillboard {
 
   setOpacity(val: number) {
     this.material.uniforms['uOpacity'].value = val;
-    this.glassMaterial.opacity = GLASS_OPACITY * val;
+    this.glowMaterial.opacity = val;
   }
 
   dispose() {
@@ -286,8 +273,6 @@ export class SteamBillboard {
     this.material.uniforms['tex1'].value?.dispose();
     this.material.uniforms['tex2'].value?.dispose();
     this.material.dispose();
-    this.glassMaterial.dispose();
-    this.glass.geometry.dispose();
-    this.poster.geometry.dispose();
+    this.glowMaterial.dispose();
   }
 }
