@@ -1,54 +1,153 @@
-<form class="mv-search" role="search" (ngSubmit)="submit()">
-  <input name="q" type="search" [(ngModel)]="search"
-         placeholder="Buscar por texto o por autor" aria-label="Buscar comentarios" />
-  <button type="submit" aria-label="Buscar"><i class="pi pi-search"></i></button>
+<form class="mv-mod-filters" (ngSubmit)="search()">
+  <label class="mv-field mv-field-type">
+    <span>Tipo</span>
+    <select name="type" [(ngModel)]="filters.type">
+      <option value="all">Todo</option>
+      <option value="post">Publicaciones</option>
+      <option value="comment">Comentarios</option>
+    </select>
+  </label>
+  <label class="mv-field mv-field-wide">
+    <span>Texto</span>
+    <input name="q" type="search" [(ngModel)]="filters.q" placeholder="Palabras del mensaje" />
+  </label>
+  <label class="mv-field">
+    <span>Usuario</span>
+    <input name="user" type="search" [(ngModel)]="filters.user" placeholder="Nombre" />
+  </label>
+  <label class="mv-field">
+    <span>Comunidad</span>
+    <input name="community" type="search" [(ngModel)]="filters.community" placeholder="Ej. Splatoon 3" />
+  </label>
+  <label class="mv-field">
+    <span>Día</span>
+    <input name="date" type="date" [(ngModel)]="filters.date" />
+  </label>
+  <label class="mv-field">
+    <span>Mes</span>
+    <input name="month" type="month" [(ngModel)]="filters.month" />
+  </label>
+  <label class="mv-field mv-field-hour">
+    <span>Hora</span>
+    <select name="hour" [(ngModel)]="filters.hour">
+      <option value="">Cualquiera</option>
+      @for (h of hours; track h) {
+        <option [value]="'' + h">{{ h < 10 ? '0' + h : h }}:00 – {{ h < 10 ? '0' + h : h }}:59</option>
+      }
+    </select>
+  </label>
+  <div class="mv-filter-actions">
+    <button type="submit" class="mv-btn-primary"><i class="pi pi-search"></i> Buscar</button>
+    <button type="button" class="mv-btn-ghost" (click)="clear()">Limpiar</button>
+  </div>
 </form>
 
-<p class="mv-result-hint">Comentarios de todos los posts, del más nuevo al más viejo.</p>
+<p class="mv-mod-summary">
+  @if (!loading() || items().length) {
+    {{ total() }} resultado{{ total() === 1 ? '' : 's' }}
+  }
+  <span class="mv-tz">Fechas en tu hora local ({{ timeZone }})</span>
+</p>
 
 @if (error()) {
   <div class="mv-status">{{ error() }}</div>
 } @else {
-  @for (comment of comments(); track comment.id) {
-    <article class="mv-mod-item">
-      <header class="mv-mod-header">
-        <a [routerLink]="['/social/users', comment.username]">
-          <img class="mv-mod-avatar" [src]="comment.mii_avatar_url" [alt]="comment.username" />
-        </a>
-        <div class="mv-mod-meta">
-          <a class="mv-mod-name" [routerLink]="['/social/users', comment.username]">{{ comment.username }}</a>
-          <time [attr.datetime]="comment.created_at">{{ fullDate(comment.created_at) }}</time>
+  <div class="mv-mod-split">
+
+    <!-- ═══ LISTA ═════════════════════════════════════════════════════════ -->
+    <ul class="mv-mod-list" aria-label="Resultados">
+      @for (item of items(); track key(item)) {
+        <li>
+          <button type="button" class="mv-mod-row" [class.selected]="selectedKey() === key(item)"
+                  [attr.aria-current]="selectedKey() === key(item)" (click)="select(item)">
+            <img class="mv-mod-avatar" [src]="item.mii_avatar_url" alt="" />
+            <span class="mv-mod-row-body">
+              <span class="mv-mod-row-top">
+                <span class="mv-kind" [class.comment]="item.kind === 'comment'">
+                  {{ item.kind === 'post' ? 'Post' : 'Comentario' }}
+                </span>
+                <strong>{{ item.username }}</strong>
+                <time [attr.datetime]="item.created_at">{{ fullDate(item.created_at) }}</time>
+              </span>
+              <span class="mv-mod-row-text">{{ preview(item) }}</span>
+              @if (item.game_title) {
+                <span class="mv-mod-row-community"><i class="pi pi-tag"></i> {{ item.game_title }}</span>
+              }
+            </span>
+          </button>
+        </li>
+      } @empty {
+        @if (!loading()) {
+          <li class="mv-status">No hay resultados con esos filtros.</li>
+        }
+      }
+      @if (loading()) {
+        <li class="mv-status"><span class="mv-spinner"></span> Cargando...</li>
+      } @else if (hasMore()) {
+        <li><button type="button" class="mv-more-btn" (click)="loadMore()">Ver más</button></li>
+      }
+    </ul>
+
+    <!-- ═══ DETALLE ═══════════════════════════════════════════════════════ -->
+    <section class="mv-mod-detail" aria-live="polite">
+      @if (selected(); as item) {
+        <header class="mv-detail-header">
+          <img class="mv-mod-avatar mv-detail-avatar" [src]="item.mii_avatar_url" alt="" />
+          <div>
+            <a class="mv-detail-name" [routerLink]="['/social/users', item.username]">{{ item.username }}</a>
+            <div class="mv-detail-meta">
+              <span class="mv-kind" [class.comment]="item.kind === 'comment'">
+                {{ item.kind === 'post' ? 'Publicación' : 'Comentario' }}
+              </span>
+              <time [attr.datetime]="item.created_at">{{ fullDate(item.created_at) }}</time>
+            </div>
+          </div>
+        </header>
+
+        <div class="mv-detail-tags">
+          @if (item.game_title) { <span class="mv-tag"><i class="pi pi-tag"></i> {{ item.game_title }}</span> }
+          @if (item.is_spoiler) { <span class="mv-tag mv-tag-spoiler">Spoiler</span> }
+          <span class="mv-tag"><i class="pi pi-face-smile"></i> {{ item.yeahs }} Yeahs</span>
+          @if (item.kind === 'post') {
+            <span class="mv-tag"><i class="pi pi-comment"></i> {{ item.comments_count }} comentarios</span>
+          }
         </div>
-        <span class="mv-mod-tags">
-          @if (comment.is_spoiler) { <span class="mv-tag mv-tag-spoiler">Spoiler</span> }
-          @if (comment.updated_at) { <span class="mv-tag">Editado</span> }
-          <span class="mv-tag"><i class="pi pi-face-smile"></i> {{ comment.yeahs }}</span>
-        </span>
-      </header>
 
-      <p class="mv-mod-text">{{ comment.content_text }}</p>
+        @if (item.content_text) {
+          <p class="mv-detail-text">{{ item.content_text }}</p>
+        }
+        @if (item.drawing_url) {
+          <img class="mv-detail-image" [src]="item.drawing_url" alt="Dibujo de {{ item.username }}" />
+        }
+        @if (item.screenshot_url) {
+          <img class="mv-detail-image" [src]="item.screenshot_url" alt="Captura de {{ item.username }}" />
+        }
 
-      <footer class="mv-mod-footer">
-        <a class="mv-mod-post" [routerLink]="['/social/posts', comment.post_id]">
-          <i class="pi pi-reply"></i>
-          En el post de <strong>{{ comment.post_username }}</strong>
-          @if (comment.post_game_title) { · {{ comment.post_game_title }} }
-        </a>
-        <button type="button" class="mv-mod-delete" [disabled]="deletingId() === comment.id"
-                (click)="remove(comment)">
-          <i class="pi pi-trash"></i> {{ deletingId() === comment.id ? 'Borrando...' : 'Borrar' }}
-        </button>
-      </footer>
-    </article>
-  } @empty {
-    @if (!loading()) {
-      <div class="mv-status">No hay comentarios que coincidan.</div>
-    }
-  }
+        @if (item.kind === 'comment') {
+          <div class="mv-detail-context">
+            <span>Comentario en la publicación de <strong>{{ item.post_username }}</strong>:</span>
+            <p>{{ item.post_text || '(dibujo o captura sin texto)' }}</p>
+          </div>
+        }
 
-  @if (loading()) {
-    <div class="mv-status"><span class="mv-spinner"></span> Cargando...</div>
-  } @else if (hasMore()) {
-    <button type="button" class="mv-more-btn" (click)="loadMore()">Ver más</button>
-  }
+        <footer class="mv-detail-actions">
+          <a class="mv-btn-ghost" [routerLink]="['/social/posts', item.post_id]">
+            <i class="pi pi-external-link"></i> Ver en Miiverse
+          </a>
+          <button type="button" class="mv-btn-danger" [disabled]="deleting()" (click)="remove(item)">
+            <i class="pi pi-trash"></i>
+            {{ deleting() ? 'Borrando...' : (item.kind === 'post' ? 'Borrar publicación' : 'Borrar comentario') }}
+          </button>
+        </footer>
+        @if (item.kind === 'post' && item.comments_count) {
+          <p class="mv-detail-warning">Borrar la publicación también borra sus {{ item.comments_count }} comentario(s).</p>
+        }
+      } @else {
+        <div class="mv-detail-empty">
+          <i class="pi pi-arrow-left"></i>
+          <p>Elige una publicación o un comentario de la lista para verlo completo y moderarlo.</p>
+        </div>
+      }
+    </section>
+  </div>
 }

@@ -19,6 +19,15 @@
 
     <app-post-item [post]="current" [detail]="true" />
 
+    @if (auth.role() === 'admin') {
+      <div class="mv-admin-bar">
+        <span><i class="pi pi-shield"></i> Moderación</span>
+        <button type="button" [disabled]="deleting()" (click)="deletePost(current)">
+          <i class="pi pi-trash"></i> {{ deleting() ? 'Borrando...' : 'Borrar publicación' }}
+        </button>
+      </div>
+    }
+
     <app-post-comments [postId]="current.id" [postAuthor]="current.username"
                        (commentAdded)="changeCommentCount(1)"
                        (commentRemoved)="changeCommentCount(-1)" />

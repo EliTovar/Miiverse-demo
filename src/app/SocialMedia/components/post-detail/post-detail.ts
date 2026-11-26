@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MiiverseApiService, MiiversePost } from '../../services/miiverse-api.service';
+import { SocialMediaServicie } from '../../services/social-media.service';
 import { CommunityIcon } from '../shared/community-icon/community-icon';
 import { PostItem } from '../shared/post-item/post-item';
 import { PostComments } from '../shared/post-comments/post-comments';
@@ -18,6 +19,9 @@ import { PostComments } from '../shared/post-comments/post-comments';
 })
 export class PostDetail {
   private api = inject(MiiverseApiService);
+  private router = inject(Router);
+  auth = inject(SocialMediaServicie);
+  deleting = signal(false);
 
   post = signal<MiiversePost | null>(null);
   loading = signal(true);
@@ -44,6 +48,20 @@ export class PostDetail {
           this.loading.set(false);
         },
       });
+    });
+  }
+
+  /** Moderación (solo admin): borra el post con sus comentarios y vuelve a Actividad. */
+  deletePost(post: MiiversePost) {
+    const extra = post.comments_count ? ` y sus ${post.comments_count} comentario(s)` : '';
+    if (!confirm(`Moderación: ¿borrar la publicación de ${post.username}${extra}? No se puede deshacer.`)) return;
+    this.deleting.set(true);
+    this.api.deletePost(post.id).subscribe({
+      next: () => this.router.navigate(['/social']),
+      error: (err: HttpErrorResponse) => {
+        alert(err.error?.message ?? 'No se pudo borrar la publicación');
+        this.deleting.set(false);
+      },
     });
   }
 

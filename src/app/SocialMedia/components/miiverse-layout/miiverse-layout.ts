@@ -9,6 +9,8 @@ import { ComposerService } from '../../services/composer.service';
 interface LayoutRouteData {
   title?: string;
   showPostButton?: boolean;
+  /** Usa casi todo el ancho de la pantalla (vista de moderación). */
+  wide?: boolean;
 }
 
 /**

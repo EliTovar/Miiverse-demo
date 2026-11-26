@@ -24,7 +24,7 @@ export const SOCIAL_MEDIA_ROUTES: Routes = [
         path: 'moderation',
         component: Moderation,
         canActivate: [AuthGuard],
-        data: { title: 'Moderar comentarios', roles: ['admin'] },
+        data: { title: 'Moderación', roles: ['admin'], wide: true },
       },
       { path: 'communities', component: Communities, data: { title: 'Comunidades' } },
       { path: 'communities/:name', component: Community, data: { title: 'Comunidad' } },

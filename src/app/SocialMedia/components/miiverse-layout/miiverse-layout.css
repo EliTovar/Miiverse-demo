@@ -33,6 +33,9 @@
   gap: 32px;
 }
 
+/* Páginas que necesitan espacio (moderación): casi todo el ancho. */
+.mv-container.wide { max-width: 1680px; }
+
 /* ── Columna izquierda ────────────────────────────────────────── */
 .mv-sidebar {
   flex-shrink: 0;

@@ -35,11 +35,37 @@ export interface MiiverseComment {
   yeahed: boolean;
 }
 
-/** Comentario visto desde la moderación (incluye datos del post). */
-export interface MiiverseAdminComment extends MiiverseComment {
+/** Fila de la vista de moderación: un post o un comentario. */
+export interface MiiverseModerationItem {
+  kind: 'post' | 'comment';
+  id: number;
+  /** El propio id si es un post; el del post comentado si es un comentario. */
+  post_id: number;
+  username: string;
+  mii_avatar_url: string | null;
+  content_text: string | null;
+  drawing_url: string | null;
+  screenshot_url: string | null;
+  game_title: string | null;
+  is_spoiler: boolean;
+  created_at: string;
+  yeahs: number;
+  comments_count: number | null;
   post_text: string | null;
-  post_username: string;
-  post_game_title: string | null;
+  post_username: string | null;
+  /** Resultados de toda la búsqueda (no solo de esta página). */
+  total: number;
+}
+
+/** Filtros de la vista de moderación. Los vacíos no se envían. */
+export interface ModerationFilters {
+  type: 'all' | 'post' | 'comment';
+  q: string;
+  user: string;
+  community: string;
+  date: string;   // AAAA-MM-DD
+  month: string;  // AAAA-MM
+  hour: string;   // '' o '0'..'23'
 }
 
 /** Orden de las listas de posts en comunidades y perfiles. */
@@ -127,11 +153,27 @@ export class MiiverseApiService {
     return this.http.post<{ yeahs: number; yeahed: boolean }>(`${this.base}/comments/${id}/yeah`, {});
   }
 
-  /** Solo admin (el backend responde 403 a cualquier otro rol). */
-  getCommentsForModeration(search: string, page = 1, limit = 20): Observable<MiiverseAdminComment[]> {
-    const params: Record<string, string | number> = { page, limit };
-    if (search.trim()) params['q'] = search.trim();
-    return this.http.get<MiiverseAdminComment[]>(`${this.base}/admin/comments`, { params });
+  /**
+   * Solo admin (el backend responde 403 a cualquier otro rol). Envía la zona
+   * horaria del navegador para que día, mes y hora coincidan con lo que se ve.
+   */
+  getModerationItems(filters: ModerationFilters, page = 1, limit = 30): Observable<MiiverseModerationItem[]> {
+    const params: Record<string, string | number> = {
+      page,
+      limit,
+      type: filters.type,
+      tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    };
+    for (const key of ['q', 'user', 'community', 'date', 'month', 'hour'] as const) {
+      const value = filters[key].trim();
+      if (value) params[key] = value;
+    }
+    return this.http.get<MiiverseModerationItem[]>(`${this.base}/admin/items`, { params });
+  }
+
+  /** Solo admin: borra el post con sus Yeahs y comentarios. */
+  deletePost(id: number): Observable<{ id: number; comments_deleted: number }> {
+    return this.http.delete<{ id: number; comments_deleted: number }>(`${this.base}/posts/${id}`);
   }
 
   getUserProfile(username: string, sort: PostSort, page = 1, limit = 20): Observable<MiiverseUserProfile> {
