@@ -33,9 +33,10 @@ app-root {
    el compositor y las pantallas de login/registro. */
 :root {
   --mv-font: 'Nunito', system-ui, sans-serif;
-  --mv-bg: #f6f3f4;
-  --mv-text: #323232;
-  --mv-text-soft: #6e6e6e;
+  --mv-bg: #f4f0f1;            /* fondo rosado muy claro, como Archiverse */
+  --mv-header-bg: #f7f4f5;     /* cabeceras grises de los paneles */
+  --mv-text: #222222;
+  --mv-text-soft: #777777;
   --mv-border: #dcdcdc;
   --mv-surface-soft: #f2f2f2;
   --mv-green: #5ac800;

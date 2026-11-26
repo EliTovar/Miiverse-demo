@@ -17,8 +17,8 @@
   color: var(--mv-text);
   background-color: var(--mv-bg);
   /* Cuadrícula de cuadrados redondeados muy claros (SVG propio). */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Crect x='4' y='4' width='64' height='64' rx='14' fill='%23ffffff'/%3E%3C/svg%3E");
-  background-size: 72px 72px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='112' height='112'%3E%3Crect x='9' y='9' width='94' height='94' rx='20' fill='%23fbf9fa'/%3E%3C/svg%3E");
+  background-size: 112px 112px;
   background-attachment: local;
 }
 
@@ -83,11 +83,11 @@
   min-height: 50px;
   padding: 0 44px;
   border: 1px solid var(--mv-border);
-  border-radius: 12px;
-  background: linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%);
-  color: var(--mv-text);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ffffff 0%, #ececec 100%);
+  color: #333;
   font: inherit;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 800;
   text-decoration: none;
   cursor: pointer;
@@ -99,8 +99,8 @@
 .mv-user-initial {
   position: absolute;
   left: 18px;
-  font-size: 19px;
-  color: var(--mv-text-soft);
+  font-size: 20px;
+  color: #444;
 }
 
 .mv-nav-item > span:last-child {
@@ -152,23 +152,24 @@
   flex: 1;
   min-width: 0;
   background: #fff;
-  border: 1px solid var(--mv-border);
-  border-radius: 14px;
+  border: 1px solid #e4dfe1;
+  border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   overflow: hidden;
 }
 
 .mv-panel-header {
   padding: 12px 20px;
-  background: linear-gradient(180deg, var(--mv-green-light) 0%, var(--mv-green) 100%);
-  border-bottom: 1px solid var(--mv-green-dark);
+  background: var(--mv-header-bg);
+  border-bottom: 1px solid #e4dfe1;
+  /* Toque moderno: una franja verde fina arriba del panel. */
+  box-shadow: inset 0 3px 0 var(--mv-green);
 }
 
 .mv-panel-header h1 {
   font-size: 19px;
   font-weight: 800;
-  color: #fff;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  color: #333;
 }
 
 /* ── Botón flotante "Publicar" ────────────────────────────────── */

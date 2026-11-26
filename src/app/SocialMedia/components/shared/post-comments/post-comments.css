@@ -25,11 +25,12 @@ a:focus-visible { outline: 3px solid var(--mv-green); outline-offset: 2px; borde
 .mv-comment-avatar-link { flex-shrink: 0; }
 .mv-comment-avatar {
   display: block;
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  border: 1px solid var(--mv-border);
-  background: var(--mv-surface-soft);
+  width: 48px;
+  height: 48px;
+  padding: 2px;
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  background: #fff;
 }
 .mv-comment-author { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .mv-comment-name { font-weight: 800; font-size: 15px; }

@@ -66,11 +66,12 @@
 
 .mv-result-avatar {
   flex-shrink: 0;
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  border: 1px solid var(--mv-border);
-  background: var(--mv-surface-soft);
+  width: 60px;
+  height: 60px;
+  padding: 2px;
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  background: #fff;
   object-fit: cover;
 }
 
