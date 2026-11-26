@@ -20,6 +20,7 @@
     <app-post-item [post]="current" [detail]="true" />
 
     <app-post-comments [postId]="current.id" [postAuthor]="current.username"
-                       (commentAdded)="onCommentAdded()" />
+                       (commentAdded)="changeCommentCount(1)"
+                       (commentRemoved)="changeCommentCount(-1)" />
   }
 }

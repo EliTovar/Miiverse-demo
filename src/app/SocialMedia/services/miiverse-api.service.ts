@@ -29,6 +29,10 @@ export interface MiiverseComment {
   content_text: string;
   is_spoiler: boolean;
   created_at: string;
+  updated_at: string | null;
+  yeahs: number;
+  /** Si el usuario con sesión ya le dio Yeah (false para invitados). */
+  yeahed: boolean;
 }
 
 /** Orden de las listas de posts en comunidades y perfiles. */
@@ -102,6 +106,18 @@ export class MiiverseApiService {
   /** El token lo añade el interceptor JWT de la app. */
   createComment(postId: number, dto: { content_text: string; is_spoiler: boolean }): Observable<MiiverseComment> {
     return this.http.post<MiiverseComment>(`${this.base}/posts/${postId}/comments`, dto);
+  }
+
+  updateComment(id: number, dto: { content_text: string; is_spoiler: boolean }): Observable<MiiverseComment> {
+    return this.http.patch<MiiverseComment>(`${this.base}/comments/${id}`, dto);
+  }
+
+  deleteComment(id: number): Observable<{ id: number; post_id: number }> {
+    return this.http.delete<{ id: number; post_id: number }>(`${this.base}/comments/${id}`);
+  }
+
+  toggleCommentYeah(id: number): Observable<{ yeahs: number; yeahed: boolean }> {
+    return this.http.post<{ yeahs: number; yeahed: boolean }>(`${this.base}/comments/${id}/yeah`, {});
   }
 
   getUserProfile(username: string, sort: PostSort, page = 1, limit = 20): Observable<MiiverseUserProfile> {

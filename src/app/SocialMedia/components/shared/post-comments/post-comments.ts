@@ -27,8 +27,9 @@ export class PostComments {
   postId = input.required<number>();
   /** Autor del post: sus comentarios se resaltan. */
   postAuthor = input.required<string>();
-  /** Avisa a la página para que actualice el contador del post. */
+  /** Avisan a la página para que actualice el contador del post. */
   commentAdded = output<MiiverseComment>();
+  commentRemoved = output<MiiverseComment>();
 
   readonly maxLength = MAX_LENGTH;
   comments = signal<MiiverseComment[]>([]);
@@ -39,6 +40,16 @@ export class PostComments {
   isSpoiler = signal(false);
   sending = signal(false);
   sendError = signal('');
+
+  /** Comentario que se está editando (solo uno a la vez). */
+  editingId = signal<number | null>(null);
+  editText = signal('');
+  editSpoiler = signal(false);
+  saving = signal(false);
+  /** Error de la última acción sobre un comentario concreto (editar, borrar, Yeah). */
+  actionError = signal<{ id: number; message: string } | null>(null);
+  /** Ids con una petición de Yeah en curso, para evitar dobles clics. */
+  private yeahPending = new Set<number>();
 
   constructor() {
     effect(() => {
@@ -74,6 +85,81 @@ export class PostComments {
         this.sending.set(false);
       },
     });
+  }
+
+  /** Solo el autor ve los botones Editar y Borrar (el backend lo vuelve a comprobar). */
+  isMine(comment: MiiverseComment): boolean {
+    const me = this.auth.userId();
+    return me !== null && comment.user_id === me;
+  }
+
+  // ── Editar ──────────────────────────────────────────────────────────────
+  startEdit(comment: MiiverseComment) {
+    this.editingId.set(comment.id);
+    this.editText.set(comment.content_text);
+    this.editSpoiler.set(comment.is_spoiler);
+    this.actionError.set(null);
+  }
+
+  cancelEdit() {
+    this.editingId.set(null);
+  }
+
+  saveEdit(comment: MiiverseComment) {
+    const content = this.editText().trim();
+    if (!content || this.saving()) return;
+    this.saving.set(true);
+    this.api.updateComment(comment.id, { content_text: content, is_spoiler: this.editSpoiler() }).subscribe({
+      next: updated => {
+        this.replace(updated);
+        this.editingId.set(null);
+        this.saving.set(false);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.fail(comment.id, err, 'No se pudo guardar el comentario');
+        this.saving.set(false);
+      },
+    });
+  }
+
+  // ── Borrar ──────────────────────────────────────────────────────────────
+  remove(comment: MiiverseComment) {
+    if (!confirm('¿Borrar este comentario? No se puede deshacer.')) return;
+    this.api.deleteComment(comment.id).subscribe({
+      next: () => {
+        this.comments.update(list => list.filter(c => c.id !== comment.id));
+        this.commentRemoved.emit(comment);
+      },
+      error: (err: HttpErrorResponse) => this.fail(comment.id, err, 'No se pudo borrar el comentario'),
+    });
+  }
+
+  // ── Yeah ────────────────────────────────────────────────────────────────
+  toggleYeah(comment: MiiverseComment) {
+    if (this.auth.isGuest() || this.yeahPending.has(comment.id)) return;
+    this.yeahPending.add(comment.id);
+    this.api.toggleCommentYeah(comment.id).subscribe({
+      next: ({ yeahs, yeahed }) => {
+        this.replace({ ...this.find(comment.id) ?? comment, yeahs, yeahed });
+        this.yeahPending.delete(comment.id);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.fail(comment.id, err, 'No se pudo dar Yeah');
+        this.yeahPending.delete(comment.id);
+      },
+    });
+  }
+
+  private find(id: number) {
+    return this.comments().find(c => c.id === id);
+  }
+
+  private replace(updated: MiiverseComment) {
+    this.comments.update(list => list.map(c => (c.id === updated.id ? updated : c)));
+  }
+
+  private fail(id: number, err: HttpErrorResponse, fallback: string) {
+    this.actionError.set({ id, message: err.error?.message ?? fallback });
   }
 
   fullDate(dateStr: string): string {

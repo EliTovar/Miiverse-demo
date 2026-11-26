@@ -47,8 +47,8 @@ export class PostDetail {
     });
   }
 
-  /** Suma 1 al contador de comentarios que muestra el post. */
-  onCommentAdded() {
-    this.post.update(post => (post ? { ...post, comments_count: post.comments_count + 1 } : post));
+  /** Ajusta el contador de comentarios que muestra el post (+1 al comentar, -1 al borrar). */
+  changeCommentCount(delta: number) {
+    this.post.update(post => (post ? { ...post, comments_count: post.comments_count + delta } : post));
   }
 }
