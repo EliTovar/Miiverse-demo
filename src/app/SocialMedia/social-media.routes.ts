@@ -11,6 +11,7 @@ import { PostDetail } from './components/post-detail/post-detail';
 import { UserProfile } from './components/user-profile/user-profile';
 import { Search } from './components/search/search';
 import { Moderation } from './components/moderation/moderation';
+import { AdminPanel } from './components/admin-panel/admin-panel';
 
 export const SOCIAL_MEDIA_ROUTES: Routes = [
   {
@@ -20,6 +21,12 @@ export const SOCIAL_MEDIA_ROUTES: Routes = [
     children: [
       { path: '', component: MiiverseFeed, data: { title: 'Actividad', showPostButton: true } },
       { path: 'search', component: Search, data: { title: 'Buscar' } },
+      {
+        path: 'panel',
+        component: AdminPanel,
+        canActivate: [AuthGuard],
+        data: { title: 'Administración', roles: ['admin'] },
+      },
       {
         path: 'moderation',
         component: Moderation,
