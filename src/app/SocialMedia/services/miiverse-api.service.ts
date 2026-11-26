@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_CONFIG } from '../../config/api.config';
 
@@ -184,14 +184,10 @@ export class MiiverseApiService {
   }
 
   createPost(dto: { content_text?: string; drawing_url?: string; game_title?: string; is_spoiler?: boolean }): Observable<MiiversePost> {
-    const token = localStorage.getItem('access_token');
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-    return this.http.post<MiiversePost>(`${this.base}/posts`, dto, { headers });
+    return this.http.post<MiiversePost>(`${this.base}/posts`, dto);
   }
 
   toggleYeah(postId: number): Observable<{ yeahs: number }> {
-    const token = localStorage.getItem('access_token');
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-    return this.http.post<{ yeahs: number }>(`${this.base}/posts/${postId}/yeah`, {}, { headers });
+    return this.http.post<{ yeahs: number }>(`${this.base}/posts/${postId}/yeah`, {});
   }
 }
