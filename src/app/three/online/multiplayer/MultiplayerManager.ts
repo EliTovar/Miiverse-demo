@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import { Socket } from 'socket.io-client';
 import { CharacterController, AnimationName } from '../characters/character-controller';
-import { loadFBXCharacter } from '../loaders/character-loader';
+import { loadCharacter } from '../loaders/character-loader';
 import { InputGate } from '../characters/InputGate';
 
 type ClientMode = 'spectator' | 'player';
@@ -137,7 +137,7 @@ export class MultiplayerManager {
 
     console.log('🚀 Escena iniciada');
     try {
-      const { model, animations } = await loadFBXCharacter();
+      const { model, animations } = await loadCharacter();
 
       // 1. Aplicar posición inicial persistente ANTES de dar de alta al jugador
       if (this.initialLocalPosition) {
@@ -224,7 +224,7 @@ export class MultiplayerManager {
     this.loadingRemotes.add(player.id);
 
     try {
-      const { model, animations } = await loadFBXCharacter();
+      const { model, animations } = await loadCharacter();
 
       if (this.remotePlayers.has(player.id)) {
         this.loadingRemotes.delete(player.id);
