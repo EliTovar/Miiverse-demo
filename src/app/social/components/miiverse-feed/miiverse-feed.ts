@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   ElementRef,
   inject,
   OnInit,
@@ -9,6 +10,7 @@ import {
   signal,
   ViewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
@@ -28,6 +30,7 @@ import { PostItem } from '../shared/post-item/post-item';
 })
 export class MiiverseFeed implements OnInit, OnDestroy {
   private api = inject(MiiverseApiService);
+  private destroyRef = inject(DestroyRef);
   private auth = inject(AuthStateService);
   private cdr = inject(ChangeDetectorRef);
   private composerService = inject(ComposerService);
@@ -83,10 +86,14 @@ export class MiiverseFeed implements OnInit, OnDestroy {
   }
 
   setupComposerListener() {
-    this.composerService.postCreated.subscribe((newPost) => {
-      this.posts.update(ps => [newPost, ...ps]);
-      this.cdr.markForCheck();
-    });
+    // Se cancela sola al destruir el componente (antes se acumulaba una
+    // suscripción cada vez que se entraba al feed).
+    this.composerService.postCreated
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((newPost) => {
+        this.posts.update(ps => [newPost, ...ps]);
+        this.cdr.markForCheck();
+      });
   }
 
   loadFeed() {
