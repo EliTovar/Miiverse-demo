@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { MiiverseApiService, MiiversePost } from '../../../services/miiverse-api.service';
 import { SocialMediaServicie } from '../../../services/social-media.service';
 import { CommunityIcon } from '../community-icon/community-icon';
+import { Spoiler } from '../spoiler/spoiler';
 
 /**
  * Un post de Miiverse tal y como se ve en las listas (Actividad, comunidad,
@@ -11,7 +12,7 @@ import { CommunityIcon } from '../community-icon/community-icon';
 @Component({
   selector: 'app-post-item',
   standalone: true,
-  imports: [RouterLink, CommunityIcon],
+  imports: [RouterLink, CommunityIcon, Spoiler],
   templateUrl: './post-item.html',
   styleUrl: './post-item.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

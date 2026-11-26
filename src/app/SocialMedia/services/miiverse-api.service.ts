@@ -15,6 +15,20 @@ export interface MiiversePost {
   yeahs: number;
   created_at: string;
   is_seed: boolean;
+  is_spoiler: boolean;
+  comments_count: number;
+}
+
+/** Comentario de un post. */
+export interface MiiverseComment {
+  id: number;
+  post_id: number;
+  user_id: number | null;
+  username: string;
+  mii_avatar_url: string | null;
+  content_text: string;
+  is_spoiler: boolean;
+  created_at: string;
 }
 
 /** Orden de las listas de posts en comunidades y perfiles. */
@@ -81,6 +95,15 @@ export class MiiverseApiService {
     return this.http.get<MiiverseUserSummary[]>(`${this.base}/users`, { params });
   }
 
+  getComments(postId: number): Observable<MiiverseComment[]> {
+    return this.http.get<MiiverseComment[]>(`${this.base}/posts/${postId}/comments`);
+  }
+
+  /** El token lo añade el interceptor JWT de la app. */
+  createComment(postId: number, dto: { content_text: string; is_spoiler: boolean }): Observable<MiiverseComment> {
+    return this.http.post<MiiverseComment>(`${this.base}/posts/${postId}/comments`, dto);
+  }
+
   getUserProfile(username: string, sort: PostSort, page = 1, limit = 20): Observable<MiiverseUserProfile> {
     return this.http.get<MiiverseUserProfile>(
       `${this.base}/users/${encodeURIComponent(username)}`,
@@ -88,7 +111,7 @@ export class MiiverseApiService {
     );
   }
 
-  createPost(dto: { content_text?: string; drawing_url?: string; game_title?: string }): Observable<MiiversePost> {
+  createPost(dto: { content_text?: string; drawing_url?: string; game_title?: string; is_spoiler?: boolean }): Observable<MiiversePost> {
     const token = localStorage.getItem('access_token');
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
     return this.http.post<MiiversePost>(`${this.base}/posts`, dto, { headers });

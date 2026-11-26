@@ -59,6 +59,11 @@ import { MiiverseApiService } from '../../../services/miiverse-api.service';
             placeholder="🎮 Comunidad / Juego (opcional)"
           />
 
+          <label class="mv-spoiler-check">
+            <input type="checkbox" [(ngModel)]="composerSpoiler" />
+            Contiene spoilers
+          </label>
+
           <div class="mv-composer-footer">
             <button class="mv-btn mv-btn-ghost" (click)="close()">Cancelar</button>
             <button
@@ -202,6 +207,18 @@ import { MiiverseApiService } from '../../../services/miiverse-api.service';
       outline: none;
     }
 
+    .mv-spoiler-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #666;
+      cursor: pointer;
+    }
+    .mv-spoiler-check input { accent-color: var(--mv-orange); width: 16px; height: 16px; }
+
     .mv-composer-footer {
       display: flex;
       gap: 12px;
@@ -257,6 +274,7 @@ export class ComposerModalComponent {
 
   composerText = signal('');
   composerGame = signal('');
+  composerSpoiler = signal(false);
   isPosting = false;
 
   constructor() {
@@ -269,6 +287,7 @@ export class ComposerModalComponent {
     this.service.close();
     this.composerText.set('');
     this.composerGame.set('');
+    this.composerSpoiler.set(false);
   }
 
   submitPost() {
@@ -285,6 +304,7 @@ export class ComposerModalComponent {
       content_text: text || undefined,
       drawing_url: drawingUrl,
       game_title: this.composerGame() || undefined,
+      is_spoiler: this.composerSpoiler(),
     }).subscribe({
       next: (post) => {
         this.service.notifyPostCreated(post);

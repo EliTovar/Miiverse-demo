@@ -5,12 +5,13 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MiiverseApiService, MiiversePost } from '../../services/miiverse-api.service';
 import { CommunityIcon } from '../shared/community-icon/community-icon';
 import { PostItem } from '../shared/post-item/post-item';
+import { PostComments } from '../shared/post-comments/post-comments';
 
 /** Página de un post: la comunidad arriba y el post completo. */
 @Component({
   selector: 'app-post-detail',
   standalone: true,
-  imports: [RouterLink, CommunityIcon, PostItem],
+  imports: [RouterLink, CommunityIcon, PostItem, PostComments],
   templateUrl: './post-detail.html',
   styleUrl: './post-detail.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,5 +45,10 @@ export class PostDetail {
         },
       });
     });
+  }
+
+  /** Suma 1 al contador de comentarios que muestra el post. */
+  onCommentAdded() {
+    this.post.update(post => (post ? { ...post, comments_count: post.comments_count + 1 } : post));
   }
 }

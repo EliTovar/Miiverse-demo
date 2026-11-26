@@ -1,0 +1,61 @@
+<section class="mv-comments" aria-labelledby="mv-comments-title">
+  <h2 id="mv-comments-title" class="mv-comments-bar">
+    Comentarios
+    @if (!loading()) { <span>({{ comments().length }})</span> }
+  </h2>
+
+  @if (loading()) {
+    <div class="mv-status"><span class="mv-spinner"></span> Cargando comentarios...</div>
+  } @else if (loadError()) {
+    <div class="mv-status">No se pudieron cargar los comentarios.</div>
+  } @else {
+    @for (comment of comments(); track comment.id) {
+      <article class="mv-comment" [class.by-author]="comment.username === postAuthor()">
+        <header class="mv-comment-header">
+          <a [routerLink]="['/social/users', comment.username]" class="mv-comment-avatar-link">
+            <img class="mv-comment-avatar" [src]="comment.mii_avatar_url" [alt]="comment.username" />
+          </a>
+          <div class="mv-comment-author">
+            <a class="mv-comment-name" [routerLink]="['/social/users', comment.username]">{{ comment.username }}</a>
+            <time [attr.datetime]="comment.created_at">{{ fullDate(comment.created_at) }}</time>
+          </div>
+          @if (comment.username === postAuthor()) {
+            <span class="mv-author-tag">Autor</span>
+          }
+        </header>
+        <app-spoiler [active]="comment.is_spoiler">
+          <p class="mv-comment-text">{{ comment.content_text }}</p>
+        </app-spoiler>
+      </article>
+    } @empty {
+      <div class="mv-status">Todavía no hay comentarios. ¡Sé el primero!</div>
+    }
+  }
+
+  @if (auth.isGuest()) {
+    <p class="mv-comment-guest">
+      <a routerLink="/auth/login">Inicia sesión</a> para comentar.
+    </p>
+  } @else {
+    <form class="mv-comment-form" (ngSubmit)="send()">
+      <label for="mv-comment-input" class="mv-sr-only">Escribe un comentario</label>
+      <textarea id="mv-comment-input" name="text" rows="3"
+                [ngModel]="text()" (ngModelChange)="text.set($event)"
+                [maxlength]="maxLength" placeholder="Escribe un comentario..."></textarea>
+      <div class="mv-comment-actions">
+        <label class="mv-spoiler-check">
+          <input type="checkbox" name="spoiler"
+                 [ngModel]="isSpoiler()" (ngModelChange)="isSpoiler.set($event)" />
+          Contiene spoilers
+        </label>
+        <span class="mv-char-count">{{ text().length }}/{{ maxLength }}</span>
+        <button type="submit" [disabled]="!text().trim() || sending()">
+          {{ sending() ? 'Enviando...' : 'Comentar' }}
+        </button>
+      </div>
+      @if (sendError()) {
+        <p class="mv-comment-error" role="alert">{{ sendError() }}</p>
+      }
+    </form>
+  }
+</section>

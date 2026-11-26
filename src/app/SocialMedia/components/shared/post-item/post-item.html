@@ -24,21 +24,23 @@
     }
   </header>
 
-  @if (post().content_text) {
-    <p class="mv-post-text">{{ post().content_text }}</p>
-  }
+  <app-spoiler [active]="post().is_spoiler">
+    @if (post().content_text) {
+      <p class="mv-post-text">{{ post().content_text }}</p>
+    }
 
-  @if (post().drawing_url) {
-    <div class="mv-post-image">
-      <img [src]="post().drawing_url" alt="Dibujo de {{ post().username }}" loading="lazy" />
-    </div>
-  }
+    @if (post().drawing_url) {
+      <div class="mv-post-image">
+        <img [src]="post().drawing_url" alt="Dibujo de {{ post().username }}" loading="lazy" />
+      </div>
+    }
 
-  @if (post().screenshot_url) {
-    <div class="mv-post-image">
-      <img [src]="post().screenshot_url" alt="Captura de {{ post().username }}" loading="lazy" />
-    </div>
-  }
+    @if (post().screenshot_url) {
+      <div class="mv-post-image">
+        <img [src]="post().screenshot_url" alt="Captura de {{ post().username }}" loading="lazy" />
+      </div>
+    }
+  </app-spoiler>
 
   <footer class="mv-post-footer">
     <button
@@ -52,10 +54,26 @@
       Yeah!
     </button>
 
+    @if (post().is_spoiler) {
+      <span class="mv-spoiler-tag">Spoiler</span>
+    }
+
     <span class="mv-counter" title="Yeahs">
       <i class="pi pi-face-smile"></i>
       {{ yeahs() }}
     </span>
+
+    @if (detail()) {
+      <span class="mv-counter mv-counter-comments" title="Comentarios">
+        <i class="pi pi-comment"></i>
+        {{ post().comments_count }}
+      </span>
+    } @else {
+      <a class="mv-counter mv-counter-comments" [routerLink]="['/social/posts', post().id]" title="Ver comentarios">
+        <i class="pi pi-comment"></i>
+        {{ post().comments_count }}
+      </a>
+    }
   </footer>
 
 </article>
