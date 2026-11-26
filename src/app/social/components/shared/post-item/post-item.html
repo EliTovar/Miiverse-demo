@@ -1,0 +1,79 @@
+<article class="mv-post" [class.detail]="detail()">
+
+  <header class="mv-post-header">
+    <a class="mv-avatar-link" [routerLink]="['/social/users', post().username]">
+      <img class="mv-avatar" [src]="post().mii_avatar_url" [alt]="post().username" />
+    </a>
+
+    <div class="mv-post-author">
+      <a class="mv-username" [routerLink]="['/social/users', post().username]">{{ post().username }}</a>
+      @if (post().game_title) {
+        <a class="mv-community" [routerLink]="['/social/communities', post().game_title]">
+          <app-community-icon [name]="post().game_title!" [size]="18" />
+          {{ post().game_title }}
+        </a>
+      }
+    </div>
+
+    @if (detail()) {
+      <time class="mv-time" [attr.datetime]="post().created_at">{{ fullDate(post().created_at) }}</time>
+    } @else {
+      <a class="mv-time" [routerLink]="['/social/posts', post().id]" title="Ver publicación">
+        <time [attr.datetime]="post().created_at">{{ timeAgo(post().created_at) }}</time>
+      </a>
+    }
+  </header>
+
+  <app-spoiler [active]="post().is_spoiler">
+    @if (post().content_text) {
+      <p class="mv-post-text">{{ post().content_text }}</p>
+    }
+
+    @if (post().drawing_url) {
+      <div class="mv-post-image">
+        <img [src]="post().drawing_url" alt="Dibujo de {{ post().username }}" loading="lazy" />
+      </div>
+    }
+
+    @if (post().screenshot_url) {
+      <div class="mv-post-image">
+        <img [src]="post().screenshot_url" alt="Captura de {{ post().username }}" loading="lazy" />
+      </div>
+    }
+  </app-spoiler>
+
+  <footer class="mv-post-footer">
+    <button
+      type="button"
+      class="mv-yeah-btn"
+      [disabled]="isGuest"
+      [title]="isGuest ? 'Inicia sesión para dar Yeah!' : 'Yeah!'"
+      (click)="toggleYeah()"
+    >
+      <i class="pi pi-face-smile"></i>
+      Yeah!
+    </button>
+
+    @if (post().is_spoiler) {
+      <span class="mv-spoiler-tag">Spoiler</span>
+    }
+
+    <span class="mv-counter" title="Yeahs">
+      <i class="pi pi-face-smile"></i>
+      {{ yeahs() }}
+    </span>
+
+    @if (detail()) {
+      <span class="mv-counter mv-counter-comments" title="Comentarios">
+        <i class="pi pi-comment"></i>
+        {{ post().comments_count }}
+      </span>
+    } @else {
+      <a class="mv-counter mv-counter-comments" [routerLink]="['/social/posts', post().id]" title="Ver comentarios">
+        <i class="pi pi-comment"></i>
+        {{ post().comments_count }}
+      </a>
+    }
+  </footer>
+
+</article>

@@ -1,4 +1,7 @@
-<app-navbar></app-navbar>
+@if (showNavbar()) {
+  <app-navbar></app-navbar>
+}
+<app-composer-modal></app-composer-modal>
 
 <div class="app-content">
   <router-outlet></router-outlet>

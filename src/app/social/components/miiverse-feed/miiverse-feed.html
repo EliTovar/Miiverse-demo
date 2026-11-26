@@ -1,0 +1,46 @@
+<section class="mv-feed">
+
+  @if (isGuest) {
+    <p class="mv-guest-hint">
+      <i class="pi pi-info-circle"></i>
+      Inicia sesión para publicar y dar Yeah!
+    </p>
+  }
+
+  @if (loading()) {
+    @for (n of [1,2,3,4]; track n) {
+      <div class="mv-post mv-skeleton">
+        <div class="sk-avatar"></div>
+        <div class="sk-lines">
+          <div class="sk-line sk-short"></div>
+          <div class="sk-line sk-long"></div>
+          <div class="sk-line sk-medium"></div>
+        </div>
+      </div>
+    }
+  } @else {
+    @for (post of posts(); track post.id) {
+      <app-post-item [post]="post" />
+    }
+
+    <div #scrollAnchor class="mv-scroll-anchor"></div>
+
+    @if (loadingMore) {
+      <div class="mv-status">
+        <span class="mv-spinner"></span>
+        Cargando más publicaciones...
+      </div>
+    }
+
+    @if (!hasMore && posts().length > 0) {
+      <div class="mv-status">No hay más publicaciones.</div>
+    }
+
+    @if (posts().length === 0) {
+      <div class="mv-empty">
+        <i class="pi pi-comments"></i>
+        <p>No hay publicaciones aún.<br>¡Sé el primero en compartir algo!</p>
+      </div>
+    }
+  }
+</section>

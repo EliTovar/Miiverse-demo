@@ -1,0 +1,98 @@
+/* Formulario de login/registro dentro del panel central. Compartido por ambos componentes. */
+
+:host {
+  display: block;
+  padding: 32px 20px 36px;
+}
+
+.mv-auth-card {
+  max-width: 380px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mv-auth-card h2 {
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+  color: var(--mv-text);
+}
+
+.mv-auth-subtitle {
+  margin-top: -10px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--mv-text-soft);
+}
+
+.mv-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mv-field label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--mv-text-soft);
+}
+
+.mv-field input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--mv-border);
+  border-radius: 12px;
+  background: var(--mv-surface-soft);
+  color: var(--mv-text);
+  font: inherit;
+  font-size: 15px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.mv-field input:focus {
+  outline: none;
+  border-color: var(--mv-green);
+  background: #fff;
+}
+
+.mv-auth-submit {
+  margin-top: 6px;
+  padding: 12px;
+  border: 1px solid var(--mv-green-dark);
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--mv-green-light) 0%, var(--mv-green) 100%);
+  color: #fff;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.1s;
+}
+.mv-auth-submit:hover { filter: brightness(1.05); }
+.mv-auth-submit:active { transform: scale(0.98); }
+.mv-auth-submit:focus-visible {
+  outline: 3px solid var(--mv-green-dark);
+  outline-offset: 2px;
+}
+
+.mv-auth-error {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #d23c3c;
+}
+
+.mv-auth-switch {
+  text-align: center;
+  font-size: 14px;
+  color: var(--mv-text-soft);
+}
+.mv-auth-switch a {
+  color: var(--mv-green-dark);
+  font-weight: 800;
+  text-decoration: none;
+}
+.mv-auth-switch a:hover { text-decoration: underline; }

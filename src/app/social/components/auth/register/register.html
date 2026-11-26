@@ -1,0 +1,30 @@
+<form class="mv-auth-card" (ngSubmit)="register()">
+  <h2>Crea tu cuenta</h2>
+  <p class="mv-auth-subtitle">Únete a la comunidad de Miiverse</p>
+
+  <div class="mv-field">
+    <label for="register-username">Nombre de usuario</label>
+    <input id="register-username" name="username" autocomplete="username"
+           [(ngModel)]="username" placeholder="MiiExplorer" />
+  </div>
+
+  <div class="mv-field">
+    <label for="register-email">Email</label>
+    <input id="register-email" name="email" type="email" autocomplete="email"
+           [(ngModel)]="email" placeholder="tu@email.com" />
+  </div>
+
+  <div class="mv-field">
+    <label for="register-password">Contraseña</label>
+    <input id="register-password" name="password" type="password" autocomplete="new-password"
+           [(ngModel)]="password" placeholder="••••••••" />
+  </div>
+
+  <button type="submit" class="mv-auth-submit">Crear cuenta</button>
+
+  @if (error()) {
+    <small class="mv-auth-error">{{ error() }}</small>
+  }
+
+  <p class="mv-auth-switch">¿Ya tienes cuenta? <a routerLink="/auth/login">Inicia sesión</a></p>
+</form>

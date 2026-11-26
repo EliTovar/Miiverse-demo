@@ -1,0 +1,83 @@
+/* Buscador y lista de resultados (comunidades o usuarios). Compartido por Communities y Search. */
+
+:host { display: block; }
+
+.mv-search {
+  display: flex;
+  margin: 16px 20px 8px;
+  border: 2px solid var(--mv-border);
+  border-radius: 10px;
+  background: var(--mv-surface-soft);
+  overflow: hidden;
+}
+.mv-search:focus-within { border-color: var(--mv-green); background: #fff; }
+.mv-search input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  color: var(--mv-text);
+  font: inherit;
+  font-size: 15px;
+}
+.mv-search input:focus { outline: none; }
+.mv-search button {
+  padding: 0 16px;
+  border: none;
+  background: transparent;
+  color: var(--mv-text-soft);
+  font-size: 17px;
+  cursor: pointer;
+}
+.mv-search button:hover { color: var(--mv-green-dark); }
+
+.mv-result-list { list-style: none; }
+
+.mv-result-list a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #ececec;
+  color: var(--mv-text);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.mv-result-list a:hover { background: #fafafa; }
+.mv-result-list a:focus-visible { outline: 3px solid var(--mv-green); outline-offset: -3px; }
+
+.mv-result-info { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.mv-result-name {
+  font-size: 17px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mv-result-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--mv-text-soft);
+}
+.mv-chevron { margin-left: auto; color: #bbb; }
+
+.mv-result-avatar {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  padding: 2px;
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  background: #fff;
+  object-fit: cover;
+}
+
+.mv-result-hint {
+  margin: 14px 20px 4px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--mv-text-soft);
+}

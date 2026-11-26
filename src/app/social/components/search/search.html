@@ -1,0 +1,64 @@
+<form class="mv-search" role="search" (ngSubmit)="submit()">
+  <input name="q" type="search" [(ngModel)]="query"
+         [placeholder]="tab() === 'users' ? 'Buscar usuarios por nombre' : 'Buscar comunidades'"
+         aria-label="Texto a buscar" />
+  <button type="submit" aria-label="Buscar"><i class="pi pi-search"></i></button>
+</form>
+
+<div class="mv-tabs" role="tablist">
+  <button type="button" role="tab" [class.active]="tab() === 'users'"
+          [attr.aria-selected]="tab() === 'users'" (click)="submit('users')">Usuarios</button>
+  <button type="button" role="tab" [class.active]="tab() === 'communities'"
+          [attr.aria-selected]="tab() === 'communities'" (click)="submit('communities')">Comunidades</button>
+</div>
+
+@if (loading()) {
+  <div class="mv-status"><span class="mv-spinner"></span> Buscando...</div>
+} @else if (error()) {
+  <div class="mv-status">No se pudo completar la búsqueda.</div>
+} @else if (tab() === 'users') {
+  @if (!query.trim()) {
+    <p class="mv-result-hint">Usuarios más activos</p>
+  }
+  <ul class="mv-result-list">
+    @for (user of users(); track user.username) {
+      <li>
+        <a [routerLink]="['/social/users', user.username]">
+          @if (user.avatar_url) {
+            <img class="mv-result-avatar" [src]="user.avatar_url" [alt]="" />
+          }
+          <span class="mv-result-info">
+            <span class="mv-result-name">{{ user.username }}</span>
+            <span class="mv-result-meta">
+              <i class="pi pi-comments"></i>
+              {{ user.posts_count }} {{ user.posts_count === 1 ? 'publicación' : 'publicaciones' }}
+            </span>
+          </span>
+          <i class="pi pi-chevron-right mv-chevron"></i>
+        </a>
+      </li>
+    } @empty {
+      <li class="mv-status">No hay usuarios con ese nombre.</li>
+    }
+  </ul>
+} @else {
+  <ul class="mv-result-list">
+    @for (community of communities(); track community.name) {
+      <li>
+        <a [routerLink]="['/social/communities', community.name]">
+          <app-community-icon [name]="community.name" [size]="56" />
+          <span class="mv-result-info">
+            <span class="mv-result-name">{{ community.name }}</span>
+            <span class="mv-result-meta">
+              <i class="pi pi-comments"></i>
+              {{ community.posts_count }} {{ community.posts_count === 1 ? 'publicación' : 'publicaciones' }}
+            </span>
+          </span>
+          <i class="pi pi-chevron-right mv-chevron"></i>
+        </a>
+      </li>
+    } @empty {
+      <li class="mv-status">No hay comunidades con ese nombre.</li>
+    }
+  </ul>
+}

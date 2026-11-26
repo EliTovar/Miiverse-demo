@@ -1,0 +1,272 @@
+/* Marco estilo Miiverse/Archiverse. Los colores salen de las variables --mv-* de styles.scss. */
+
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+/* Es el contenedor con scroll de toda la sección (el body tiene overflow: hidden). */
+.mv-shell {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  color-scheme: light; /* la app global es oscura; aquí barras de scroll claras */
+  font-family: var(--mv-font);
+  color: var(--mv-text);
+  background-color: var(--mv-bg);
+  /* Cuadrícula de cuadrados redondeados muy claros (SVG propio). */
+  /* Tablero como el de Archiverse (medido en las capturas de Eli): celdas de
+     60 px que alternan el fondo #f1edee con cuadrados redondeados #faf6f7. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect x='0' y='0' width='60' height='60' rx='12' fill='%23faf6f7'/%3E%3Crect x='60' y='60' width='60' height='60' rx='12' fill='%23faf6f7'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+  background-attachment: local;
+}
+
+.mv-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 48px 24px 120px;
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+/* Páginas que necesitan espacio (moderación): casi todo el ancho. */
+.mv-container.wide { max-width: 1680px; }
+
+/* ── Columna izquierda ────────────────────────────────────────── */
+.mv-sidebar {
+  flex-shrink: 0;
+  width: 240px;
+  position: sticky;
+  top: 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.mv-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.mv-brand-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--mv-green-light) 0%, var(--mv-green) 100%);
+  color: #fff;
+  font-size: 22px;
+  box-shadow: 0 3px 8px rgba(90, 200, 0, 0.35);
+}
+
+.mv-brand-text {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--mv-green);
+}
+
+.mv-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Botones anchos con icono a la izquierda y texto centrado, como en Archiverse. */
+.mv-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  padding: 0 44px;
+  border: 1px solid var(--mv-border);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ffffff 0%, #ececec 100%);
+  color: #333;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.mv-nav-item > i,
+.mv-user-initial {
+  position: absolute;
+  left: 18px;
+  font-size: 20px;
+  color: #444;
+}
+
+.mv-nav-item > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mv-nav-item:hover:not(.disabled) {
+  transform: translateY(-1px);
+  border-color: var(--mv-green);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* Sección activa: en verde. */
+.mv-nav-item.active {
+  background: linear-gradient(180deg, var(--mv-green-light) 0%, var(--mv-green) 100%);
+  border-color: var(--mv-green-dark);
+  color: #fff;
+}
+.mv-nav-item.active > i { color: #fff; }
+.mv-nav-item.active .mv-user-initial { background: rgba(255, 255, 255, 0.25); color: #fff; }
+
+.mv-nav-item.disabled { opacity: 0.45; cursor: not-allowed; }
+
+.mv-user-initial {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  left: 12px;
+  border-radius: 8px;
+  background: var(--mv-green-pale);
+  color: var(--mv-green-dark);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.mv-nav-back { margin-top: 8px; }
+
+.mv-nav-item:focus-visible,
+.mv-brand:focus-visible {
+  outline: 3px solid var(--mv-green);
+  outline-offset: 2px;
+}
+
+/* ── Panel central ────────────────────────────────────────────── */
+.mv-panel {
+  flex: 1;
+  min-width: 0;
+  background: #fff;
+  border: 1px solid #e4dfe1;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.mv-panel-header {
+  padding: 12px 20px;
+  background: var(--mv-header-bg);
+  border-bottom: 1px solid #e4dfe1;
+  /* Toque moderno: una franja verde fina arriba del panel. */
+  box-shadow: inset 0 3px 0 var(--mv-green);
+}
+
+.mv-panel-header h1 {
+  font-size: 19px;
+  font-weight: 800;
+  color: #333;
+}
+
+/* ── Botón flotante "Publicar" ────────────────────────────────── */
+.mv-post-fab {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px 12px 12px;
+  border: 1px solid var(--mv-border);
+  border-radius: 18px;
+  background: #fff;
+  color: var(--mv-text);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.mv-post-fab i {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: linear-gradient(180deg, var(--mv-green-light) 0%, var(--mv-green) 100%);
+  color: #fff;
+  font-size: 16px;
+}
+.mv-post-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+.mv-post-fab:focus-visible {
+  outline: 3px solid var(--mv-green);
+  outline-offset: 2px;
+}
+
+/* ── Tablet: menú más estrecho ────────────────────────────────── */
+@media (max-width: 900px) {
+  .mv-container { gap: 20px; padding-top: 24px; }
+  .mv-sidebar { width: 190px; top: 24px; }
+  .mv-brand-text { font-size: 26px; }
+  .mv-nav-item { font-size: 15px; padding: 0 16px 0 40px; justify-content: flex-start; }
+  .mv-nav-item > i { left: 14px; }
+}
+
+/* ── Móvil: el menú pasa a ser una barra inferior fija ────────── */
+@media (max-width: 640px) {
+  .mv-container { display: block; padding: 0 0 140px; }
+
+  .mv-sidebar {
+    position: fixed;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    width: auto;
+    padding: 6px 4px;
+    background: rgba(255, 255, 255, 0.96);
+    border-top: 1px solid var(--mv-border);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.06);
+  }
+
+  .mv-brand { display: none; }
+
+  .mv-nav { flex-direction: row; justify-content: space-around; gap: 2px; overflow-x: auto; }
+
+  .mv-nav-item {
+    flex-direction: column;
+    gap: 2px;
+    min-width: 62px;
+    min-height: 0;
+    padding: 4px;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    font-size: 10px;
+  }
+  .mv-nav-item > i,
+  .mv-user-initial { position: static; font-size: 18px; }
+  .mv-user-initial { width: 22px; height: 22px; font-size: 12px; }
+  .mv-nav-item.active { background: var(--mv-green-pale); color: var(--mv-green-dark); }
+  .mv-nav-item.active > i { color: var(--mv-green-dark); }
+  .mv-nav-back { margin-top: 0; }
+
+  .mv-panel { border-radius: 0; border-left: none; border-right: none; }
+
+  .mv-post-fab { bottom: 76px; right: 14px; padding: 8px 14px 8px 8px; }
+}

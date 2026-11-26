@@ -1,0 +1,142 @@
+<div class="mv-tabs" role="tablist">
+  <button type="button" role="tab" [class.active]="tab() === 'summary'"
+          [attr.aria-selected]="tab() === 'summary'" (click)="showTab('summary')">Resumen</button>
+  <button type="button" role="tab" [class.active]="tab() === 'users'"
+          [attr.aria-selected]="tab() === 'users'" (click)="showTab('users')">Usuarios</button>
+  <button type="button" role="tab" [class.active]="tab() === 'tools'"
+          [attr.aria-selected]="tab() === 'tools'" (click)="showTab('tools')">Herramientas</button>
+</div>
+
+<!-- ═══ RESUMEN ═══════════════════════════════════════════════════════════ -->
+@if (tab() === 'summary') {
+  @if (statsError()) {
+    <div class="mv-status">{{ statsError() }}</div>
+  } @else {
+    @if (stats(); as s) {
+      <div class="mv-stat-grid">
+        <div class="mv-stat">
+          <i class="pi pi-users"></i>
+          <strong>{{ s.users }}</strong>
+          <span>Usuarios</span>
+          <small>+{{ s.new_users_7d }} en 7 días</small>
+        </div>
+        <div class="mv-stat">
+          <i class="pi pi-shield"></i>
+          <strong>{{ s.admins }}</strong>
+          <span>Administradores</span>
+        </div>
+        <div class="mv-stat">
+          <i class="pi pi-pencil"></i>
+          <strong>{{ s.posts }}</strong>
+          <span>Publicaciones</span>
+          <small>+{{ s.posts_7d }} en 7 días</small>
+        </div>
+        <div class="mv-stat">
+          <i class="pi pi-comments"></i>
+          <strong>{{ s.comments }}</strong>
+          <span>Comentarios</span>
+          <small>+{{ s.comments_7d }} en 7 días</small>
+        </div>
+      </div>
+    } @else {
+      <div class="mv-status"><span class="mv-spinner"></span> Cargando...</div>
+    }
+  }
+}
+
+<!-- ═══ USUARIOS ══════════════════════════════════════════════════════════ -->
+@if (tab() === 'users') {
+  <form class="mv-admin-search" role="search" (ngSubmit)="searchUsers()">
+    <input name="q" type="search" [(ngModel)]="search"
+           placeholder="Buscar por nombre o email" aria-label="Buscar usuarios" />
+    <button type="submit" aria-label="Buscar"><i class="pi pi-search"></i></button>
+  </form>
+  <p class="mv-admin-hint">
+    {{ total() }} usuario{{ total() === 1 ? '' : 's' }}. Los cambios de rol se aplican cuando el usuario vuelve a iniciar sesión.
+  </p>
+
+  @if (usersError()) {
+    <div class="mv-status">{{ usersError() }}</div>
+  } @else {
+    <div class="mv-table-wrap">
+      <table class="mv-user-table">
+        <thead>
+          <tr>
+            <th scope="col">Usuario</th>
+            <th scope="col">Email</th>
+            <th scope="col">Alta</th>
+            <th scope="col" class="num">Posts</th>
+            <th scope="col" class="num">Coment.</th>
+            <th scope="col">Rol</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr>
+              <td>
+                <a [routerLink]="['/social/users', user.username]">{{ user.username }}</a>
+                @if (isMe(user)) { <span class="mv-me">tú</span> }
+              </td>
+              <td class="mv-email">{{ user.email }}</td>
+              <td>{{ formatDate(user.created_at) }}</td>
+              <td class="num">{{ user.posts_count }}</td>
+              <td class="num">{{ user.comments_count }}</td>
+              <td>
+                <div class="mv-role-cell">
+                  <span class="mv-role" [class.admin]="user.role === 'admin'">
+                    {{ user.role === 'admin' ? 'Admin' : 'Usuario' }}
+                  </span>
+                  @if (!isMe(user)) {
+                    <button type="button" class="mv-role-btn" [disabled]="savingId() === user.id"
+                            (click)="toggleRole(user)">
+                      {{ savingId() === user.id ? 'Guardando...' : (user.role === 'admin' ? 'Quitar admin' : 'Hacer admin') }}
+                    </button>
+                  }
+                </div>
+                @if (notice()?.id === user.id) {
+                  <small class="mv-notice" [class.error]="notice()?.error">{{ notice()?.text }}</small>
+                }
+              </td>
+            </tr>
+          } @empty {
+            @if (!loadingUsers()) {
+              <tr><td colspan="6" class="mv-status">No hay usuarios con esa búsqueda.</td></tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (loadingUsers()) {
+      <div class="mv-status"><span class="mv-spinner"></span> Cargando...</div>
+    } @else if (hasMore()) {
+      <button type="button" class="mv-more-btn" (click)="loadMoreUsers()">Ver más</button>
+    }
+  }
+}
+
+<!-- ═══ HERRAMIENTAS ══════════════════════════════════════════════════════ -->
+@if (tab() === 'tools') {
+  <ul class="mv-tools">
+    <li>
+      <a routerLink="/social/moderation">
+        <i class="pi pi-shield"></i>
+        <span>
+          <strong>Moderación</strong>
+          <small>Revisar y borrar publicaciones y comentarios, con filtros por fecha, usuario y comunidad.</small>
+        </span>
+        <i class="pi pi-chevron-right"></i>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/social/admin/ia">
+        <i class="pi pi-sparkles"></i>
+        <span>
+          <strong>Asistente IA (3D)</strong>
+          <small>Escena 3D para hablar con la IA. Necesita GEMINI_API_KEY en el .env del backend para responder.</small>
+        </span>
+        <i class="pi pi-chevron-right"></i>
+      </a>
+    </li>
+  </ul>
+}

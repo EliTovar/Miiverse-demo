@@ -1,0 +1,61 @@
+
+/* Escena ocupa todo menos el input */
+.three-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-height: 0; /* 🔥 MUY IMPORTANTE en flex */
+}
+
+/* Canvas */
+.canvas, canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* Chat abajo: barra clara con el tema de Miiverse (variables --mv-*). */
+.chat-container {
+  width: 100%;
+  padding: 10px 18px;
+  background: var(--mv-header-bg);
+  border-top: 1px solid #e4dfe1;
+  color-scheme: light;
+}
+
+.chat-container input {
+  width: 100%;
+  padding: 12px 18px;
+  border: 1px solid var(--mv-border);
+  border-radius: 999px;
+  outline: none;
+  background: #fff;
+  color: var(--mv-text);
+  font-family: var(--mv-font);
+  font-size: 15px;
+  font-weight: 600;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+
+.chat-container input:focus {
+  border-color: var(--mv-green);
+  box-shadow: 0 0 0 3px var(--mv-green-pale);
+}
+
+.chat-container input::placeholder {
+  color: var(--mv-text-soft);
+}
+
+/* Animaciones Premium */
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}

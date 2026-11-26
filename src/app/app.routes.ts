@@ -11,14 +11,14 @@ export const routes: Routes = [
   {
     path: 'social',
     loadChildren: () =>
-      import('./SocialMedia/social-media.module')
+      import('./social/social-media.module')
         .then(m => m.SocialMediaModule)
   },
 
   {
     path: 'auth',
     loadChildren: () =>
-      import('./SocialMedia/components/auth/auth.module')
+      import('./social/components/auth/auth.module')
         .then(m => m.AuthModule)
   },
 

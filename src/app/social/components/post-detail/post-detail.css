@@ -1,0 +1,49 @@
+:host { display: block; }
+
+/* Barra con la comunidad del post, como la cabecera de Archiverse. */
+.mv-community-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #ececec;
+  background: #fafafa;
+  color: var(--mv-text);
+  font-size: 16px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.mv-community-bar:hover { color: var(--mv-green-dark); }
+.mv-community-bar .pi-chevron-right { margin-left: auto; color: #bbb; }
+
+.mv-admin-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 20px 16px;
+  padding: 8px 12px;
+  border: 1px dashed #e8b4b4;
+  border-radius: 10px;
+  background: #fff8f8;
+  color: #a33;
+  font-size: 13px;
+  font-weight: 700;
+}
+.mv-admin-bar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid #d23c3c;
+  border-radius: 999px;
+  background: #fff;
+  color: #d23c3c;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.mv-admin-bar button:hover:not(:disabled) { background: #d23c3c; color: #fff; }
+.mv-admin-bar button:disabled { opacity: 0.6; cursor: wait; }
+
+.mv-empty a { color: var(--mv-green-dark); font-weight: 800; }

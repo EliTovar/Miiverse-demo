@@ -1,0 +1,85 @@
+<div class="mv-shell">
+  <div class="mv-container" [class.wide]="routeData().wide">
+
+    <!-- ═══ COLUMNA IZQUIERDA: marca + menú ═════════════════════════════ -->
+    <aside class="mv-sidebar">
+      <a class="mv-brand" routerLink="/social" aria-label="Miiverse, ir a Actividad">
+        <span class="mv-brand-icon"><i class="pi pi-comments"></i></span>
+        <span class="mv-brand-text">Miiverse</span>
+      </a>
+
+      <nav class="mv-nav" aria-label="Menú de Miiverse">
+        @if (auth.isGuest()) {
+          <a class="mv-nav-item" routerLink="/auth/login" routerLinkActive="active">
+            <i class="pi pi-user"></i>
+            <span>Iniciar sesión</span>
+          </a>
+        } @else {
+          @if (auth.username(); as username) {
+            <a class="mv-nav-item" [routerLink]="['/social/users', username]" routerLinkActive="active"
+               [title]="'Mi perfil: ' + username">
+              <span class="mv-user-initial">{{ username.charAt(0).toUpperCase() }}</span>
+              <span>{{ username }}</span>
+            </a>
+          }
+        }
+
+        <a class="mv-nav-item" routerLink="/social" routerLinkActive="active"
+           [routerLinkActiveOptions]="{ exact: true }">
+          <i class="pi pi-home"></i>
+          <span>Actividad</span>
+        </a>
+
+        <a class="mv-nav-item" routerLink="/social/search" routerLinkActive="active">
+          <i class="pi pi-search"></i>
+          <span>Buscar</span>
+        </a>
+
+        <a class="mv-nav-item" routerLink="/social/communities" routerLinkActive="active">
+          <i class="pi pi-th-large"></i>
+          <span>Comunidades</span>
+        </a>
+
+        @if (auth.role() === 'admin') {
+          <a class="mv-nav-item" routerLink="/social/moderation" routerLinkActive="active">
+            <i class="pi pi-shield"></i>
+            <span>Moderar</span>
+          </a>
+          <a class="mv-nav-item" routerLink="/social/panel" routerLinkActive="active">
+            <i class="pi pi-cog"></i>
+            <span>Admin</span>
+          </a>
+        }
+
+        @if (!auth.isGuest()) {
+          <button type="button" class="mv-nav-item" (click)="logout()">
+            <i class="pi pi-sign-out"></i>
+            <span>Salir</span>
+          </button>
+        }
+
+        <a class="mv-nav-item mv-nav-back" routerLink="/">
+          <i class="pi pi-arrow-left"></i>
+          <span>Mundo 3D</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- ═══ PANEL CENTRAL ═══════════════════════════════════════════════ -->
+    <main class="mv-panel">
+      <header class="mv-panel-header">
+        <h1>{{ routeData().title ?? 'Miiverse' }}</h1>
+      </header>
+
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <!-- ═══ BOTÓN FLOTANTE "PUBLICAR" ══════════════════════════════════════ -->
+  @if (routeData().showPostButton && !auth.isGuest()) {
+    <button type="button" class="mv-post-fab" (click)="openComposer()" aria-label="Publicar">
+      <i class="pi pi-pencil"></i>
+      <span>Publicar</span>
+    </button>
+  }
+</div>

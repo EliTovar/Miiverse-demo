@@ -1,0 +1,131 @@
+/* Panel de administración. Pestañas, estados y "Ver más" son estilos globales (styles.scss). */
+
+:host { display: block; padding-bottom: 8px; }
+
+/* ── Resumen ──────────────────────────────────────────────────── */
+.mv-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+  padding: 16px 20px;
+}
+.mv-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px;
+  border: 1px solid #e4dfe1;
+  border-radius: 12px;
+  background: var(--mv-header-bg);
+}
+.mv-stat i { font-size: 20px; color: var(--mv-green-dark); margin-bottom: 6px; }
+.mv-stat strong { font-size: 30px; font-weight: 800; color: var(--mv-text); line-height: 1.1; }
+.mv-stat span { font-size: 14px; font-weight: 700; color: var(--mv-text-soft); }
+.mv-stat small { margin-top: 4px; font-size: 12px; color: var(--mv-green-dark); font-weight: 700; }
+
+/* ── Usuarios ─────────────────────────────────────────────────── */
+.mv-admin-search {
+  display: flex;
+  margin: 16px 20px 6px;
+  border: 2px solid var(--mv-border);
+  border-radius: 10px;
+  background: var(--mv-surface-soft);
+  overflow: hidden;
+}
+.mv-admin-search:focus-within { border-color: var(--mv-green); background: #fff; }
+.mv-admin-search input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  color: var(--mv-text);
+  font: inherit;
+  font-size: 15px;
+}
+.mv-admin-search input:focus { outline: none; }
+.mv-admin-search button {
+  padding: 0 16px;
+  border: none;
+  background: transparent;
+  color: var(--mv-text-soft);
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.mv-admin-hint { margin: 0 20px 10px; font-size: 13px; color: var(--mv-text-soft); }
+
+.mv-table-wrap { overflow-x: auto; }
+.mv-user-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.mv-user-table th {
+  padding: 8px 12px;
+  border-top: 1px solid #e4dfe1;
+  border-bottom: 1px solid #e4dfe1;
+  background: var(--mv-header-bg);
+  color: var(--mv-text-soft);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: left;
+  white-space: nowrap;
+}
+.mv-user-table td { padding: 10px 12px; border-bottom: 1px solid #eee; vertical-align: top; }
+.mv-user-table .num { text-align: right; }
+.mv-user-table th:first-child,
+.mv-user-table td:first-child { padding-left: 20px; }
+.mv-user-table a { color: var(--mv-text); font-weight: 800; text-decoration: none; }
+.mv-user-table a:hover { color: var(--mv-green-dark); }
+.mv-email { color: var(--mv-text-soft); word-break: break-all; }
+
+.mv-me {
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--mv-surface-soft);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--mv-text-soft);
+}
+
+.mv-role-cell { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mv-role {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--mv-surface-soft);
+  color: var(--mv-text-soft);
+  font-size: 12px;
+  font-weight: 800;
+}
+.mv-role.admin { background: var(--mv-green-pale); color: var(--mv-green-dark); }
+.mv-role-btn {
+  padding: 4px 12px;
+  border: 1px solid var(--mv-border);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--mv-text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.mv-role-btn:hover:not(:disabled) { border-color: var(--mv-green); color: var(--mv-green-dark); }
+.mv-role-btn:disabled { opacity: 0.6; cursor: wait; }
+.mv-notice { display: block; margin-top: 4px; font-size: 12px; color: var(--mv-green-dark); }
+.mv-notice.error { color: #d23c3c; }
+
+/* ── Herramientas ─────────────────────────────────────────────── */
+.mv-tools { list-style: none; padding: 8px 0; }
+.mv-tools a {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #eee;
+  color: var(--mv-text);
+  text-decoration: none;
+}
+.mv-tools a:hover { background: #fafafa; }
+.mv-tools a > i:first-child { font-size: 24px; color: var(--mv-green-dark); }
+.mv-tools a > i:last-child { margin-left: auto; color: #bbb; }
+.mv-tools span { display: flex; flex-direction: column; gap: 2px; }
+.mv-tools strong { font-size: 16px; }
+.mv-tools small { font-size: 13px; color: var(--mv-text-soft); }

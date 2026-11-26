@@ -1,8 +1,7 @@
-/* Tailwind */
+@layer primeng, tailwind-utilities;
+
+/* Tailwind 4 — Importación simplificada */
 @import "tailwindcss";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 @import "primeicons/primeicons.css";
 
@@ -27,4 +26,120 @@ app-root {
   width: 100% !important;
   height: 100% !important;
   overflow: hidden !important;
+}
+
+/* ── Tema Miiverse (Wii U) ───────────────────────────────────────
+   Variables compartidas por el marco de la red social, el feed,
+   el compositor y las pantallas de login/registro. */
+:root {
+  --mv-font: 'Nunito', system-ui, sans-serif;
+  --mv-bg: #f1edee;            /* fondo de Archiverse (medido en sus capturas) */
+  --mv-header-bg: #f7f4f5;     /* cabeceras grises de los paneles */
+  --mv-text: #222222;
+  --mv-text-soft: #777777;
+  --mv-border: #dcdcdc;
+  --mv-surface-soft: #f2f2f2;
+  --mv-green: #5ac800;
+  --mv-green-light: #8ee03c;
+  --mv-green-dark: #3c9600;
+  --mv-green-pale: #ecf9e0;
+  --mv-orange: #ff8a00;
+}
+
+/* ── Piezas compartidas de las páginas de Miiverse ───────────────
+   Globales porque las usan varias páginas (feed, comunidad, perfil). */
+
+/* Pestañas segmentadas verdes (Recientes / Populares...). */
+.mv-tabs {
+  display: flex;
+  margin: 16px 20px 4px;
+  border: 1px solid var(--mv-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.mv-tabs button {
+  flex: 1;
+  padding: 10px 12px;
+  border: none;
+  border-right: 1px solid var(--mv-border);
+  background: linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%);
+  color: var(--mv-text);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+}
+.mv-tabs button:last-child { border-right: none; }
+.mv-tabs button:hover:not(.active) { color: var(--mv-green-dark); }
+.mv-tabs button.active {
+  background: linear-gradient(180deg, var(--mv-green-light) 0%, var(--mv-green) 100%);
+  color: #fff;
+  cursor: default;
+}
+.mv-tabs button:focus-visible { outline: 3px solid var(--mv-green-dark); outline-offset: -3px; }
+
+/* Mensajes de estado, vacío y botón "Ver más". */
+.mv-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 22px 16px;
+  color: var(--mv-text-soft);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+.mv-spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid var(--mv-green-pale);
+  border-top-color: var(--mv-green);
+  border-radius: 50%;
+  animation: mv-spin 0.8s linear infinite;
+}
+@keyframes mv-spin { to { transform: rotate(360deg); } }
+
+.mv-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--mv-text-soft);
+}
+.mv-empty i { font-size: 44px; color: var(--mv-green); margin-bottom: 12px; }
+.mv-empty p { font-size: 15px; line-height: 1.7; font-weight: 700; }
+
+.mv-more-btn {
+  display: block;
+  margin: 16px auto 20px;
+  padding: 10px 28px;
+  border: 1px solid var(--mv-border);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffffff 0%, #efefef 100%);
+  color: var(--mv-text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.mv-more-btn:hover:not(:disabled) { border-color: var(--mv-green); color: var(--mv-green-dark); }
+.mv-more-btn:disabled { opacity: 0.6; cursor: wait; }
+
+/* Esqueleto de carga de un post. */
+.mv-skeleton { display: flex; gap: 14px; padding: 18px 20px; border-bottom: 1px solid #ececec; }
+.mv-skeleton .sk-avatar { flex-shrink: 0; width: 60px; height: 60px; border-radius: 10px; background: #ececec; }
+.mv-skeleton .sk-lines { flex: 1; display: flex; flex-direction: column; gap: 10px; padding-top: 8px; }
+.mv-skeleton .sk-line {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #eeeeee 25%, #f7f7f7 50%, #eeeeee 75%);
+  background-size: 200% 100%;
+  animation: mv-shimmer 1.4s infinite;
+}
+.mv-skeleton .sk-short  { width: 35%; }
+.mv-skeleton .sk-medium { width: 60%; }
+.mv-skeleton .sk-long   { width: 90%; }
+@keyframes mv-shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
 }
