@@ -17,8 +17,10 @@
   color: var(--mv-text);
   background-color: var(--mv-bg);
   /* Cuadrícula de cuadrados redondeados muy claros (SVG propio). */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='112' height='112'%3E%3Crect x='9' y='9' width='94' height='94' rx='20' fill='%23fbf9fa'/%3E%3C/svg%3E");
-  background-size: 112px 112px;
+  /* Tablero como el de Archiverse (medido en las capturas de Eli): celdas de
+     60 px que alternan el fondo #f1edee con cuadrados redondeados #faf6f7. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect x='0' y='0' width='60' height='60' rx='12' fill='%23faf6f7'/%3E%3Crect x='60' y='60' width='60' height='60' rx='12' fill='%23faf6f7'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
   background-attachment: local;
 }
 
