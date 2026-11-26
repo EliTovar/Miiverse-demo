@@ -1,55 +1,27 @@
-import { Component, inject, effect } from '@angular/core';
-import { MenuItem } from 'primeng/api';
-import { MenubarModule } from 'primeng/menubar';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthStateService } from '../../../core/auth/auth-state.service';
-import { Router } from '@angular/router';
 import { ComposerService } from '../../services/composer.service';
-import { CommonModule } from '@angular/common';
-import { ButtonModule } from 'primeng/button';
 
+/**
+ * Barra superior del mundo 3D (y del panel 3D de admin).
+ * Usa el mismo tema que el marco de Miiverse (variables --mv-* de styles.scss).
+ */
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [MenubarModule, CommonModule, ButtonModule],
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './navbar.html',
+  styleUrl: './navbar.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Navbar {
   auth = inject(AuthStateService);
-  router = inject(Router);
+  private router = inject(Router);
   private composerService = inject(ComposerService);
 
-  items: MenuItem[] = [];
-
-  constructor() {
-    effect(() => {
-      this.auth.role();
-      this.buildMenu();
-    });
-  }
-
-  buildMenu() {
-    this.items = [
-      { label: 'Home', icon: 'pi pi-home', routerLink: '/' },
-      { label: 'MiiVerse', icon: 'pi pi-star', routerLink: '/social' },
-    ];
-
-    if (!this.auth.isGuest()) {
-      this.items.push({
-        label: 'Crear Post',
-        icon: 'pi pi-plus',
-        command: () => {
-          this.composerService.open({ mode: 'draw-only' });
-        }
-      });
-    }
-
-    if (this.auth.role() === 'admin') {
-      this.items.push({
-        label: 'Admin',
-        icon: 'pi pi-cog',
-        routerLink: '/social/admin',
-      });
-    }
+  openComposer() {
+    this.composerService.open({ mode: 'draw-only' });
   }
 
   goLogin() {

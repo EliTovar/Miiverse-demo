@@ -29,7 +29,7 @@ export class DebugHud {
     this.element.id = HUD_ID;
     Object.assign(this.element.style, {
       position: 'absolute',
-      top: '10px',
+      top: '70px', // debajo de la barra superior
       left: '10px',
       padding: '12px',
       background: 'rgba(10, 15, 23, 0.9)',

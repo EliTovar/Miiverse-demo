@@ -1,11 +1,13 @@
-<header>
-    <!-- <h1>ADMINISTRACIÓN</h1> -->
-    <nav>
-        <ul>
-            <li><a routerLink="world">Mundo</a></li>
-            <li><a routerLink="ia">IA</a></li>
-        </ul>
-    </nav>
+<!-- Subpestañas del panel 3D de admin, con el tema de Miiverse. -->
+<header class="admin-subbar">
+  <nav class="admin-tabs" aria-label="Secciones del panel 3D de admin">
+    <a routerLink="world" routerLinkActive="active"><i class="pi pi-map"></i><span>Mundo</span></a>
+    <a routerLink="ia" routerLinkActive="active"><i class="pi pi-sparkles"></i><span>IA</span></a>
+  </nav>
+
+  <a class="admin-link" routerLink="/social/panel">
+    <i class="pi pi-chart-bar"></i><span>Panel de Miiverse</span>
+  </a>
 </header>
 
 <router-outlet></router-outlet>

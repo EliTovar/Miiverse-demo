@@ -1,28 +1,46 @@
-<p-menubar [model]="items">
-  <ng-template pTemplate="start">
-    <div class="flex items-center gap-2 mr-6">
-      <span class="text-2xl">🌐</span>
-      <span class="font-bold text-xl tracking-tight text-white hidden md:block">Miiverse</span>
-    </div>
-  </ng-template>
+<!-- Barra superior del mundo 3D y del panel 3D de admin, con el tema de Miiverse. -->
+<header class="mv-topbar">
+  <a class="mv-topbar-brand" routerLink="/" aria-label="Miiverse, ir al mundo 3D">
+    <span class="mv-topbar-brand-icon"><i class="pi pi-comments"></i></span>
+    <span class="mv-topbar-brand-text">Miiverse</span>
+  </a>
 
-  <ng-template pTemplate="end">
-    <button
-      *ngIf="auth.isGuest()"
-      pButton
-      label="Login"
-      icon="pi pi-sign-in"
-      class="p-button-text"
-      (click)="goLogin()"
-    ></button>
+  <nav class="mv-topbar-nav" aria-label="Menú principal">
+    <a class="mv-topbar-item" routerLink="/" routerLinkActive="active"
+       [routerLinkActiveOptions]="{ exact: true }" title="Mundo 3D">
+      <i class="pi pi-globe"></i>
+      <span>Mundo 3D</span>
+    </a>
 
-    <button
-      *ngIf="!auth.isGuest()"
-      pButton
-      label="Logout"
-      icon="pi pi-sign-out"
-      class="p-button-text"
-      (click)="logout()"
-    ></button>
-  </ng-template>
-</p-menubar>
+    <a class="mv-topbar-item" routerLink="/social" title="Miiverse">
+      <i class="pi pi-home"></i>
+      <span>Miiverse</span>
+    </a>
+
+    @if (auth.role() === 'admin') {
+      <a class="mv-topbar-item" routerLink="/social/admin" routerLinkActive="active" title="Admin">
+        <i class="pi pi-cog"></i>
+        <span>Admin</span>
+      </a>
+    }
+  </nav>
+
+  <div class="mv-topbar-actions">
+    @if (auth.isGuest()) {
+      <button type="button" class="mv-topbar-item" (click)="goLogin()" title="Iniciar sesión">
+        <i class="pi pi-sign-in"></i>
+        <span>Iniciar sesión</span>
+      </button>
+    } @else {
+      <button type="button" class="mv-topbar-item mv-topbar-post" (click)="openComposer()" title="Publicar dibujo">
+        <i class="pi pi-pencil"></i>
+        <span>Publicar</span>
+      </button>
+
+      <button type="button" class="mv-topbar-item" (click)="logout()" title="Salir">
+        <i class="pi pi-sign-out"></i>
+        <span>Salir</span>
+      </button>
+    }
+  </div>
+</header>
