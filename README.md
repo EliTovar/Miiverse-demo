@@ -1,8 +1,8 @@
-# MiiVerse 2.0
+# MiiVerse 1.0
 
 Mundo 3D multijugador y red social inspirados en Miiverse de Wii U.
 
-## Novedades de la 2.0
+## Qué incluye la 1.0
 - **Red social con el estilo de Miiverse/Archiverse**: menú lateral, paneles con cabecera gris y franja verde, fondo de cuadros, comunidades, perfiles, búsqueda, comentarios con spoilers, moderación y panel de administración.
 - **Mundo 3D como la plaza de Wii U**: cielo y suelo blancos con malla, iconos de cristal flotando en óvalo y barra superior con el tema de Miiverse.
 - **Cursores estilo Wii** (jugador 1) en toda la aplicación.
