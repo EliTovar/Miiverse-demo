@@ -171,7 +171,8 @@ export class MainScenario implements AfterViewInit, OnDestroy {
     // -------------------------------------------------------------------------
     // 🔧 PUNTO DE ENFOQUE INICIAL (Donde mira la cámara al empezar)
     // -------------------------------------------------------------------------
-    // orbitControls.controls.target.set(0, 0, 0); // Apunta al centro (0,0,0)
+    // Un poco por detrás del centro: así se ven las tres filas de iconos, como en la plaza de Wii U.
+    orbitControls.controls.target.set(0, 0, -12);
     // -------------------------------------------------------------------------
 
     this.loopManager.addUpdateCallback(() => orbitControls.update());

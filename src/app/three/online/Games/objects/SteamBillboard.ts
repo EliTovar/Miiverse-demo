@@ -272,8 +272,12 @@ export class SteamBillboard {
     this.mesh.scale.setScalar(this.hoverScale);
   }
 
+  /**
+   * Pone el icono paralelo a la pantalla (misma rotación que la cámara), como
+   * los iconos de la plaza de Wii U: siempre de frente y sin inclinarse.
+   */
   lookAt(camera: THREE.Camera) {
-    this.mesh.lookAt(camera.position);
+    this.mesh.quaternion.copy(camera.quaternion);
   }
 
   setOpacity(val: number) {
