@@ -1,0 +1,54 @@
+<form class="mv-search" role="search" (ngSubmit)="submit()">
+  <input name="q" type="search" [(ngModel)]="search"
+         placeholder="Buscar por texto o por autor" aria-label="Buscar comentarios" />
+  <button type="submit" aria-label="Buscar"><i class="pi pi-search"></i></button>
+</form>
+
+<p class="mv-result-hint">Comentarios de todos los posts, del más nuevo al más viejo.</p>
+
+@if (error()) {
+  <div class="mv-status">{{ error() }}</div>
+} @else {
+  @for (comment of comments(); track comment.id) {
+    <article class="mv-mod-item">
+      <header class="mv-mod-header">
+        <a [routerLink]="['/social/users', comment.username]">
+          <img class="mv-mod-avatar" [src]="comment.mii_avatar_url" [alt]="comment.username" />
+        </a>
+        <div class="mv-mod-meta">
+          <a class="mv-mod-name" [routerLink]="['/social/users', comment.username]">{{ comment.username }}</a>
+          <time [attr.datetime]="comment.created_at">{{ fullDate(comment.created_at) }}</time>
+        </div>
+        <span class="mv-mod-tags">
+          @if (comment.is_spoiler) { <span class="mv-tag mv-tag-spoiler">Spoiler</span> }
+          @if (comment.updated_at) { <span class="mv-tag">Editado</span> }
+          <span class="mv-tag"><i class="pi pi-face-smile"></i> {{ comment.yeahs }}</span>
+        </span>
+      </header>
+
+      <p class="mv-mod-text">{{ comment.content_text }}</p>
+
+      <footer class="mv-mod-footer">
+        <a class="mv-mod-post" [routerLink]="['/social/posts', comment.post_id]">
+          <i class="pi pi-reply"></i>
+          En el post de <strong>{{ comment.post_username }}</strong>
+          @if (comment.post_game_title) { · {{ comment.post_game_title }} }
+        </a>
+        <button type="button" class="mv-mod-delete" [disabled]="deletingId() === comment.id"
+                (click)="remove(comment)">
+          <i class="pi pi-trash"></i> {{ deletingId() === comment.id ? 'Borrando...' : 'Borrar' }}
+        </button>
+      </footer>
+    </article>
+  } @empty {
+    @if (!loading()) {
+      <div class="mv-status">No hay comentarios que coincidan.</div>
+    }
+  }
+
+  @if (loading()) {
+    <div class="mv-status"><span class="mv-spinner"></span> Cargando...</div>
+  } @else if (hasMore()) {
+    <button type="button" class="mv-more-btn" (click)="loadMore()">Ver más</button>
+  }
+}

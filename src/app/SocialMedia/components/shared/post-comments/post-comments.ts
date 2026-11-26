@@ -87,10 +87,15 @@ export class PostComments {
     });
   }
 
-  /** Solo el autor ve los botones Editar y Borrar (el backend lo vuelve a comprobar). */
+  /** Solo el autor ve Editar (el backend lo vuelve a comprobar). */
   isMine(comment: MiiverseComment): boolean {
     const me = this.auth.userId();
     return me !== null && comment.user_id === me;
+  }
+
+  /** Borrar: el autor o un administrador (moderación). */
+  canDelete(comment: MiiverseComment): boolean {
+    return this.isMine(comment) || this.auth.role() === 'admin';
   }
 
   // ── Editar ──────────────────────────────────────────────────────────────
@@ -124,7 +129,10 @@ export class PostComments {
 
   // ── Borrar ──────────────────────────────────────────────────────────────
   remove(comment: MiiverseComment) {
-    if (!confirm('¿Borrar este comentario? No se puede deshacer.')) return;
+    const question = this.isMine(comment)
+      ? '¿Borrar este comentario? No se puede deshacer.'
+      : `Moderación: ¿borrar el comentario de ${comment.username}? No se puede deshacer.`;
+    if (!confirm(question)) return;
     this.api.deleteComment(comment.id).subscribe({
       next: () => {
         this.comments.update(list => list.filter(c => c.id !== comment.id));

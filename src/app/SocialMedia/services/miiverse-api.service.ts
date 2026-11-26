@@ -35,6 +35,13 @@ export interface MiiverseComment {
   yeahed: boolean;
 }
 
+/** Comentario visto desde la moderación (incluye datos del post). */
+export interface MiiverseAdminComment extends MiiverseComment {
+  post_text: string | null;
+  post_username: string;
+  post_game_title: string | null;
+}
+
 /** Orden de las listas de posts en comunidades y perfiles. */
 export type PostSort = 'recent' | 'oldest' | 'popular';
 
@@ -118,6 +125,13 @@ export class MiiverseApiService {
 
   toggleCommentYeah(id: number): Observable<{ yeahs: number; yeahed: boolean }> {
     return this.http.post<{ yeahs: number; yeahed: boolean }>(`${this.base}/comments/${id}/yeah`, {});
+  }
+
+  /** Solo admin (el backend responde 403 a cualquier otro rol). */
+  getCommentsForModeration(search: string, page = 1, limit = 20): Observable<MiiverseAdminComment[]> {
+    const params: Record<string, string | number> = { page, limit };
+    if (search.trim()) params['q'] = search.trim();
+    return this.http.get<MiiverseAdminComment[]>(`${this.base}/admin/comments`, { params });
   }
 
   getUserProfile(username: string, sort: PostSort, page = 1, limit = 20): Observable<MiiverseUserProfile> {

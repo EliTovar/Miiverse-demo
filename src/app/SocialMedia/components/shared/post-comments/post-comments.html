@@ -60,13 +60,16 @@
               <span class="mv-edited" [title]="'Editado el ' + fullDate(comment.updated_at)">Editado</span>
             }
 
-            @if (isMine(comment)) {
+            @if (canDelete(comment)) {
               <span class="mv-comment-own-actions">
-                <button type="button" class="mv-link-btn" (click)="startEdit(comment)">
-                  <i class="pi pi-pencil"></i> Editar
-                </button>
-                <button type="button" class="mv-link-btn mv-danger" (click)="remove(comment)">
-                  <i class="pi pi-trash"></i> Borrar
+                @if (isMine(comment)) {
+                  <button type="button" class="mv-link-btn" (click)="startEdit(comment)">
+                    <i class="pi pi-pencil"></i> Editar
+                  </button>
+                }
+                <button type="button" class="mv-link-btn mv-danger" (click)="remove(comment)"
+                        [title]="isMine(comment) ? 'Borrar mi comentario' : 'Borrar como administrador'">
+                  <i class="pi pi-trash"></i> {{ isMine(comment) ? 'Borrar' : 'Borrar (admin)' }}
                 </button>
               </span>
             }
