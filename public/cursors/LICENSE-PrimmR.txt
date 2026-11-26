@@ -1,0 +1,14 @@
+Vector Wii Pointers by PrimmR
+Created March 2024
+
+Thanks for downloading my selection of HD Wii Pointers!
+
+In this archive I've included plain SVG files for all the main hand pointer icons used by the Wii. 
+I've also included rasterised PNGs in various resolutions, so you don't need to go to the trouble of rasterising them yourself.
+
+If you're looking for a Windows mouse cursor theme based on these Wii Pointers, one is also available at my site (https://primm.gay)
+
+Feel free to use these wherever you want, as long as it's for non-commercial use. 
+And finally, credit of any form would also be greatly appreciated if you use these in a public distribution!
+
+Enjoy!!

@@ -91,7 +91,7 @@ import { FormsModule } from '@angular/forms';
       border-radius: 50%;
       border: 2px solid white;
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      cursor: pointer;
+      cursor: var(--mv-cursor-hand);
       transition: transform 0.2s;
     }
 
@@ -121,7 +121,7 @@ import { FormsModule } from '@angular/forms';
       border-radius: 8px;
       font-size: 0.9rem;
       font-weight: 600;
-      cursor: pointer;
+      cursor: var(--mv-cursor-hand);
       display: flex;
       align-items: center;
       gap: 6px;

@@ -123,7 +123,7 @@ a.mv-time:hover { color: var(--mv-green-dark); text-decoration: underline; }
   font: inherit;
   font-size: 13px;
   font-weight: 800;
-  cursor: pointer;
+  cursor: var(--mv-cursor-hand);
   transition: border-color 0.15s, color 0.15s, transform 0.1s;
 }
 .mv-yeah-btn:hover:not(:disabled) {

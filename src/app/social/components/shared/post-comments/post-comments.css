@@ -90,7 +90,7 @@ a:focus-visible { outline: 3px solid var(--mv-green); outline-offset: 2px; borde
   font-size: 14px;
   font-weight: 700;
   color: var(--mv-text-soft);
-  cursor: pointer;
+  cursor: var(--mv-cursor-hand);
 }
 .mv-spoiler-check input { accent-color: var(--mv-orange); width: 16px; height: 16px; }
 .mv-char-count { margin-left: auto; font-size: 12px; color: var(--mv-text-soft); }
@@ -103,7 +103,7 @@ a:focus-visible { outline: 3px solid var(--mv-green); outline-offset: 2px; borde
   font: inherit;
   font-size: 14px;
   font-weight: 800;
-  cursor: pointer;
+  cursor: var(--mv-cursor-hand);
 }
 .mv-comment-actions button:disabled { opacity: 0.5; cursor: not-allowed; }
 .mv-comment-actions button:focus-visible { outline: 3px solid var(--mv-green-dark); outline-offset: 2px; }
@@ -127,7 +127,7 @@ a:focus-visible { outline: 3px solid var(--mv-green); outline-offset: 2px; borde
   font: inherit;
   font-size: 13px;
   font-weight: 800;
-  cursor: pointer;
+  cursor: var(--mv-cursor-hand);
 }
 .mv-comment-yeah:hover:not(:disabled) { border-color: var(--mv-green); color: var(--mv-green-dark); }
 .mv-comment-yeah.active { border-color: var(--mv-green); background: var(--mv-green); color: #fff; }
@@ -149,7 +149,7 @@ a:focus-visible { outline: 3px solid var(--mv-green); outline-offset: 2px; borde
   font: inherit;
   font-size: 13px;
   font-weight: 700;
-  cursor: pointer;
+  cursor: var(--mv-cursor-hand);
 }
 .mv-link-btn:hover { background: #f0f0f0; color: var(--mv-text); }
 .mv-link-btn.mv-danger:hover { background: #fdeaea; color: #d23c3c; }

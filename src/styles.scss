@@ -46,6 +46,36 @@ app-root {
   --mv-orange: #ff8a00;
 }
 
+/* ── Cursores estilo Wii (jugador 1, azul) ───────────────────────
+   "Vector Wii Pointers" de PrimmR (uso no comercial, se agradece el crédito).
+   PNG de 32 px en public/cursors/ (y @2x para pantallas de alta densidad).
+   El número tras la URL es el punto que hace clic (punta del dedo / centro de la mano).
+   Para un elemento clicable propio usa `cursor: var(--mv-cursor-hand)`. */
+:root {
+  --mv-cursor-default: url('/cursors/pointer.png') 12 3, auto;
+  --mv-cursor-hand: url('/cursors/hand-open.png') 16 12, pointer;
+  --mv-cursor-grab: url('/cursors/hand-closed.png') 16 18, grabbing;
+}
+@supports (cursor: image-set(url('/cursors/pointer.png') 1x) 0 0, auto) {
+  :root {
+    --mv-cursor-default: image-set(url('/cursors/pointer.png') 1x, url('/cursors/pointer@2x.png') 2x) 12 3, auto;
+    --mv-cursor-hand: image-set(url('/cursors/hand-open.png') 1x, url('/cursors/hand-open@2x.png') 2x) 16 12, pointer;
+    --mv-cursor-grab: image-set(url('/cursors/hand-closed.png') 1x, url('/cursors/hand-closed@2x.png') 2x) 16 18, grabbing;
+  }
+}
+
+html { cursor: var(--mv-cursor-default); }
+
+a[href], button:not(:disabled), [role="button"], [role="tab"], select, summary, label[for],
+input[type="checkbox"], input[type="radio"], input[type="file"] {
+  cursor: var(--mv-cursor-hand);
+}
+
+/* Al pulsar (o arrastrar el mundo 3D), la mano se cierra como en Wii. */
+a[href]:active, button:not(:disabled):active, [role="button"]:active, canvas:active {
+  cursor: var(--mv-cursor-grab);
+}
+
 /* ── Piezas compartidas de las páginas de Miiverse ───────────────
    Globales porque las usan varias páginas (feed, comunidad, perfil). */
 
@@ -68,14 +98,14 @@ app-root {
   font-size: 15px;
   font-weight: 800;
   text-align: left;
-  cursor: pointer;
+  cursor: var(--mv-cursor-hand);
 }
 .mv-tabs button:last-child { border-right: none; }
 .mv-tabs button:hover:not(.active) { color: var(--mv-green-dark); }
 .mv-tabs button.active {
   background: linear-gradient(180deg, var(--mv-green-light) 0%, var(--mv-green) 100%);
   color: #fff;
-  cursor: default;
+  cursor: var(--mv-cursor-default);
 }
 .mv-tabs button:focus-visible { outline: 3px solid var(--mv-green-dark); outline-offset: -3px; }
 
@@ -120,7 +150,7 @@ app-root {
   font: inherit;
   font-size: 14px;
   font-weight: 800;
-  cursor: pointer;
+  cursor: var(--mv-cursor-hand);
 }
 .mv-more-btn:hover:not(:disabled) { border-color: var(--mv-green); color: var(--mv-green-dark); }
 .mv-more-btn:disabled { opacity: 0.6; cursor: wait; }

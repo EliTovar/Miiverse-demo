@@ -50,7 +50,7 @@
   background: transparent;
   color: var(--mv-text-soft);
   font-size: 17px;
-  cursor: pointer;
+  cursor: var(--mv-cursor-hand);
 }
 
 .mv-admin-hint { margin: 0 20px 10px; font-size: 13px; color: var(--mv-text-soft); }
@@ -105,7 +105,7 @@
   font: inherit;
   font-size: 12px;
   font-weight: 800;
-  cursor: pointer;
+  cursor: var(--mv-cursor-hand);
 }
 .mv-role-btn:hover:not(:disabled) { border-color: var(--mv-green); color: var(--mv-green-dark); }
 .mv-role-btn:disabled { opacity: 0.6; cursor: wait; }

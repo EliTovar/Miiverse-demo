@@ -44,7 +44,7 @@
   font-size: 14px;
   font-weight: 800;
   text-decoration: none;
-  cursor: pointer;
+  cursor: var(--mv-cursor-hand);
 }
 .mv-btn-primary {
   border: 1px solid var(--mv-green-dark);
@@ -98,7 +98,7 @@
   color: var(--mv-text);
   font: inherit;
   text-align: left;
-  cursor: pointer;
+  cursor: var(--mv-cursor-hand);
 }
 .mv-mod-row:hover { background: #fafafa; }
 .mv-mod-row.selected { background: var(--mv-green-pale); border-left-color: var(--mv-green); }

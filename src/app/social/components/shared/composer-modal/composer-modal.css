@@ -51,7 +51,7 @@
   border: none;
   font-size: 1.5rem;
   color: #999;
-  cursor: pointer;
+  cursor: var(--mv-cursor-hand);
   padding: 4px;
 }
 
@@ -70,7 +70,7 @@
   background: transparent;
   border-radius: 8px;
   font-weight: 600;
-  cursor: pointer;
+  cursor: var(--mv-cursor-hand);
   color: #666;
   transition: all 0.2s;
 }
@@ -134,7 +134,7 @@
   font-size: 0.95rem;
   font-weight: 700;
   color: #666;
-  cursor: pointer;
+  cursor: var(--mv-cursor-hand);
 }
 .mv-spoiler-check input { accent-color: var(--mv-orange); width: 16px; height: 16px; }
 
@@ -157,7 +157,7 @@
   border-radius: 12px;
   font-weight: 800;
   font-family: inherit;
-  cursor: pointer;
+  cursor: var(--mv-cursor-hand);
   transition: all 0.2s;
   font-size: 1rem;
 }

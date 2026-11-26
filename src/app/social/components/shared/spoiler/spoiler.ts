@@ -45,7 +45,7 @@ import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core
       font: inherit;
       font-size: 13px;
       font-weight: 800;
-      cursor: pointer;
+      cursor: var(--mv-cursor-hand);
     }
     .mv-spoiler-cover button:hover { background: var(--mv-orange); color: #fff; }
     .mv-spoiler-cover button:focus-visible { outline: 3px solid var(--mv-orange); outline-offset: 2px; }
