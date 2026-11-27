@@ -1,0 +1,104 @@
+<!doctype html>
+<!-- Página que usa convert.cjs (no es parte de la app). Convierte piezas DAE del Mii a GLB con Three.js. -->
+<html><body>
+<script type="importmap">{"imports":{"three":"/three/build/three.module.js","three/addons/":"/three/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { ColladaLoader } from 'three/addons/loaders/ColladaLoader.js';
+import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
+
+const loader = new ColladaLoader();
+const exporter = new GLTFExporter();
+
+/** ColladaLoader nombra los huesos "joint0, joint1…": recuperamos el nombre real (Arm_1_L…) del DAE. */
+function jointNames(daeText) {
+  const map = {};
+  for (const m of daeText.matchAll(/<node[^>]*name="([^"]+)"[^>]*sid="([^"]+)"[^>]*type="JOINT"/g)) map[m[2]] = m[1];
+  return map;
+}
+
+/** Material blanco con el nombre del "slot" (Body, Hair, Head…) para teñirlo en la app. */
+function cleanMesh(mesh) {
+  const slot = mesh.name.split('__mt_').pop();
+  const geometry = mesh.geometry;
+  ['color', 'uv1', 'uv2'].forEach((a) => geometry.deleteAttribute(a));
+  mesh.geometry = mergeVertices(geometry, 1e-5); // geometría indexada: ~3 veces menos peso
+  mesh.material = new THREE.MeshStandardMaterial({ name: slot, color: 0xffffff, roughness: 0.8 });
+}
+
+/** Piezas de cabeza: en reposo se ven igual sin huesos, así que las dejamos como mallas rígidas. */
+function unskin(root) {
+  const group = new THREE.Group();
+  root.traverse((o) => {
+    if (!o.isMesh) return;
+    o.geometry.deleteAttribute('skinIndex');
+    o.geometry.deleteAttribute('skinWeight');
+    const mesh = new THREE.Mesh(o.geometry, o.material);
+    mesh.name = o.name;
+    o.updateWorldMatrix(true, false);
+    mesh.applyMatrix4(o.matrixWorld);
+    group.add(mesh);
+  });
+  return group;
+}
+
+async function toBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 8192) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+  return btoa(s);
+}
+
+window.convertPart = async (srcPath, rigid) => {
+  const text = await (await fetch('/src/' + srcPath)).text();
+  const names = jointNames(text);
+  const scene = loader.parse(text, '').scene;
+  scene.scale.setScalar(1); // ColladaLoader aplica pulgadas→metros (0.0254); la app decide su escala
+  scene.traverse((o) => {
+    if (o.isBone && names[o.name]) o.name = names[o.name];
+    if (o.isMesh) cleanMesh(o);
+  });
+  scene.children.filter((c) => c.isLight).forEach((l) => scene.remove(l));
+  scene.updateMatrixWorld(true);
+  const root = rigid ? unskin(scene) : scene;
+  return toBase64(await exporter.parseAsync(root, { binary: true }));
+};
+
+/** Recolorea una textura de partes de cara (usa canales R/G/B como máscaras) */
+async function recolor(src, colors) {
+  const img = await new Promise((ok, fail) => { const i = new Image(); i.onload = () => ok(i); i.onerror = fail; i.src = '/src/' + src; });
+  const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+  const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0);
+  const data = ctx.getImageData(0, 0, c.width, c.height); const d = data.data;
+  for (let i = 0; i < d.length; i += 4) {
+    let rgba = [...colors.k];
+    for (const [ch, idx] of [['r', 0], ['g', 1], ['b', 2]]) {
+      const w = d[i + idx] / 255; const col = colors[ch];
+      if (col) rgba = rgba.map((v, j) => v * (1 - w) + col[j] * w);
+    }
+    d[i] = rgba[0]; d[i + 1] = rgba[1]; d[i + 2] = rgba[2]; d[i + 3] = rgba[3] * (d[i + 3] / 255);
+  }
+  ctx.putImageData(data, 0, 0);
+  return c;
+}
+
+/** Cara por defecto (ojos + boca) para la malla "Mask" de la cabeza. */
+window.buildFace = async (eyeSrc, mouthSrc) => {
+  const eye = await recolor(eyeSrc, { k: [20, 20, 20, 255], g: [255, 255, 255, 255], b: [70, 45, 30, 255], r: [0, 0, 0, 0] });
+  const mouth = await recolor(mouthSrc, { k: [0, 0, 0, 0], g: [190, 60, 60, 255], r: [210, 80, 80, 255] });
+  const size = 512, scale = 0.55, eyeY = 0.5, mouthY = 0.7;
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  const ew = eye.width * scale, eh = eye.height * scale;
+  ctx.drawImage(eye, size * 0.36 - ew / 2, size * eyeY - eh / 2, ew, eh);
+  ctx.save(); ctx.scale(-1, 1); // ojo derecho = espejo del izquierdo
+  ctx.drawImage(eye, -(size * 0.64 + ew / 2), size * eyeY - eh / 2, ew, eh); ctx.restore();
+  const mw = mouth.width * scale, mh = mouth.height * scale;
+  ctx.drawImage(mouth, size / 2 - mw / 2, size * mouthY - mh / 2, mw, mh);
+  return c.toDataURL('image/png').split(',')[1];
+};
+
+window.ready = true;
+</script>
+</body></html>

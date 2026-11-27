@@ -1,0 +1,52 @@
+{
+  "body": {
+    "body": "BodyBaseDefault.dae"
+  },
+  "heads": {
+    "head-00": "MiiHead/MiiHead00.dae",
+    "head-01": "MiiHead/MiiHead01.dae",
+    "head-02": "MiiHead/MiiHead02.dae",
+    "head-03": "MiiHead/MiiHead03.dae",
+    "head-04": "MiiHead/MiiHead04.dae",
+    "head-05": "MiiHead/MiiHead05.dae"
+  },
+  "hair": {
+    "hair-000": "MiiHairAll/MiiHairAll000/MiiHairAll000.dae",
+    "hair-001": "MiiHairAll/MiiHairAll001/MiiHairAll001.dae",
+    "hair-002": "MiiHairAll/MiiHairAll002/MiiHairAll002.dae",
+    "hair-003": "MiiHairAll/MiiHairAll003/MiiHairAll003.dae",
+    "hair-004": "MiiHairAll/MiiHairAll004/MiiHairAll004.dae",
+    "hair-005": "MiiHairAll/MiiHairAll005/MiiHairAll005.dae"
+  },
+  "noses": {
+    "nose-01": "MiiNose/MiiNose01.dae",
+    "nose-03": "MiiNose/MiiNose03.dae"
+  },
+  "tops": {
+    "tshirt-long": "Cloth/ClothTopsTshirtLong.dae",
+    "tshirt-half": "Cloth/ClothTopsTshirtHalf.dae",
+    "tshirt-sleeveless": "Cloth/ClothTopsTshirtSleeveless.dae",
+    "shirt-long": "Cloth/ClothTopsYshirtLong.dae",
+    "coat-long": "Cloth/ClothTopsCoatLong.dae",
+    "outer-long": "Cloth/ClothTopsOuterLong.dae"
+  },
+  "bottoms": {
+    "pants-long": "Cloth/ClothBottoms/ClothBottomsPantsLong.dae",
+    "pants-wide": "Cloth/ClothBottoms/ClothBottomsPantsWide.dae",
+    "skirt-box": "Cloth/ClothBottoms/ClothBottomsSkirtBox.dae",
+    "skirt-long": "Cloth/ClothBottoms/ClothBottomsSkirtLong.dae",
+    "skirt-mini": "Cloth/ClothBottoms/ClothBottomsSkirtMini.dae"
+  },
+  "shoes": {
+    "sneaker": "Cloth/ClothShoes/ClothShoesSneaker.dae",
+    "standard": "Cloth/ClothShoes/ClothShoesStandard.dae",
+    "boots-short": "Cloth/ClothShoes/ClothShoesBootsShort.dae",
+    "loafer": "Cloth/ClothShoes/ClothShoesLoafer.dae",
+    "sandal": "Cloth/ClothShoes/ClothShoesSandal.dae",
+    "skate": "Cloth/ClothShoes/ClothShoesSkate.dae"
+  },
+  "face": {
+    "eye": "MiiParts/Eye000.png",
+    "mouth": "MiiParts/Mouth000.png"
+  }
+}
