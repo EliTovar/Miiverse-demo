@@ -8,9 +8,7 @@
     <section class="mv-page-header">
       <div class="mv-banner" aria-hidden="true"></div>
       <div class="mv-header-body">
-        @if (user.avatar_url) {
-          <img class="mv-header-avatar" [src]="user.avatar_url" [alt]="user.username" />
-        }
+        <img class="mv-header-avatar" [src]="user.avatar_url | miiAvatar" [alt]="user.username" />
         <div class="mv-header-text">
           <h2>{{ user.username }}</h2>
           <p class="mv-header-meta">

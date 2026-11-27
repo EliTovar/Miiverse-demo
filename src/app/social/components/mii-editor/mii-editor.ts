@@ -1,52 +1,17 @@
 import { ChangeDetectionStrategy, Component, ElementRef, NgZone, OnDestroy, AfterViewInit, ViewChild, computed, inject, signal } from '@angular/core';
-import { DEFAULT_APPEARANCE, MII_CATALOG, MiiAppearance, MiiColors } from '../../../three/online/loaders/mii-appearance';
+import { BASE_MIIS, MiiAppearance, MiiColors } from '../../../three/online/loaders/mii-appearance';
 import { loadSavedAppearance, saveAppearance } from '../../../three/online/loaders/mii-appearance-storage';
+import { facePartThumbnail } from '../../../three/online/loaders/mii-face';
+import { CATEGORIES, Category, OptionGroup, PartField } from './mii-editor-config';
 import { MiiPreview } from './mii-preview';
 
-type PartKey = 'head' | 'nose' | 'hair' | 'top' | 'bottoms' | 'shoes';
-
-interface PartGroup {
-  key: PartKey;
-  title: string;
-  /** Nombre corto para numerar las opciones sin nombre propio ("Cabeza 1"). */
-  item: string;
-  options: readonly string[];
-}
-
-interface Section {
-  id: string;
-  label: string;
-  parts: PartGroup[];
-  colors: { key: keyof MiiColors; label: string }[];
-}
-
-/** Pestañas del menú: qué piezas y qué colores se editan en cada una. */
-const SECTIONS: Section[] = [
-  {
-    id: 'face', label: 'Cara',
-    parts: [
-      { key: 'head', title: 'Forma de la cabeza', item: 'Cabeza', options: MII_CATALOG.heads },
-      { key: 'nose', title: 'Nariz', item: 'Nariz', options: MII_CATALOG.noses },
-    ],
-    colors: [{ key: 'skin', label: 'Piel' }],
-  },
-  { id: 'hair', label: 'Pelo', parts: [{ key: 'hair', title: 'Peinado', item: 'Peinado', options: MII_CATALOG.hair }], colors: [{ key: 'hair', label: 'Color' }] },
-  { id: 'top', label: 'Arriba', parts: [{ key: 'top', title: 'Prenda', item: 'Prenda', options: MII_CATALOG.tops }], colors: [{ key: 'top', label: 'Color' }] },
-  { id: 'bottoms', label: 'Abajo', parts: [{ key: 'bottoms', title: 'Prenda', item: 'Prenda', options: MII_CATALOG.bottoms }], colors: [{ key: 'bottoms', label: 'Color' }] },
-  { id: 'shoes', label: 'Zapatos', parts: [{ key: 'shoes', title: 'Calzado', item: 'Calzado', options: MII_CATALOG.shoes }], colors: [{ key: 'shoes', label: 'Color' }] },
-];
-
-/** Nombres legibles de las piezas. Las que no aparecen se numeran ("Cabeza 1", "Peinado 3"…). */
-const LABELS: Record<string, string> = {
-  'tshirt-long': 'Camiseta manga larga', 'tshirt-half': 'Camiseta manga corta', 'tshirt-sleeveless': 'Sin mangas',
-  'shirt-long': 'Camisa', 'coat-long': 'Abrigo', 'outer-long': 'Chaqueta',
-  'pants-long': 'Pantalón', 'pants-wide': 'Pantalón ancho', 'skirt-box': 'Falda recta', 'skirt-long': 'Falda larga', 'skirt-mini': 'Minifalda',
-  sneaker: 'Tenis', standard: 'Zapatos', 'boots-short': 'Botines', loafer: 'Mocasines', sandal: 'Sandalias', skate: 'Tenis de skate',
-};
+const THUMBS_PATH = 'models/mii-parts/thumbs';
 
 /**
- * Página "Mi Mii": elige piezas y colores, mira el resultado en 3D y guárdalo.
- * La apariencia se guarda en el navegador y se usa al aparecer en el mundo 3D.
+ * Página "Mi Mii" (estilo editor de Mii de Switch):
+ * 1. Si aún no tienes Mii, eliges con cuál empezar.
+ * 2. Eliges una categoría (Cara, Peinado, Ojos…) y cambias piezas y colores.
+ * 3. "Listo" lo guarda en el navegador; se usa al entrar al Mundo 3D.
  */
 @Component({
   selector: 'app-mii-editor',
@@ -58,20 +23,29 @@ const LABELS: Record<string, string> = {
 export class MiiEditor implements AfterViewInit, OnDestroy {
   private zone = inject(NgZone);
   private preview?: MiiPreview;
+  private savedAppearance = loadSavedAppearance();
 
   @ViewChild('previewHost', { static: true }) previewHost!: ElementRef<HTMLDivElement>;
 
-  readonly sections = SECTIONS;
-  appearance = signal<MiiAppearance>(loadSavedAppearance() ?? DEFAULT_APPEARANCE);
-  activeId = signal(SECTIONS[0].id);
-  active = computed(() => SECTIONS.find((s) => s.id === this.activeId())!);
-  saved = signal(true);
+  readonly categories = CATEGORIES;
+  readonly baseMiis = BASE_MIIS.map((_, i) => `${THUMBS_PATH}/base/${i}.webp`);
+
+  /** Sin Mii guardado se empieza eligiendo un Mii base. */
+  choosingBase = signal(this.savedAppearance === null);
+  appearance = signal<MiiAppearance>(this.savedAppearance ?? BASE_MIIS[0]);
+  activeId = signal(CATEGORIES[0].id);
+  active = computed(() => CATEGORIES.find((c) => c.id === this.activeId())!);
+  saved = signal(this.savedAppearance !== null);
   loadError = signal(false);
+  /** Miniaturas de ojos, cejas, bocas y bigotes (se dibujan con el color actual). */
+  private faceThumbs = signal<Record<string, string>>({}); // "eyes/004" → data URL
+  private faceThumbColors = new Map<string, string>(); // con qué color se dibujó cada una
 
   ngAfterViewInit(): void {
     // El render 3D va fuera de Angular para no lanzar detección de cambios en cada frame.
     this.zone.runOutsideAngular(() => {
       this.preview = new MiiPreview(this.previewHost.nativeElement);
+      this.preview.focus(this.active().view);
     });
     this.refreshPreview();
   }
@@ -80,22 +54,49 @@ export class MiiEditor implements AfterViewInit, OnDestroy {
     this.preview?.dispose();
   }
 
-  label(group: PartGroup, id: string): string {
-    return LABELS[id] ?? `${group.item} ${group.options.indexOf(id) + 1}`;
+  startWith(index: number) {
+    this.choosingBase.set(false);
+    this.update(BASE_MIIS[index]);
+    this.openCategory(CATEGORIES[0]);
   }
 
-  choose(key: PartKey, id: string) {
-    this.update({ ...this.appearance(), [key]: id });
+  openCategory(category: Category) {
+    this.activeId.set(category.id);
+    this.preview?.focus(category.view);
+    this.loadFaceThumbs();
   }
 
-  setColor(key: keyof MiiColors, event: Event) {
-    const color = (event.target as HTMLInputElement).value;
-    this.update({ ...this.appearance(), colors: { ...this.appearance().colors, [key]: color } });
+  thumb(group: OptionGroup, id: string): string {
+    const source = group.thumbs;
+    if (source.kind === 'model') return `${THUMBS_PATH}/${source.folder}/${id}.webp`;
+    return this.faceThumbs()[`${source.type}/${id}`] ?? '';
+  }
+
+  isSelected(field: PartField, id: string | null): boolean {
+    return this.appearance()[field] === id;
+  }
+
+  choose(field: PartField, id: string | null) {
+    this.update({ ...this.appearance(), [field]: id });
+  }
+
+  setColor(field: keyof MiiColors, color: string) {
+    this.update({ ...this.appearance(), colors: { ...this.appearance().colors, [field]: color } });
+    this.loadFaceThumbs(); // las miniaturas de la cara usan el color
+  }
+
+  setBody(field: 'height' | 'weight', event: Event) {
+    this.update({ ...this.appearance(), [field]: Number((event.target as HTMLInputElement).value) });
+  }
+
+  toggleMole() {
+    this.update({ ...this.appearance(), mole: !this.appearance().mole });
   }
 
   save() {
     try {
       saveAppearance(this.appearance());
+      this.savedAppearance = this.appearance();
       this.saved.set(true);
     } catch {
       this.loadError.set(true); // localStorage lleno o bloqueado
@@ -103,7 +104,11 @@ export class MiiEditor implements AfterViewInit, OnDestroy {
   }
 
   reset() {
-    this.update(loadSavedAppearance() ?? DEFAULT_APPEARANCE);
+    if (!this.savedAppearance) {
+      this.choosingBase.set(true); // aún no había Mii: vuelve a elegir uno base
+      return;
+    }
+    this.update(this.savedAppearance);
     this.saved.set(true);
   }
 
@@ -118,5 +123,26 @@ export class MiiEditor implements AfterViewInit, OnDestroy {
     this.zone.runOutsideAngular(() => {
       this.preview?.show(appearance).catch(() => this.zone.run(() => this.loadError.set(true)));
     });
+  }
+
+  /** Dibuja las miniaturas de la cara de la categoría abierta que falten o tengan otro color. */
+  private async loadFaceThumbs() {
+    const jobs: Promise<[string, string]>[] = [];
+    for (const group of this.active().groups) {
+      const source = group.thumbs;
+      if (source.kind !== 'face') continue;
+      const color = this.appearance().colors[source.color];
+      for (const id of group.options) {
+        const key = `${source.type}/${id}`;
+        if (this.faceThumbColors.get(key) === color) continue;
+        this.faceThumbColors.set(key, color);
+        jobs.push(facePartThumbnail(source.type, id, color).then((url) => [key, url]));
+      }
+    }
+    if (!jobs.length) return;
+    // Mientras se dibujan se siguen viendo las anteriores; si alguna falla, el botón muestra su número.
+    const done = await Promise.allSettled(jobs);
+    const added = done.flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []));
+    this.faceThumbs.update((thumbs) => ({ ...thumbs, ...Object.fromEntries(added) }));
   }
 }

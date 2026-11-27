@@ -6,12 +6,13 @@ import { catchError, map, tap, throwError } from 'rxjs';
 import { MiiverseApiService } from '../../services/miiverse-api.service';
 import { MiiverseUserProfile } from '../../models/miiverse.models';
 import { FetchPostsPage, PostList, SortOption } from '../shared/post-list/post-list';
+import { MiiAvatarPipe } from '../shared/mii-avatar/mii-avatar.pipe';
 
 /** Perfil público de un usuario: cabecera, contadores y sus posts. */
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [RouterLink, PostList],
+  imports: [RouterLink, PostList, MiiAvatarPipe],
   templateUrl: './user-profile.html',
   styleUrl: '../shared/page-header.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

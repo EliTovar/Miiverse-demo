@@ -60,7 +60,7 @@
         <li>
           <button type="button" class="mv-mod-row" [class.selected]="selectedKey() === key(item)"
                   [attr.aria-current]="selectedKey() === key(item)" (click)="select(item)">
-            <img class="mv-mod-avatar" [src]="item.mii_avatar_url" alt="" />
+            <img class="mv-mod-avatar" [src]="item.mii_avatar_url | miiAvatar" alt="" />
             <span class="mv-mod-row-body">
               <span class="mv-mod-row-top">
                 <span class="mv-kind" [class.comment]="item.kind === 'comment'">
@@ -92,7 +92,7 @@
     <section class="mv-mod-detail" aria-live="polite">
       @if (selected(); as item) {
         <header class="mv-detail-header">
-          <img class="mv-mod-avatar mv-detail-avatar" [src]="item.mii_avatar_url" alt="" />
+          <img class="mv-mod-avatar mv-detail-avatar" [src]="item.mii_avatar_url | miiAvatar" alt="" />
           <div>
             <a class="mv-detail-name" [routerLink]="['/social/users', item.username]">{{ item.username }}</a>
             <div class="mv-detail-meta">

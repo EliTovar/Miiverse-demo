@@ -8,7 +8,13 @@
     "head-02": "MiiHead/MiiHead02.dae",
     "head-03": "MiiHead/MiiHead03.dae",
     "head-04": "MiiHead/MiiHead04.dae",
-    "head-05": "MiiHead/MiiHead05.dae"
+    "head-05": "MiiHead/MiiHead05.dae",
+    "head-06": "MiiHead/MiiHead06.dae",
+    "head-07": "MiiHead/MiiHead07.dae",
+    "head-08": "MiiHead/MiiHead08.dae",
+    "head-09": "MiiHead/MiiHead09.dae",
+    "head-10": "MiiHead/MiiHead10.dae",
+    "head-11": "MiiHead/MiiHead11.dae"
   },
   "hair": {
     "hair-000": "MiiHairAll/MiiHairAll000/MiiHairAll000.dae",
@@ -16,11 +22,81 @@
     "hair-002": "MiiHairAll/MiiHairAll002/MiiHairAll002.dae",
     "hair-003": "MiiHairAll/MiiHairAll003/MiiHairAll003.dae",
     "hair-004": "MiiHairAll/MiiHairAll004/MiiHairAll004.dae",
-    "hair-005": "MiiHairAll/MiiHairAll005/MiiHairAll005.dae"
+    "hair-005": "MiiHairAll/MiiHairAll005/MiiHairAll005.dae",
+    "hair-006": "MiiHairAll/MiiHairAll006/MiiHairAll006.dae",
+    "hair-007": "MiiHairAll/MiiHairAll007/MiiHairAll007.dae",
+    "hair-008": "MiiHairAll/MiiHairAll008/MiiHairAll008.dae",
+    "hair-009": "MiiHairAll/MiiHairAll009/MiiHairAll009.dae",
+    "hair-010": "MiiHairAll/MiiHairAll010/MiiHairAll010.dae",
+    "hair-011": "MiiHairAll/MiiHairAll011/MiiHairAll011.dae",
+    "hair-012": "MiiHairAll/MiiHairAll012/MiiHairAll012.dae",
+    "hair-013": "MiiHairAll/MiiHairAll013/MiiHairAll013.dae",
+    "hair-014": "MiiHairAll/MiiHairAll014/MiiHairAll014.dae",
+    "hair-015": "MiiHairAll/MiiHairAll015/MiiHairAll015.dae",
+    "hair-016": "MiiHairAll/MiiHairAll016/MiiHairAll016.dae",
+    "hair-017": "MiiHairAll/MiiHairAll017/MiiHairAll017.dae",
+    "hair-018": "MiiHairAll/MiiHairAll018/MiiHairAll018.dae",
+    "hair-019": "MiiHairAll/MiiHairAll019/MiiHairAll019.dae",
+    "hair-020": "MiiHairAll/MiiHairAll020/MiiHairAll020.dae",
+    "hair-021": "MiiHairAll/MiiHairAll021/MiiHairAll021.dae",
+    "hair-022": "MiiHairAll/MiiHairAll022/MiiHairAll022.dae",
+    "hair-023": "MiiHairAll/MiiHairAll023/MiiHairAll023.dae",
+    "hair-024": "MiiHairAll/MiiHairAll024/MiiHairAll024.dae",
+    "hair-025": "MiiHairAll/MiiHairAll025/MiiHairAll025.dae",
+    "hair-026": "MiiHairAll/MiiHairAll026/MiiHairAll026.dae",
+    "hair-027": "MiiHairAll/MiiHairAll027/MiiHairAll027.dae",
+    "hair-028": "MiiHairAll/MiiHairAll028/MiiHairAll028.dae",
+    "hair-029": "MiiHairAll/MiiHairAll029/MiiHairAll029.dae"
   },
   "noses": {
+    "nose-00": "MiiNose/MiiNose00.dae",
     "nose-01": "MiiNose/MiiNose01.dae",
-    "nose-03": "MiiNose/MiiNose03.dae"
+    "nose-02": "MiiNose/MiiNose02.dae",
+    "nose-03": "MiiNose/MiiNose03.dae",
+    "nose-04": "MiiNose/MiiNose04.dae",
+    "nose-05": "MiiNose/MiiNose05.dae",
+    "nose-06": "MiiNose/MiiNose06.dae",
+    "nose-07": "MiiNose/MiiNose07.dae",
+    "nose-08": "MiiNose/MiiNose08.dae",
+    "nose-09": "MiiNose/MiiNose09.dae",
+    "nose-10": "MiiNose/MiiNose10.dae",
+    "nose-11": "MiiNose/MiiNose11.dae"
+  },
+  "beards": {
+    "beard-00": "MiiBeard/MiiBeard00.dae",
+    "beard-01": "MiiBeard/MiiBeard01.dae",
+    "beard-02": "MiiBeard/MiiBeard02.dae",
+    "beard-03": "MiiBeard/MiiBeard03.dae",
+    "beard-04": "MiiBeard/MiiBeard04.dae",
+    "beard-05": "MiiBeard/MiiBeard05.dae",
+    "beard-06": "MiiBeard/MiiBeard06.dae",
+    "beard-07": "MiiBeard/MiiBeard07.dae",
+    "beard-08": "MiiBeard/MiiBeard08.dae",
+    "beard-09": "MiiBeard/MiiBeard09.dae",
+    "beard-10": "MiiBeard/MiiBeard10.dae",
+    "beard-11": "MiiBeard/MiiBeard11.dae",
+    "beard-12": "MiiBeard/MiiBeard12.dae"
+  },
+  "glasses": {
+    "glasses-00": "MiiGlass/MiiGlass00.dae",
+    "glasses-01": "MiiGlass/MiiGlass01.dae",
+    "glasses-02": "MiiGlass/MiiGlass02.dae",
+    "glasses-03": "MiiGlass/MiiGlass03.dae",
+    "glasses-04": "MiiGlass/MiiGlass04.dae",
+    "glasses-05": "MiiGlass/MiiGlass05.dae",
+    "glasses-06": "MiiGlass/MiiGlass06.dae",
+    "glasses-07": "MiiGlass/MiiGlass07.dae",
+    "glasses-08": "MiiGlass/MiiGlass08.dae",
+    "glasses-09": "MiiGlass/MiiGlass09.dae",
+    "glasses-10": "MiiGlass/MiiGlass10.dae",
+    "glasses-11": "MiiGlass/MiiGlass11.dae",
+    "glasses-12": "MiiGlass/MiiGlass12.dae",
+    "glasses-13": "MiiGlass/MiiGlass13.dae",
+    "glasses-14": "MiiGlass/MiiGlass14.dae",
+    "glasses-15": "MiiGlass/MiiGlass15.dae",
+    "glasses-16": "MiiGlass/MiiGlass16.dae",
+    "glasses-17": "MiiGlass/MiiGlass17.dae",
+    "glasses-18": "MiiGlass/MiiGlass18.dae"
   },
   "tops": {
     "tshirt-long": "Cloth/ClothTopsTshirtLong.dae",
@@ -46,8 +122,13 @@
     "skate": "Cloth/ClothShoes/ClothShoesSkate.dae"
   },
   "face": {
-    "eye": "MiiParts/Eye000.png",
-    "mouth": "MiiParts/Mouth000.png"
+    "textures": {
+      "eyes": "MiiParts/Eye",
+      "mouths": "MiiParts/Mouth",
+      "eyebrows": "MiiParts/Eyebrow",
+      "mustaches": "MiiParts/Mustache",
+      "moles": "MiiParts/Mole"
+    }
   },
   "mannequin": {
     "head": "MannequinHead.dae",

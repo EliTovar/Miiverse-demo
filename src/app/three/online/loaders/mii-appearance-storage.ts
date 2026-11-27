@@ -15,6 +15,15 @@ function pick(value: unknown, options: readonly string[], fallback: string): str
   return typeof value === 'string' && options.includes(value) ? value : fallback;
 }
 
+/** Igual que `pick`, pero la pieza es opcional (`null` = sin bigote, sin lentes…). */
+function pickOptional(value: unknown, options: readonly string[]): string | null {
+  return typeof value === 'string' && options.includes(value) ? value : null;
+}
+
+function pickNumber(value: unknown, fallback: number): number {
+  return typeof value === 'number' && value >= 0 && value <= 1 ? value : fallback;
+}
+
 function pickColors(value: unknown): MiiColors {
   const saved = (value ?? {}) as Partial<Record<keyof MiiColors, unknown>>;
   const colors = { ...DEFAULT_APPEARANCE.colors };
@@ -29,13 +38,23 @@ function pickColors(value: unknown): MiiColors {
 function sanitize(raw: unknown): MiiAppearance {
   const data = (raw ?? {}) as Partial<Record<keyof MiiAppearance, unknown>>;
   const d = DEFAULT_APPEARANCE;
+  const c = MII_CATALOG;
   return {
-    head: pick(data.head, MII_CATALOG.heads, d.head),
-    hair: pick(data.hair, MII_CATALOG.hair, d.hair),
-    nose: pick(data.nose, MII_CATALOG.noses, d.nose),
-    top: pick(data.top, MII_CATALOG.tops, d.top),
-    bottoms: pick(data.bottoms, MII_CATALOG.bottoms, d.bottoms),
-    shoes: pick(data.shoes, MII_CATALOG.shoes, d.shoes),
+    head: pick(data.head, c.heads, d.head),
+    hair: pick(data.hair, c.hair, d.hair),
+    eyebrows: pick(data.eyebrows, c.eyebrows, d.eyebrows),
+    eyes: pick(data.eyes, c.eyes, d.eyes),
+    nose: pick(data.nose, c.noses, d.nose),
+    mouth: pick(data.mouth, c.mouths, d.mouth),
+    mustache: pickOptional(data.mustache, c.mustaches),
+    beard: pickOptional(data.beard, c.beards),
+    mole: data.mole === true,
+    glasses: pickOptional(data.glasses, c.glasses),
+    height: pickNumber(data.height, d.height),
+    weight: pickNumber(data.weight, d.weight),
+    top: pick(data.top, c.tops, d.top),
+    bottoms: pick(data.bottoms, c.bottoms, d.bottoms),
+    shoes: pick(data.shoes, c.shoes, d.shoes),
     colors: pickColors(data.colors),
   };
 }

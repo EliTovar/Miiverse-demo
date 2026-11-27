@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MiiverseApiService } from '../../services/miiverse-api.service';
 import { MiiverseCommunity, MiiverseUserSummary } from '../../models/miiverse.models';
 import { CommunityIcon } from '../shared/community-icon/community-icon';
+import { MiiAvatarPipe } from '../shared/mii-avatar/mii-avatar.pipe';
 
 type SearchTab = 'users' | 'communities';
 
@@ -16,7 +17,7 @@ type SearchTab = 'users' | 'communities';
 @Component({
   selector: 'app-search',
   standalone: true,
-  imports: [FormsModule, RouterLink, CommunityIcon],
+  imports: [FormsModule, RouterLink, CommunityIcon, MiiAvatarPipe],
   templateUrl: './search.html',
   styleUrl: '../shared/result-list.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

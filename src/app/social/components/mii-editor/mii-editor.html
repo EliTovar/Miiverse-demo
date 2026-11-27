@@ -1,45 +1,95 @@
-<div class="mii-editor">
-  <div class="mii-preview" #previewHost aria-label="Vista previa de tu Mii"></div>
-
-  <div class="mii-options">
-    <div class="mv-tabs" role="tablist">
-      @for (section of sections; track section.id) {
-        <button type="button" role="tab" [class.active]="activeId() === section.id"
-                [attr.aria-selected]="activeId() === section.id" (click)="activeId.set(section.id)">
-          {{ section.label }}
+@if (choosingBase()) {
+  <section class="mii-start">
+    <h2>¿Con qué Mii quieres empezar?</h2>
+    <p>Elige uno y después cámbiale lo que quieras.</p>
+    <div class="mii-start-options">
+      @for (src of baseMiis; track src; let i = $index) {
+        <button type="button" class="mii-start-option" (click)="startWith(i)">
+          <img [src]="src" alt="" />
+          <span>Estilo {{ i + 1 }}</span>
         </button>
       }
     </div>
+  </section>
+}
 
-    @for (group of active().parts; track group.key) {
-      <h3 class="mii-group-title">{{ group.title }}</h3>
-      <div class="mii-choices">
-        @for (id of group.options; track id) {
-          <button type="button" class="mii-choice" [class.selected]="appearance()[group.key] === id"
-                  [attr.aria-pressed]="appearance()[group.key] === id" (click)="choose(group.key, id)">
-            {{ label(group, id) }}
+<div class="mii-editor" [hidden]="choosingBase()">
+  <div class="mii-preview" #previewHost aria-label="Vista previa de tu Mii"></div>
+
+  <nav class="mii-categories" aria-label="Categorías">
+    @for (category of categories; track category.id) {
+      <button type="button" [class.active]="activeId() === category.id"
+              [attr.aria-pressed]="activeId() === category.id" (click)="openCategory(category)">
+        <i [class]="category.icon" aria-hidden="true"></i>
+        <span>{{ category.label }}</span>
+      </button>
+    }
+  </nav>
+
+  <div class="mii-panel">
+    <h3 class="mii-panel-title">{{ active().label }}</h3>
+
+    @if (active().extra === 'mole') {
+      <button type="button" class="mii-toggle" [class.on]="appearance().mole" [attr.aria-pressed]="appearance().mole"
+              (click)="toggleMole()">
+        Lunar: {{ appearance().mole ? 'sí' : 'no' }}
+      </button>
+    }
+
+    @if (active().extra === 'body') {
+      <label class="mii-slider">
+        <span>Altura</span>
+        <input type="range" min="0" max="1" step="0.05" [value]="appearance().height" (input)="setBody('height', $event)" />
+      </label>
+      <label class="mii-slider">
+        <span>Complexión</span>
+        <input type="range" min="0" max="1" step="0.05" [value]="appearance().weight" (input)="setBody('weight', $event)" />
+      </label>
+    }
+
+    @for (group of active().groups; track group.field) {
+      <h4 class="mii-group-title">{{ group.title }}</h4>
+      <div class="mii-grid">
+        @if (group.optional) {
+          <button type="button" class="mii-option none" [class.selected]="isSelected(group.field, null)"
+                  [attr.aria-pressed]="isSelected(group.field, null)" (click)="choose(group.field, null)">
+            Ninguno
+          </button>
+        }
+        @for (id of group.options; track id; let i = $index) {
+          <button type="button" class="mii-option" [class.selected]="isSelected(group.field, id)"
+                  [attr.aria-pressed]="isSelected(group.field, id)" [attr.aria-label]="group.title + ' ' + (i + 1)"
+                  (click)="choose(group.field, id)">
+            @if (thumb(group, id); as src) {
+              <img [src]="src" alt="" loading="lazy" />
+            } @else {
+              {{ i + 1 }}
+            }
           </button>
         }
       </div>
     }
 
-    @for (color of active().colors; track color.key) {
-      <label class="mii-color">
-        <span>{{ color.label }}</span>
-        <input type="color" [value]="appearance().colors[color.key]" (input)="setColor(color.key, $event)" />
-      </label>
+    @for (color of active().colors; track color.field) {
+      <h4 class="mii-group-title">{{ color.title }}</h4>
+      <div class="mii-palette">
+        @for (swatch of color.palette; track swatch) {
+          <button type="button" class="mii-swatch" [style.background]="swatch"
+                  [class.selected]="appearance().colors[color.field] === swatch"
+                  [attr.aria-label]="color.title + ' ' + swatch" (click)="setColor(color.field, swatch)"></button>
+        }
+      </div>
     }
+  </div>
 
+  <div class="mii-actions">
     @if (loadError()) {
       <p class="mii-error">No se pudo cargar o guardar el Mii. Recarga la página e inténtalo de nuevo.</p>
     }
-
-    <div class="mii-actions">
-      <button type="button" class="mii-secondary" [disabled]="saved()" (click)="reset()">Deshacer cambios</button>
-      <button type="button" class="mii-primary" [disabled]="saved()" (click)="save()">
-        {{ saved() ? 'Guardado' : 'Guardar' }}
-      </button>
-    </div>
     <p class="mii-hint">Tu Mii se usa al entrar al Mundo 3D. Por ahora se guarda solo en este navegador.</p>
+    <button type="button" class="mii-secondary" [disabled]="saved()" (click)="reset()">Deshacer cambios</button>
+    <button type="button" class="mii-primary" [disabled]="saved()" (click)="save()">
+      {{ saved() ? 'Guardado' : 'Listo' }}
+    </button>
   </div>
 </div>

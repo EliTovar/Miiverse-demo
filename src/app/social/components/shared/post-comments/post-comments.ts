@@ -6,6 +6,7 @@ import { MiiverseApiService } from '../../../services/miiverse-api.service';
 import { MiiverseComment } from '../../../models/miiverse.models';
 import { AuthStateService } from '../../../../core/auth/auth-state.service';
 import { Spoiler } from '../spoiler/spoiler';
+import { MiiAvatarPipe } from '../mii-avatar/mii-avatar.pipe';
 
 const MAX_LENGTH = 500;
 
@@ -16,7 +17,7 @@ const MAX_LENGTH = 500;
 @Component({
   selector: 'app-post-comments',
   standalone: true,
-  imports: [FormsModule, RouterLink, Spoiler],
+  imports: [FormsModule, RouterLink, Spoiler, MiiAvatarPipe],
   templateUrl: './post-comments.html',
   styleUrl: './post-comments.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

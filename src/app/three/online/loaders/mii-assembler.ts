@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { MiiAppearance } from './mii-appearance';
+import { drawFace } from './mii-face';
 
 /*
  * Arma un Mii a partir de piezas sueltas (cuerpo, ropa, cabeza, pelo, nariz).
@@ -10,12 +11,12 @@ import { MiiAppearance } from './mii-appearance';
  * - El cuerpo trae el esqueleto. La ropa usa los MISMOS nombres de huesos
  *   (Arm_1_L, Leg_1_L…), así que "re-enlazamos" cada prenda a los huesos del
  *   cuerpo y se mueve con él sin animarla aparte.
- * - Cabeza, pelo y nariz son mallas rígidas que cuelgan del hueso "Head".
+ * - Cabeza, pelo, nariz, barba y lentes son mallas rígidas que cuelgan del hueso "Head".
  * - Todas las piezas vienen en blanco y se tiñen con los colores de la apariencia.
+ * - La cara (ojos, cejas, boca…) se dibuja en un canvas (ver mii-face.ts).
  */
 
 const PARTS_PATH = 'models/mii-parts';
-const FACE_TEXTURE = `${PARTS_PATH}/faces/face-default.png`;
 const MANNEQUIN_FACE = `${PARTS_PATH}/mannequin/face.png`;
 const MANNEQUIN_COLOR = '#f4f1ea';
 
@@ -26,8 +27,14 @@ const HIDDEN_BY = {
   shoes: /^Body(Foot|Sole)__/,
 };
 
-/** Posición de la nariz sobre la cara (en el espacio de la cabeza). Ajustada a ojo. */
+/**
+ * Nariz y lentes vienen modelados en el origen y mirando hacia atrás:
+ * los colocamos sobre la cara (en el espacio de la cabeza). Ajustado a ojo.
+ */
 const NOSE_OFFSET = new THREE.Vector3(0, 0.3, 0.1);
+const GLASSES_OFFSET = new THREE.Vector3(0, 0.305, 0.3);
+/** Los lentes vienen más anchos que la cara: se reducen para que no sobresalgan al girar. */
+const GLASSES_SCALE = 0.8;
 
 const loader = new GLTFLoader();
 const textureLoader = new THREE.TextureLoader();
@@ -56,12 +63,37 @@ function getTexture(url: string): THREE.Texture {
 }
 
 /** La malla "Mask" de la cabeza lleva la cara (textura); el resto de la cabeza, el color de piel. */
-function paintHead(skin: string, faceUrl: string) {
+function paintHead(skin: string, face: THREE.Texture) {
   return (mesh: THREE.Mesh) => {
     if (!mesh.name.startsWith('Mask')) return skin;
-    mesh.material = new THREE.MeshStandardMaterial({ map: getTexture(faceUrl), transparent: true, roughness: 0.8 });
+    mesh.material = new THREE.MeshStandardMaterial({ map: face, transparent: true, roughness: 0.8 });
     return null;
   };
+}
+
+/** La línea de la nariz: una malla con una máscara; se pinta oscura donde la máscara es blanca. */
+function paintNose(skin: string, lineUrl: string) {
+  return (mesh: THREE.Mesh) => {
+    if (!mesh.name.startsWith('NoseLine')) return skin;
+    const alphaMap = getTexture(lineUrl);
+    mesh.material = new THREE.MeshBasicMaterial({ color: '#000000', alphaMap, transparent: true, opacity: 0.35, depthWrite: false });
+    return null;
+  };
+}
+
+/** Lentes: la montura ("Flame") lleva el color; los cristales son casi transparentes. */
+function paintGlasses(color: string) {
+  return (mesh: THREE.Mesh) => {
+    if (mesh.name.startsWith('Flame')) return color;
+    mesh.material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.15, depthWrite: false });
+    return null;
+  };
+}
+
+/** Tamaño del cuerpo según altura y peso (0..1). La cabeza no cambia de tamaño. */
+function bodyScale(height: number, weight: number) {
+  const w = 0.8 + 0.45 * weight;
+  return new THREE.Vector3(w, 0.85 + 0.3 * height, w);
 }
 
 /** Clona el cuerpo base y devuelve sus huesos por nombre. */
@@ -118,7 +150,7 @@ function dressWith(
  * Crea un grupo colgado del hueso Head cuyo origen coincide con el de los
  * archivos de cabeza/pelo/nariz (que están modelados con la cabeza en el origen).
  */
-function createHeadAnchor(model: THREE.Object3D, headBone: THREE.Bone): THREE.Group {
+function createHeadAnchor(model: THREE.Object3D, headBone: THREE.Bone, bodySize = new THREE.Vector3(1, 1, 1)): THREE.Group {
   model.updateMatrixWorld(true);
   const toModel = model.matrixWorld.clone().invert();
   const boneInModel = toModel.clone().multiply(headBone.matrixWorld);
@@ -127,9 +159,20 @@ function createHeadAnchor(model: THREE.Object3D, headBone: THREE.Bone): THREE.Gr
   const anchor = new THREE.Group();
   anchor.name = 'HeadAnchor';
   anchor.matrixAutoUpdate = false;
-  anchor.matrix.copy(boneInModel.invert()).multiply(new THREE.Matrix4().makeTranslation(headPosition));
+  // Deshace la escala del cuerpo (altura/peso) para que la cabeza mantenga su tamaño.
+  const undoBodySize = new THREE.Matrix4().makeScale(1 / bodySize.x, 1 / bodySize.y, 1 / bodySize.z);
+  anchor.matrix.copy(boneInModel.invert()).multiply(new THREE.Matrix4().makeTranslation(headPosition)).multiply(undoBodySize);
   headBone.add(anchor);
   return anchor;
+}
+
+/** Grupo colocado sobre la cara y girado hacia el frente (ver NOSE_OFFSET). */
+function onFace(anchor: THREE.Object3D, offset: THREE.Vector3): THREE.Group {
+  const group = new THREE.Group();
+  group.position.copy(offset);
+  group.rotation.y = Math.PI;
+  anchor.add(group);
+  return group;
 }
 
 function addRigid(source: THREE.Group, parent: THREE.Object3D, colorFor: (mesh: THREE.Mesh) => string | null) {
@@ -143,7 +186,8 @@ function addRigid(source: THREE.Group, parent: THREE.Object3D, colorFor: (mesh: 
 }
 
 export async function buildMii(appearance: MiiAppearance): Promise<THREE.Group> {
-  const [body, top, bottoms, shoes, head, hair, nose] = await Promise.all([
+  const optional = (category: string, id: string | null) => (id ? loadPart(category, id) : null);
+  const [body, top, bottoms, shoes, head, hair, nose, beard, glasses, faceCanvas] = await Promise.all([
     loadPart('body', 'body'),
     loadPart('tops', appearance.top),
     loadPart('bottoms', appearance.bottoms),
@@ -151,10 +195,15 @@ export async function buildMii(appearance: MiiAppearance): Promise<THREE.Group> 
     loadPart('heads', appearance.head),
     loadPart('hair', appearance.hair),
     loadPart('noses', appearance.nose),
+    optional('beards', appearance.beard),
+    optional('glasses', appearance.glasses),
+    drawFace(appearance),
   ]);
   const { colors } = appearance;
 
   const { model, bones: bodyBones } = cloneBody(body);
+  const size = bodyScale(appearance.height, appearance.weight);
+  model.scale.copy(size);
 
   const bodyMeshes = collectMeshes(model);
   const meshParent = bodyMeshes[0].parent!;
@@ -164,20 +213,19 @@ export async function buildMii(appearance: MiiAppearance): Promise<THREE.Group> 
     mesh.visible = !hidden.some((pattern) => pattern.test(mesh.name));
   }
 
-  dressWith(top, bodyBones, meshParent, colors.top);
+  dressWith(top, bodyBones, meshParent, colors.favorite);
   dressWith(bottoms, bodyBones, meshParent, colors.bottoms);
   dressWith(shoes, bodyBones, meshParent, colors.shoes);
 
-  const anchor = createHeadAnchor(model, bodyBones.get('Head')!);
-  addRigid(head, anchor, paintHead(colors.skin, FACE_TEXTURE));
+  const face = new THREE.CanvasTexture(faceCanvas);
+  face.colorSpace = THREE.SRGBColorSpace;
+
+  const anchor = createHeadAnchor(model, bodyBones.get('Head')!, size);
+  addRigid(head, anchor, paintHead(colors.skin, face));
   addRigid(hair, anchor, () => colors.hair);
-  const noseGroup = new THREE.Group();
-  noseGroup.position.copy(NOSE_OFFSET);
-  noseGroup.rotation.y = Math.PI; // la nariz viene modelada mirando hacia atrás
-  anchor.add(noseGroup);
-  addRigid(nose, noseGroup, (mesh) => (mesh.name.startsWith('NoseLine') ? null : colors.skin)).traverse((o) => {
-    if (o.name.startsWith('NoseLine')) o.visible = false;
-  });
+  if (beard) addRigid(beard, anchor, () => colors.hair);
+  if (glasses) addRigid(glasses, onFace(anchor, GLASSES_OFFSET), paintGlasses(colors.glasses)).scale.setScalar(GLASSES_SCALE);
+  addRigid(nose, onFace(anchor, NOSE_OFFSET), paintNose(colors.skin, `${PARTS_PATH}/noses/${appearance.nose}-line.png`));
 
   return model;
 }
@@ -190,6 +238,6 @@ export async function buildMannequin(): Promise<THREE.Group> {
   const [body, head] = await Promise.all([loadPart('body', 'body'), loadPart('mannequin', 'head')]);
   const { model, bones } = cloneBody(body);
   for (const mesh of collectMeshes(model)) tint(mesh, MANNEQUIN_COLOR);
-  addRigid(head, createHeadAnchor(model, bones.get('Head')!), paintHead(MANNEQUIN_COLOR, MANNEQUIN_FACE));
+  addRigid(head, createHeadAnchor(model, bones.get('Head')!), paintHead(MANNEQUIN_COLOR, getTexture(MANNEQUIN_FACE)));
   return model;
 }

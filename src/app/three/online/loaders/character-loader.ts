@@ -20,7 +20,7 @@ let cachedAnimations: THREE.AnimationClip[] | null = null;
  */
 export async function loadCharacter(appearance: MiiAppearance | null = null): Promise<LoadedCharacter> {
   const model = appearance ? await buildMii(appearance) : await buildMannequin();
-  model.scale.setScalar(MODEL_SCALE);
+  model.scale.multiplyScalar(MODEL_SCALE); // conserva la altura/peso del Mii
 
   cachedAnimations ??= createMiiAnimations(model);
   return { model, animations: cachedAnimations };

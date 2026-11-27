@@ -11,7 +11,19 @@ en archivos GLB que la app carga desde `public/models/mii-parts/`.
   Sin esto la ropa no encontraría los huesos del cuerpo.
 - Deja cada pieza con material blanco (la app la tiñe) y geometría indexada (pesa ~3 veces menos).
 - Cabeza, pelo y nariz se guardan como mallas rígidas (cuelgan del hueso `Head`).
-- Genera `faces/face-default.png` (ojos + boca) para la malla `Mask` de la cabeza.
+- Copia las texturas de la cara (`face/eyes`, `face/eyebrows`, `face/mouths`, `face/mustaches`, `face/moles`)
+  y la línea de cada nariz (`noses/<id>-line.png`). La app compone la cara en un canvas (`mii-face.ts`).
+
+## Miniaturas del editor
+
+Después de convertir, genera una foto por pieza para el menú "Mi Mii":
+
+```bash
+node tools/mii-parts/thumbnails.cjs
+```
+
+Usa el mismo código de la app (`buildMii`) y escribe `public/models/mii-parts/thumbs/<categoría>/<id>.webp`.
+Vuelve a ejecutarlo si cambias piezas, colores por defecto o la colocación de nariz/lentes.
 
 ## Uso
 

@@ -13,7 +13,7 @@
       <article class="mv-comment" [class.by-author]="comment.username === postAuthor()">
         <header class="mv-comment-header">
           <a [routerLink]="['/social/users', comment.username]" class="mv-comment-avatar-link">
-            <img class="mv-comment-avatar" [src]="comment.mii_avatar_url" [alt]="comment.username" />
+            <img class="mv-comment-avatar" [src]="comment.mii_avatar_url | miiAvatar" [alt]="comment.username" />
           </a>
           <div class="mv-comment-author">
             <a class="mv-comment-name" [routerLink]="['/social/users', comment.username]">{{ comment.username }}</a>

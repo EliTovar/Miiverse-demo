@@ -6,6 +6,7 @@ import { AuthStateService } from '../../../../core/auth/auth-state.service';
 import { backendUrl } from '../../../../core/config/api.config';
 import { CommunityIcon } from '../community-icon/community-icon';
 import { Spoiler } from '../spoiler/spoiler';
+import { MiiAvatarPipe } from '../mii-avatar/mii-avatar.pipe';
 
 /**
  * Un post de Miiverse tal y como se ve en las listas (Actividad, comunidad,
@@ -14,7 +15,7 @@ import { Spoiler } from '../spoiler/spoiler';
 @Component({
   selector: 'app-post-item',
   standalone: true,
-  imports: [RouterLink, CommunityIcon, Spoiler],
+  imports: [RouterLink, CommunityIcon, Spoiler, MiiAvatarPipe],
   templateUrl: './post-item.html',
   styleUrl: './post-item.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -24,9 +24,7 @@
     @for (user of users(); track user.username) {
       <li>
         <a [routerLink]="['/social/users', user.username]">
-          @if (user.avatar_url) {
-            <img class="mv-result-avatar" [src]="user.avatar_url" [alt]="" />
-          }
+          <img class="mv-result-avatar" [src]="user.avatar_url | miiAvatar" [alt]="" />
           <span class="mv-result-info">
             <span class="mv-result-name">{{ user.username }}</span>
             <span class="mv-result-meta">

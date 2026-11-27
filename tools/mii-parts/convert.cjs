@@ -12,7 +12,7 @@ const { chromium } = require('playwright');
 const ROOT = path.resolve(__dirname, '../..');
 const OUT = path.join(ROOT, 'public/models/mii-parts');
 const THREE_DIR = path.join(ROOT, 'node_modules/three');
-const RIGID = new Set(['heads', 'hair', 'noses']); // piezas que cuelgan del hueso Head
+const RIGID = new Set(['heads', 'hair', 'noses', 'beards', 'glasses']); // piezas que cuelgan del hueso Head
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.png': 'image/png', '.dae': 'model/vnd.collada+xml' };
 
 const [srcDir, mannequinDir] = process.argv.slice(2);
@@ -36,6 +36,29 @@ function serve() {
   return new Promise((ok) => server.listen(0, () => ok(server)));
 }
 
+/** Texturas de la cara (ojos, bocas, cejas…): se copian tal cual; la app las recolorea en un canvas. */
+function copyFaceTextures() {
+  for (const [type, prefix] of Object.entries(parts.face.textures)) {
+    const dir = path.join(srcDir, path.dirname(prefix));
+    const base = path.basename(prefix);
+    const files = fs.readdirSync(dir).filter((f) => new RegExp(`^${base}\\d+\\.png$`).test(f)).sort();
+    fs.mkdirSync(path.join(OUT, 'face', type), { recursive: true });
+    for (const file of files) {
+      const id = file.slice(base.length, -4); // "Eye012.png" -> "012"
+      fs.copyFileSync(path.join(dir, file), path.join(OUT, 'face', type, `${id}.png`));
+    }
+    console.log(`face/${type}: ${files.length} texturas`);
+  }
+}
+
+/** La línea de la nariz es una máscara (textura) aparte del modelo 3D. */
+function copyNoseLines() {
+  for (const [id, src] of Object.entries(parts.noses)) {
+    const mask = path.join(srcDir, src.replace(/\.dae$/, '_NoseLine_Msk.png'));
+    if (fs.existsSync(mask)) fs.copyFileSync(mask, path.join(OUT, 'noses', `${id}-line.png`));
+  }
+}
+
 (async () => {
   const server = await serve();
   const browser = await chromium.launch();
@@ -56,10 +79,8 @@ function serve() {
       }
     }
 
-    const face = await page.evaluate(([e, m]) => window.buildFace(e, m), [parts.face.eye, parts.face.mouth]);
-    fs.mkdirSync(path.join(OUT, 'faces'), { recursive: true });
-    fs.writeFileSync(path.join(OUT, 'faces/face-default.png'), Buffer.from(face, 'base64'));
-    console.log('faces/face-default.png');
+    copyFaceTextures();
+    copyNoseLines();
 
     // Maniquí: el Mii por defecto de quien todavía no ha creado el suyo.
     fs.mkdirSync(path.join(OUT, 'mannequin'), { recursive: true });

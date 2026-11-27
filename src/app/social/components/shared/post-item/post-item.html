@@ -2,7 +2,7 @@
 
   <header class="mv-post-header">
     <a class="mv-avatar-link" [routerLink]="['/social/users', post().username]">
-      <img class="mv-avatar" [src]="post().mii_avatar_url" [alt]="post().username" />
+      <img class="mv-avatar" [src]="post().mii_avatar_url | miiAvatar" [alt]="post().username" />
     </a>
 
     <div class="mv-post-author">

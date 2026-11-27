@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { MiiverseApiService } from '../../services/miiverse-api.service';
 import { MiiverseModerationItem, ModerationFilters } from '../../models/miiverse.models';
 import { backendUrl } from '../../../core/config/api.config';
+import { MiiAvatarPipe } from '../shared/mii-avatar/mii-avatar.pipe';
 
 const PAGE_SIZE = 30;
 
@@ -24,7 +25,7 @@ const EMPTY_FILTERS: ModerationFilters = {
 @Component({
   selector: 'app-moderation',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, MiiAvatarPipe],
   templateUrl: './moderation.html',
   styleUrl: './moderation.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
