@@ -1,0 +1,45 @@
+<div class="mii-editor">
+  <div class="mii-preview" #previewHost aria-label="Vista previa de tu Mii"></div>
+
+  <div class="mii-options">
+    <div class="mv-tabs" role="tablist">
+      @for (section of sections; track section.id) {
+        <button type="button" role="tab" [class.active]="activeId() === section.id"
+                [attr.aria-selected]="activeId() === section.id" (click)="activeId.set(section.id)">
+          {{ section.label }}
+        </button>
+      }
+    </div>
+
+    @for (group of active().parts; track group.key) {
+      <h3 class="mii-group-title">{{ group.title }}</h3>
+      <div class="mii-choices">
+        @for (id of group.options; track id) {
+          <button type="button" class="mii-choice" [class.selected]="appearance()[group.key] === id"
+                  [attr.aria-pressed]="appearance()[group.key] === id" (click)="choose(group.key, id)">
+            {{ label(group, id) }}
+          </button>
+        }
+      </div>
+    }
+
+    @for (color of active().colors; track color.key) {
+      <label class="mii-color">
+        <span>{{ color.label }}</span>
+        <input type="color" [value]="appearance().colors[color.key]" (input)="setColor(color.key, $event)" />
+      </label>
+    }
+
+    @if (loadError()) {
+      <p class="mii-error">No se pudo cargar o guardar el Mii. Recarga la página e inténtalo de nuevo.</p>
+    }
+
+    <div class="mii-actions">
+      <button type="button" class="mii-secondary" [disabled]="saved()" (click)="reset()">Deshacer cambios</button>
+      <button type="button" class="mii-primary" [disabled]="saved()" (click)="save()">
+        {{ saved() ? 'Guardado' : 'Guardar' }}
+      </button>
+    </div>
+    <p class="mii-hint">Tu Mii se usa al entrar al Mundo 3D. Por ahora se guarda solo en este navegador.</p>
+  </div>
+</div>

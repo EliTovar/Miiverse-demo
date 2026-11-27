@@ -12,6 +12,7 @@ import { UserProfile } from './components/user-profile/user-profile';
 import { Search } from './components/search/search';
 import { Moderation } from './components/moderation/moderation';
 import { AdminPanel } from './components/admin-panel/admin-panel';
+import { MiiEditor } from './components/mii-editor/mii-editor';
 
 export const SOCIAL_MEDIA_ROUTES: Routes = [
   {
@@ -21,6 +22,7 @@ export const SOCIAL_MEDIA_ROUTES: Routes = [
     children: [
       { path: '', component: MiiverseFeed, data: { title: 'Actividad', showPostButton: true } },
       { path: 'search', component: Search, data: { title: 'Buscar' } },
+      { path: 'mii', component: MiiEditor, canActivate: [AuthGuard], data: { title: 'Mi Mii', wide: true } },
       {
         path: 'panel',
         component: AdminPanel,

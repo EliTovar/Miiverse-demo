@@ -40,6 +40,13 @@
           <span>Comunidades</span>
         </a>
 
+        @if (!auth.isGuest()) {
+          <a class="mv-nav-item" routerLink="/social/mii" routerLinkActive="active">
+            <i class="pi pi-palette"></i>
+            <span>Mi Mii</span>
+          </a>
+        }
+
         @if (auth.role() === 'admin') {
           <a class="mv-nav-item" routerLink="/social/moderation" routerLinkActive="active">
             <i class="pi pi-shield"></i>

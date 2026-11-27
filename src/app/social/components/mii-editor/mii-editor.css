@@ -1,0 +1,86 @@
+/* Menú "Mi Mii". Colores de las variables --mv-* (styles.scss). */
+:host { display: block; }
+
+.mii-editor {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) 3fr;
+  gap: 16px;
+  padding: 16px 20px 20px;
+}
+
+.mii-preview {
+  min-height: 380px;
+  border: 1px solid var(--mv-border);
+  border-radius: 12px;
+  background: radial-gradient(circle at 50% 35%, #ffffff 0%, var(--mv-surface-soft) 70%);
+  overflow: hidden;
+}
+
+.mii-options { min-width: 0; }
+/* Las pestañas globales tienen margen lateral de página; aquí van dentro de la columna. */
+.mii-options .mv-tabs { margin: 0; overflow-x: auto; }
+.mii-options .mv-tabs button { flex: 1 0 auto; text-align: center; }
+
+.mii-group-title {
+  margin: 16px 0 8px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--mv-text-soft);
+}
+
+.mii-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.mii-choice {
+  padding: 8px 12px;
+  border: 2px solid var(--mv-border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--mv-text);
+  font: inherit;
+  font-size: 14px;
+  cursor: var(--mv-cursor-hand);
+}
+.mii-choice:hover { border-color: var(--mv-green-light); }
+.mii-choice.selected { border-color: var(--mv-green); background: var(--mv-green-pale); color: var(--mv-green-dark); font-weight: 800; }
+.mii-choice:focus-visible { outline: 3px solid var(--mv-green); outline-offset: 2px; }
+
+.mii-color {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  font-weight: 800;
+}
+.mii-color input {
+  width: 48px;
+  height: 36px;
+  padding: 2px;
+  border: 1px solid var(--mv-border);
+  border-radius: 8px;
+  background: #fff;
+  cursor: var(--mv-cursor-hand);
+}
+
+.mii-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+.mii-actions button {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 800;
+  cursor: var(--mv-cursor-hand);
+}
+.mii-actions button:disabled { opacity: 0.55; cursor: var(--mv-cursor-default); }
+.mii-primary {
+  border: 1px solid var(--mv-green-dark);
+  background: linear-gradient(180deg, var(--mv-green-light) 0%, var(--mv-green) 100%);
+  color: #fff;
+}
+.mii-secondary { border: 1px solid var(--mv-border); background: #fff; color: var(--mv-text); }
+
+.mii-hint { margin-top: 10px; font-size: 13px; color: var(--mv-text-soft); text-align: right; }
+.mii-error { margin-top: 12px; color: #c0392b; font-weight: 700; }
+
+@media (max-width: 720px) {
+  .mii-editor { grid-template-columns: 1fr; }
+  .mii-preview { min-height: 300px; }
+}

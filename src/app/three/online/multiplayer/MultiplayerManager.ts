@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { Socket } from 'socket.io-client';
 import { CharacterController, AnimationName } from '../characters/character-controller';
 import { loadCharacter } from '../loaders/character-loader';
+import { loadSavedAppearance } from '../loaders/mii-appearance-storage';
 import { InputGate } from '../characters/InputGate';
 
 type ClientMode = 'spectator' | 'player';
@@ -141,7 +142,8 @@ export class MultiplayerManager {
 
     console.log('🚀 Escena iniciada');
     try {
-      const { model, animations } = await loadCharacter();
+      // Tu Mii usa la apariencia guardada en el navegador (los demás jugadores aún ven el Mii por defecto).
+      const { model, animations } = await loadCharacter(loadSavedAppearance());
 
       // 1. Aplicar posición inicial persistente ANTES de dar de alta al jugador
       if (this.initialLocalPosition) {
