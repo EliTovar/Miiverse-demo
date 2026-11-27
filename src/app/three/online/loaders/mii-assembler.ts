@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
-import { MiiAppearance } from './mii-appearance';
+import { AdjustablePart, MiiAppearance, adjustment } from './mii-appearance';
 import { drawFace } from './mii-face';
 
 /*
@@ -166,10 +166,15 @@ function createHeadAnchor(model: THREE.Object3D, headBone: THREE.Bone, bodySize 
   return anchor;
 }
 
-/** Grupo colocado sobre la cara y girado hacia el frente (ver NOSE_OFFSET). */
-function onFace(anchor: THREE.Object3D, offset: THREE.Vector3): THREE.Group {
+/**
+ * Grupo colocado sobre la cara y girado hacia el frente (ver NOSE_OFFSET).
+ * Aplica los controles "subir/bajar" y "tamaño" del usuario (igual que en la cara dibujada).
+ */
+function onFace(anchor: THREE.Object3D, offset: THREE.Vector3, appearance: MiiAppearance, part: AdjustablePart, scale = 1): THREE.Group {
   const group = new THREE.Group();
   group.position.copy(offset);
+  group.position.y += (adjustment(appearance, part, 'y') - 0.5) * 0.16;
+  group.scale.setScalar(scale * (1 + (adjustment(appearance, part, 'scale') - 0.5) * 0.8));
   group.rotation.y = Math.PI;
   anchor.add(group);
   return group;
@@ -222,10 +227,11 @@ export async function buildMii(appearance: MiiAppearance): Promise<THREE.Group> 
 
   const anchor = createHeadAnchor(model, bodyBones.get('Head')!, size);
   addRigid(head, anchor, paintHead(colors.skin, face));
-  addRigid(hair, anchor, () => colors.hair);
+  const hairMesh = addRigid(hair, anchor, () => colors.hair);
+  if (appearance.hairFlip) hairMesh.scale.x = -1; // espejo
   if (beard) addRigid(beard, anchor, () => colors.hair);
-  if (glasses) addRigid(glasses, onFace(anchor, GLASSES_OFFSET), paintGlasses(colors.glasses)).scale.setScalar(GLASSES_SCALE);
-  addRigid(nose, onFace(anchor, NOSE_OFFSET), paintNose(colors.skin, `${PARTS_PATH}/noses/${appearance.nose}-line.png`));
+  if (glasses) addRigid(glasses, onFace(anchor, GLASSES_OFFSET, appearance, 'glasses', GLASSES_SCALE), paintGlasses(colors.glasses));
+  addRigid(nose, onFace(anchor, NOSE_OFFSET, appearance, 'nose'), paintNose(colors.skin, `${PARTS_PATH}/noses/${appearance.nose}-line.png`));
 
   return model;
 }

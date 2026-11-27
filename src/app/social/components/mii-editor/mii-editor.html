@@ -14,7 +14,10 @@
 }
 
 <div class="mii-editor" [hidden]="choosingBase()">
-  <div class="mii-preview" #previewHost aria-label="Vista previa de tu Mii"></div>
+  <div class="mii-preview" #previewHost aria-label="Vista previa de tu Mii">
+    <button type="button" class="mii-view-toggle" (click)="toggleView()"
+            [attr.aria-label]="is3d() ? 'Ver en 2D' : 'Ver en 3D'">{{ is3d() ? '2D' : '3D' }}</button>
+  </div>
 
   <nav class="mii-categories" aria-label="Categorías">
     @for (category of categories; track category.id) {
@@ -33,6 +36,13 @@
       <button type="button" class="mii-toggle" [class.on]="appearance().mole" [attr.aria-pressed]="appearance().mole"
               (click)="toggleMole()">
         Lunar: {{ appearance().mole ? 'sí' : 'no' }}
+      </button>
+    }
+
+    @if (active().extra === 'hairFlip') {
+      <button type="button" class="mii-toggle" [class.on]="appearance().hairFlip" [attr.aria-pressed]="appearance().hairFlip"
+              (click)="toggleHairFlip()">
+        Voltear peinado: {{ appearance().hairFlip ? 'sí' : 'no' }}
       </button>
     }
 
@@ -68,6 +78,23 @@
           </button>
         }
       </div>
+    }
+
+    @for (adjust of active().adjust ?? []; track adjust.part) {
+      <div class="mii-group-header">
+        <h4 class="mii-group-title">{{ adjust.title }}</h4>
+        <button type="button" class="mii-link" (click)="resetAdjust(adjust.part)">Restablecer</button>
+      </div>
+      @for (slider of slidersOf(adjust.part); track slider) {
+        <label class="mii-adjust">
+          <span class="mii-adjust-name">{{ sliderLabels[slider][1] }}</span>
+          <span class="mii-adjust-end" aria-hidden="true">{{ sliderLabels[slider][0] }}</span>
+          <input type="range" min="0" max="1" step="0.02" [value]="adjustValue(adjust.part, slider)"
+                 [attr.aria-label]="adjust.title + ': ' + sliderLabels[slider][1]"
+                 (input)="setAdjust(adjust.part, slider, $event)" />
+          <span class="mii-adjust-end" aria-hidden="true">{{ sliderLabels[slider][2] }}</span>
+        </label>
+      }
     }
 
     @for (color of active().colors; track color.field) {

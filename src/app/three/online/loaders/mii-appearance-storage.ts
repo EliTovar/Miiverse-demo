@@ -1,4 +1,4 @@
-import { DEFAULT_APPEARANCE, MII_CATALOG, MiiAppearance, MiiColors } from './mii-appearance';
+import { ADJUSTABLE, AdjustablePart, Adjustments, DEFAULT_APPEARANCE, MII_CATALOG, MiiAppearance, MiiColors } from './mii-appearance';
 
 /*
  * Guarda la apariencia del Mii en el navegador (localStorage).
@@ -24,6 +24,19 @@ function pickNumber(value: unknown, fallback: number): number {
   return typeof value === 'number' && value >= 0 && value <= 1 ? value : fallback;
 }
 
+/** Solo guarda los controles de posición que existen y con valores entre 0 y 1. */
+function pickAdjustments(value: unknown): Adjustments {
+  const saved = (value ?? {}) as Record<string, Record<string, unknown> | undefined>;
+  const adjust: Adjustments = {};
+  for (const [part, sliders] of Object.entries(ADJUSTABLE) as [AdjustablePart, readonly string[]][]) {
+    for (const slider of sliders) {
+      const v = saved[part]?.[slider];
+      if (typeof v === 'number' && v >= 0 && v <= 1) adjust[part] = { ...adjust[part], [slider]: v };
+    }
+  }
+  return adjust;
+}
+
 function pickColors(value: unknown): MiiColors {
   const saved = (value ?? {}) as Partial<Record<keyof MiiColors, unknown>>;
   const colors = { ...DEFAULT_APPEARANCE.colors };
@@ -42,6 +55,7 @@ function sanitize(raw: unknown): MiiAppearance {
   return {
     head: pick(data.head, c.heads, d.head),
     hair: pick(data.hair, c.hair, d.hair),
+    hairFlip: data.hairFlip === true,
     eyebrows: pick(data.eyebrows, c.eyebrows, d.eyebrows),
     eyes: pick(data.eyes, c.eyes, d.eyes),
     nose: pick(data.nose, c.noses, d.nose),
@@ -56,6 +70,7 @@ function sanitize(raw: unknown): MiiAppearance {
     bottoms: pick(data.bottoms, c.bottoms, d.bottoms),
     shoes: pick(data.shoes, c.shoes, d.shoes),
     colors: pickColors(data.colors),
+    adjust: pickAdjustments(data.adjust),
   };
 }
 

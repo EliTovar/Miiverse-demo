@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, ElementRef, NgZone, OnDestroy, AfterViewInit, ViewChild, computed, inject, signal } from '@angular/core';
-import { BASE_MIIS, MiiAppearance, MiiColors } from '../../../three/online/loaders/mii-appearance';
+import { ADJUSTABLE, AdjustablePart, BASE_MIIS, MiiAppearance, MiiColors, Slider, adjustment } from '../../../three/online/loaders/mii-appearance';
 import { loadSavedAppearance, saveAppearance } from '../../../three/online/loaders/mii-appearance-storage';
 import { facePartThumbnail } from '../../../three/online/loaders/mii-face';
-import { CATEGORIES, Category, OptionGroup, PartField } from './mii-editor-config';
+import { CATEGORIES, Category, OptionGroup, PartField, SLIDER_LABELS } from './mii-editor-config';
 import { MiiPreview } from './mii-preview';
 
 const THUMBS_PATH = 'models/mii-parts/thumbs';
@@ -28,6 +28,8 @@ export class MiiEditor implements AfterViewInit, OnDestroy {
   @ViewChild('previewHost', { static: true }) previewHost!: ElementRef<HTMLDivElement>;
 
   readonly categories = CATEGORIES;
+  readonly sliderLabels = SLIDER_LABELS;
+  readonly slidersOf = (part: AdjustablePart): readonly Slider[] => ADJUSTABLE[part];
   readonly baseMiis = BASE_MIIS.map((_, i) => `${THUMBS_PATH}/base/${i}.webp`);
 
   /** Sin Mii guardado se empieza eligiendo un Mii base. */
@@ -36,6 +38,8 @@ export class MiiEditor implements AfterViewInit, OnDestroy {
   activeId = signal(CATEGORIES[0].id);
   active = computed(() => CATEGORIES.find((c) => c.id === this.activeId())!);
   saved = signal(this.savedAppearance !== null);
+  /** Vista previa en 3D (gira un poco) o en 2D (de frente y quieta, como una foto). */
+  is3d = signal(true);
   loadError = signal(false);
   /** Miniaturas de ojos, cejas, bocas y bigotes (se dibujan con el color actual). */
   private faceThumbs = signal<Record<string, string>>({}); // "eyes/004" → data URL
@@ -87,6 +91,31 @@ export class MiiEditor implements AfterViewInit, OnDestroy {
 
   setBody(field: 'height' | 'weight', event: Event) {
     this.update({ ...this.appearance(), [field]: Number((event.target as HTMLInputElement).value) });
+  }
+
+  toggleView() {
+    this.is3d.update((value) => !value);
+    this.preview?.setMode(this.is3d() ? '3d' : '2d');
+  }
+
+  adjustValue(part: AdjustablePart, slider: Slider): number {
+    return adjustment(this.appearance(), part, slider);
+  }
+
+  setAdjust(part: AdjustablePart, slider: Slider, event: Event) {
+    const value = Number((event.target as HTMLInputElement).value);
+    const current = this.appearance();
+    this.update({ ...current, adjust: { ...current.adjust, [part]: { ...current.adjust[part], [slider]: value } } });
+  }
+
+  /** Vuelve los controles de esa parte a su posición original. */
+  resetAdjust(part: AdjustablePart) {
+    const { [part]: _removed, ...rest } = this.appearance().adjust;
+    this.update({ ...this.appearance(), adjust: rest });
+  }
+
+  toggleHairFlip() {
+    this.update({ ...this.appearance(), hairFlip: !this.appearance().hairFlip });
   }
 
   toggleMole() {

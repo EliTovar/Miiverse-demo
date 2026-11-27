@@ -1,4 +1,4 @@
-import { MII_CATALOG, MiiColors } from '../../../three/online/loaders/mii-appearance';
+import { AdjustablePart, MII_CATALOG, MiiColors, Slider } from '../../../three/online/loaders/mii-appearance';
 import { FacePartType } from '../../../three/online/loaders/mii-face';
 
 /*
@@ -36,9 +36,21 @@ export interface Category {
   view: 'face' | 'body';
   groups: OptionGroup[];
   colors: ColorGroup[];
-  /** Controles especiales: interruptor del lunar o deslizadores de altura/peso. */
-  extra?: 'mole' | 'body';
+  /** Controles especiales: interruptores (lunar, voltear peinado) o altura/peso. */
+  extra?: 'mole' | 'body' | 'hairFlip';
+  /** Partes con deslizadores de posición (subir, separar, girar, tamaño…). */
+  adjust?: { part: AdjustablePart; title: string }[];
 }
+
+/** Texto de cada deslizador: [lado izquierdo, nombre, lado derecho]. */
+export const SLIDER_LABELS: Record<Slider, [string, string, string]> = {
+  y: ['Abajo', 'Altura', 'Arriba'],
+  x: ['Izquierda', 'Lado', 'Derecha'],
+  spacing: ['Juntar', 'Separación', 'Separar'],
+  rotate: ['↺', 'Giro', '↻'],
+  scale: ['Pequeño', 'Tamaño', 'Grande'],
+  stretch: ['Aplastar', 'Forma', 'Estirar'],
+};
 
 /** Convierte un color HSL (grados, %, %) a "#rrggbb". */
 function hsl(h: number, s: number, l: number): string {
@@ -70,36 +82,42 @@ const model = (folder: string): ThumbSource => ({ kind: 'model', folder });
 export const CATEGORIES: Category[] = [
   {
     id: 'face', label: 'Cara', icon: 'pi pi-user', view: 'face', extra: 'mole',
+    adjust: [{ part: 'mole', title: 'Posición del lunar' }],
     groups: [{ field: 'head', title: 'Forma de la cara', options: C.heads, thumbs: model('heads') }],
     colors: [{ field: 'skin', title: 'Color de piel', palette: SKIN_TONES }],
   },
   {
-    id: 'hair', label: 'Peinado', icon: 'pi pi-star', view: 'face',
+    id: 'hair', label: 'Peinado', icon: 'pi pi-star', view: 'face', extra: 'hairFlip',
     groups: [{ field: 'hair', title: 'Peinado', options: C.hair, thumbs: model('hair') }],
     colors: [{ field: 'hair', title: 'Color de pelo', palette: PALETTE }],
   },
   {
     id: 'eyebrows', label: 'Cejas', icon: 'pi pi-minus', view: 'face',
+    adjust: [{ part: 'eyebrows', title: 'Posición' }],
     groups: [{ field: 'eyebrows', title: 'Cejas', options: C.eyebrows, thumbs: { kind: 'face', type: 'eyebrows', color: 'hair' } }],
     colors: [{ field: 'hair', title: 'Color (igual que el pelo)', palette: PALETTE }],
   },
   {
     id: 'eyes', label: 'Ojos', icon: 'pi pi-eye', view: 'face',
+    adjust: [{ part: 'eyes', title: 'Posición' }],
     groups: [{ field: 'eyes', title: 'Ojos', options: C.eyes, thumbs: { kind: 'face', type: 'eyes', color: 'eyes' } }],
     colors: [{ field: 'eyes', title: 'Color de ojos', palette: PALETTE }],
   },
   {
     id: 'nose', label: 'Nariz', icon: 'pi pi-angle-down', view: 'face',
+    adjust: [{ part: 'nose', title: 'Posición' }],
     groups: [{ field: 'nose', title: 'Nariz', options: C.noses, thumbs: model('noses') }],
     colors: [],
   },
   {
     id: 'mouth', label: 'Boca', icon: 'pi pi-face-smile', view: 'face',
+    adjust: [{ part: 'mouth', title: 'Posición' }],
     groups: [{ field: 'mouth', title: 'Boca', options: C.mouths, thumbs: { kind: 'face', type: 'mouths', color: 'mouth' } }],
     colors: [{ field: 'mouth', title: 'Color de labios', palette: PALETTE }],
   },
   {
     id: 'facial-hair', label: 'Vello facial', icon: 'pi pi-sparkles', view: 'face',
+    adjust: [{ part: 'mustache', title: 'Posición del bigote' }],
     groups: [
       { field: 'mustache', title: 'Bigote', options: C.mustaches, optional: true, thumbs: { kind: 'face', type: 'mustaches', color: 'hair' } },
       { field: 'beard', title: 'Barba', options: C.beards, optional: true, thumbs: model('beards') },
@@ -108,6 +126,7 @@ export const CATEGORIES: Category[] = [
   },
   {
     id: 'glasses', label: 'Lentes', icon: 'pi pi-circle', view: 'face',
+    adjust: [{ part: 'glasses', title: 'Posición' }],
     groups: [{ field: 'glasses', title: 'Lentes', options: C.glasses, optional: true, thumbs: model('glasses') }],
     colors: [{ field: 'glasses', title: 'Color de la montura', palette: PALETTE }],
   },

@@ -8,7 +8,7 @@
  * Ojos, cejas y bigote vienen solo de un lado: el otro lado es su reflejo.
  */
 
-import { MiiAppearance } from './mii-appearance';
+import { AdjustablePart, MiiAppearance, adjustment } from './mii-appearance';
 
 const FACE_PATH = 'models/mii-parts/face';
 const SIZE = 512; // la textura de la cara es de 512×512
@@ -16,7 +16,7 @@ const SIZE = 512; // la textura de la cara es de 512×512
 /** Dónde va cada parte (en fracciones del canvas) y su tamaño. Ajustado a ojo sobre la malla "Mask". */
 const LAYOUT = {
   eyes: { x: 0.36, y: 0.5, scale: 0.55 },
-  eyebrows: { x: 0.64, y: 0.4, scale: 0.7 }, // la textura es la ceja del lado derecho de la imagen
+  eyebrows: { x: 0.64, y: 0.4, scale: 0.55 }, // la textura es la ceja del lado derecho de la imagen
   mouth: { x: 0.5, y: 0.71, scale: 0.55 },
   mustache: { y: 0.665, scale: 0.35 },
   mole: { x: 0.64, y: 0.66, scale: 0.15 },
@@ -77,16 +77,43 @@ function transform(image: HTMLImageElement, pixel: (d: Uint8ClampedArray, i: num
   return canvas;
 }
 
-/** Dibuja una pieza centrada en (x, y) y, si `mirror`, también su reflejo al otro lado de la cara. */
-function drawPair(ctx: CanvasRenderingContext2D, part: HTMLCanvasElement, x: number, y: number, scale: number, mirror: boolean) {
-  const w = part.width * scale;
-  const h = part.height * scale;
-  ctx.drawImage(part, SIZE * x - w / 2, SIZE * y - h / 2, w, h);
-  if (!mirror) return;
-  ctx.save();
-  ctx.scale(-1, 1);
-  ctx.drawImage(part, -(SIZE * (1 - x) + w / 2), SIZE * y - h / 2, w, h);
-  ctx.restore();
+/** Posición final de una pieza: la de LAYOUT más lo que el usuario movió con los controles. */
+interface Placement {
+  x: number;
+  y: number;
+  rotate: number; // radianes
+  scaleX: number;
+  scaleY: number;
+}
+
+/** Convierte los controles (0..1, 0.5 = sin cambio) en posición, giro y tamaño. */
+function place(face: MiiAppearance, part: AdjustablePart, base: { x: number; y: number; scale: number }): Placement {
+  const v = (slider: Parameters<typeof adjustment>[2]) => adjustment(face, part, slider) - 0.5; // -0.5..0.5
+  const side = Math.sign(base.x - 0.5); // las piezas en pareja se separan hacia su lado
+  const scale = base.scale * (1 + v('scale') * 0.8);
+  return {
+    x: base.x + side * v('spacing') * 0.12 + v('x') * 0.4,
+    y: base.y - v('y') * 0.16, // en el canvas, "arriba" es y menor
+    rotate: v('rotate') * 0.8 * (side || 1),
+    scaleX: scale,
+    scaleY: scale * (1 + v('stretch') * 0.8),
+  };
+}
+
+/** Dibuja una pieza en su posición y, si `mirror`, también su reflejo al otro lado de la cara. */
+function drawPart(ctx: CanvasRenderingContext2D, part: HTMLCanvasElement, p: Placement, mirror: boolean) {
+  const draw = (x: number, flip: boolean) => {
+    ctx.save();
+    ctx.translate(SIZE * x, SIZE * p.y);
+    if (flip) ctx.scale(-1, 1);
+    ctx.rotate(p.rotate);
+    const w = part.width * p.scaleX;
+    const h = part.height * p.scaleY;
+    ctx.drawImage(part, -w / 2, -h / 2, w, h);
+    ctx.restore();
+  };
+  draw(p.x, false);
+  if (mirror) draw(1 - p.x, true);
 }
 
 /** Recolorea una textura de ojos o de boca. */
@@ -115,17 +142,17 @@ export async function drawFace(face: MiiAppearance): Promise<HTMLCanvasElement> 
   canvas.width = canvas.height = SIZE;
   const ctx = canvas.getContext('2d')!;
 
-  const { eyes: e, eyebrows: b, mouth: m, mustache: s, mole: o } = LAYOUT;
-  drawPair(ctx, recolorMask(eyebrows, colors.hair), b.x, b.y, b.scale, true);
-  drawPair(ctx, paintEyes(eyes, colors.eyes), e.x, e.y, e.scale, true);
-  drawPair(ctx, paintMouth(mouth, colors.mouth), m.x, m.y, m.scale, false);
+  drawPart(ctx, recolorMask(eyebrows, colors.hair), place(face, 'eyebrows', LAYOUT.eyebrows), true);
+  drawPart(ctx, paintEyes(eyes, colors.eyes), place(face, 'eyes', LAYOUT.eyes), true);
+  drawPart(ctx, paintMouth(mouth, colors.mouth), place(face, 'mouth', LAYOUT.mouth), false);
   if (mustache) {
     // El bigote es la mitad izquierda: su borde derecho va en el centro de la cara.
     const half = recolorMask(mustache, colors.hair);
-    const x = 0.5 - (half.width * s.scale) / SIZE / 2;
-    drawPair(ctx, half, x, s.y, s.scale, true);
+    const p = place(face, 'mustache', { x: 0.5, ...LAYOUT.mustache });
+    p.x = 0.5 - (half.width * p.scaleX) / SIZE / 2;
+    drawPart(ctx, half, p, true);
   }
-  if (mole) drawPair(ctx, recolorMask(mole, '#3a2a22'), o.x, o.y, o.scale, false);
+  if (mole) drawPart(ctx, recolorMask(mole, '#3a2a22'), place(face, 'mole', LAYOUT.mole), false);
   return canvas;
 }
 

@@ -45,6 +45,24 @@
   overflow: hidden;
 }
 
+/* Botón 2D / 3D en la esquina de la vista previa. */
+.mii-view-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  min-width: 48px;
+  padding: 6px 12px;
+  border: 1px solid var(--mv-border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--mv-text);
+  font: inherit;
+  font-weight: 800;
+  cursor: var(--mv-cursor-hand);
+}
+.mii-view-toggle:focus-visible { outline: 3px solid var(--mv-green); outline-offset: 2px; }
+
 /* Lista de categorías (como la columna del editor de Switch). */
 .mii-categories { grid-area: categories; display: flex; flex-direction: column; gap: 6px; }
 .mii-categories button {
@@ -69,6 +87,21 @@
 .mii-panel { grid-area: panel; min-width: 0; max-height: 560px; overflow-y: auto; padding-right: 4px; }
 .mii-panel-title { margin: 4px 0 8px; font-size: 18px; font-weight: 800; }
 .mii-group-title { margin: 14px 0 8px; font-size: 14px; font-weight: 800; color: var(--mv-text-soft); }
+
+/* Deslizadores de posición: nombre, extremo izquierdo, barra, extremo derecho. */
+.mii-group-header { display: flex; align-items: baseline; justify-content: space-between; }
+.mii-link { border: 0; background: none; color: var(--mv-green-dark); font: inherit; font-size: 13px; font-weight: 700; cursor: var(--mv-cursor-hand); }
+.mii-adjust {
+  display: grid;
+  grid-template-columns: 90px 70px 1fr 70px;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  font-size: 13px;
+}
+.mii-adjust-name { font-weight: 800; }
+.mii-adjust-end { color: var(--mv-text-soft); text-align: center; }
+.mii-adjust input { width: 100%; accent-color: var(--mv-green); }
 
 /* Cuadrícula de opciones con miniatura. */
 .mii-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; }
@@ -150,4 +183,5 @@
   .mii-preview { min-height: 300px; }
   .mii-panel { max-height: none; }
   .mii-hint { width: 100%; }
+  .mii-adjust { grid-template-columns: 70px 52px 1fr 52px; font-size: 12px; }
 }
