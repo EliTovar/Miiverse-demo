@@ -117,7 +117,7 @@
           <p class="mv-detail-text">{{ item.content_text }}</p>
         }
         @if (item.drawing_url) {
-          <img class="mv-detail-image" [src]="item.drawing_url" alt="Dibujo de {{ item.username }}" />
+          <img class="mv-detail-image" [src]="backendUrl(item.drawing_url)" alt="Dibujo de {{ item.username }}" />
         }
         @if (item.screenshot_url) {
           <img class="mv-detail-image" [src]="item.screenshot_url" alt="Captura de {{ item.username }}" />

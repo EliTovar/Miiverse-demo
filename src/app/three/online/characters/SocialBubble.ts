@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { backendUrl } from '../../../core/config/api.config';
 
 export class SocialBubble {
   public mesh: THREE.Group;
@@ -45,7 +46,8 @@ export class SocialBubble {
     // 🧹 Limpiar timer anterior si existe
     if (this.timer) clearTimeout(this.timer);
 
-    this.loader.load(url, (texture) => {
+    // El dibujo llega como ruta del backend (/miiverse/posts/:id/drawing).
+    this.loader.load(backendUrl(url) ?? url, (texture) => {
       texture.colorSpace = THREE.SRGBColorSpace;
       this.material.map = texture;
       this.material.opacity = 1;

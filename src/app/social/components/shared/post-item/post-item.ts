@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { MiiverseApiService } from '../../../services/miiverse-api.service';
 import { MiiversePost } from '../../../models/miiverse.models';
 import { AuthStateService } from '../../../../core/auth/auth-state.service';
+import { backendUrl } from '../../../../core/config/api.config';
 import { CommunityIcon } from '../community-icon/community-icon';
 import { Spoiler } from '../spoiler/spoiler';
 
@@ -25,6 +26,9 @@ export class PostItem implements OnInit {
   post = input.required<MiiversePost>();
   /** En la página del post se muestra la fecha completa y no se enlaza a sí mismo. */
   detail = input(false);
+
+  /** El backend manda la ruta del dibujo; aquí se completa con su dirección. */
+  protected readonly backendUrl = backendUrl;
 
   /** Contador local: se actualiza con la respuesta del backend al dar Yeah. */
   yeahs = signal(0);

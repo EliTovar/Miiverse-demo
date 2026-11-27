@@ -1,4 +1,4 @@
-import { API_CONFIG } from '../../../../core/config/api.config';
+import { API_CONFIG, backendUrl } from '../../../../core/config/api.config';
 import { SteamGame } from './SteamService.service';
 
 /** Un jugador del ranking semanal, tal como lo devuelve el backend. */
@@ -35,7 +35,7 @@ export class TopPlayersService {
             author: `${player.yeahs} Yeah${player.yeahs === 1 ? '' : 's'} esta semana`,
             // Su dibujo más votado de la semana; si no tiene, su avatar (vía el
             // proxy del backend, igual que las demás imágenes de los billboards).
-            image: player.top_drawing_url
+            image: backendUrl(player.top_drawing_url)
                 ?? `${API_CONFIG.BASE_URL}/games/proxy?url=${encodeURIComponent(player.avatar_url ?? '')}`,
         }));
     }

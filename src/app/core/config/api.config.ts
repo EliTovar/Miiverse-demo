@@ -9,3 +9,13 @@ export const API_CONFIG = {
   SOCKET_URL: API_HOST,
   MIIVERSE_URL: `${API_HOST}/miiverse`,
 };
+
+/**
+ * Completa las rutas que manda el backend (por ejemplo el dibujo de un post,
+ * `/miiverse/posts/7/drawing`) con su dirección. Las data URL y las URL
+ * completas se devuelven tal cual.
+ */
+export function backendUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  return url.startsWith('/') ? API_HOST + url : url;
+}

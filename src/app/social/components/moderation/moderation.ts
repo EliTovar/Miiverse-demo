@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { MiiverseApiService } from '../../services/miiverse-api.service';
 import { MiiverseModerationItem, ModerationFilters } from '../../models/miiverse.models';
+import { backendUrl } from '../../../core/config/api.config';
 
 const PAGE_SIZE = 30;
 
@@ -30,6 +31,9 @@ const EMPTY_FILTERS: ModerationFilters = {
 })
 export class Moderation implements OnInit {
   private api = inject(MiiverseApiService);
+
+  /** El backend manda la ruta del dibujo; aquí se completa con su dirección. */
+  protected readonly backendUrl = backendUrl;
 
   readonly hours = Array.from({ length: 24 }, (_, h) => h);
   /** Zona horaria en la que se interpretan día, mes y hora. */

@@ -31,7 +31,7 @@
 
     @if (post().drawing_url) {
       <div class="mv-post-image">
-        <img [src]="post().drawing_url" alt="Dibujo de {{ post().username }}" loading="lazy" />
+        <img [src]="backendUrl(post().drawing_url)" alt="Dibujo de {{ post().username }}" loading="lazy" />
       </div>
     }
 
