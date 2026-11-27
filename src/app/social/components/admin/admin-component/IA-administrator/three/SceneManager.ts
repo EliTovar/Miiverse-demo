@@ -57,13 +57,23 @@ export class SceneManager {
     this.labels = new LabelManager(this.scene, container);
     this.labels.showLabel(this.cube.mesh, "🧠 NeuroSama inicializando...");
 
-    window.addEventListener('resize', () => this.onWindowResize(container));
-
     // Reloj
     this.clock = new THREE.Clock();
 
-    // Responsividad
-    window.addEventListener('resize', () => this.onWindowResize(container));
+    // Responsividad (antes se añadía dos veces y nunca se quitaba)
+    this.onResize = () => this.onWindowResize(container);
+    window.addEventListener('resize', this.onResize);
+  }
+
+  private readonly onResize: () => void;
+
+  /** Libera el contexto WebGL, el canvas y los listeners al salir de la página. */
+  dispose() {
+    window.removeEventListener('resize', this.onResize);
+    this.labels.dispose();
+    this.renderer.dispose();
+    this.renderer.forceContextLoss();
+    this.renderer.domElement.remove();
   }
   
 

@@ -128,6 +128,7 @@ function billboardConfigs(): BillboardConfig[] {
 export class WorldBillboards {
   private readonly managers: SteamBillboardManager[];
   private readonly occlusionRaycaster = new THREE.Raycaster();
+  private readonly direction = new THREE.Vector3();
 
   constructor(
     scene: THREE.Scene,
@@ -162,7 +163,8 @@ export class WorldBillboards {
 
     // 2. Detectar oclusión para cada jugador
     players.forEach((player) => {
-      const direction = player.position.clone().sub(camPos).normalize();
+      // Vector reutilizado: crear uno nuevo por jugador y fotograma solo da trabajo al recolector de basura.
+      const direction = this.direction.subVectors(player.position, camPos).normalize();
       const distanceToPlayer = player.position.distanceTo(camPos);
 
       this.occlusionRaycaster.set(camPos, direction);

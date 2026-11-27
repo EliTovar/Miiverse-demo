@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy, effect } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy, NgZone, effect } from '@angular/core';
 import * as THREE from 'three';
 import { Subscription } from 'rxjs';
 
@@ -36,7 +36,11 @@ export class MainScenario implements AfterViewInit, OnDestroy {
   private billboards?: WorldBillboards;
   private floorManager?: FloorManager;
   private debugHud?: DebugHud;
+  private resizeManager?: ResizeManager;
+  private orbitControls?: OrbitControlManager;
   private postCreatedSub?: Subscription;
+  /** true en cuanto Angular destruye el componente; las tareas asíncronas lo miran antes de crear nada. */
+  private destroyed = false;
 
   private unsubscribeMultiplayerLoop: (() => void) | null = null;
 
@@ -75,6 +79,8 @@ export class MainScenario implements AfterViewInit, OnDestroy {
 
     // 🔥 ESPERAR SOCKET
     await this.waitForSocketConnection();
+    // Si se salió de la plaza mientras se esperaba el socket, no crear nada.
+    if (this.destroyed) return;
 
     this.multiplayer = new MultiplayerManager(
       this.socketService.getSocket(),
@@ -84,6 +90,11 @@ export class MainScenario implements AfterViewInit, OnDestroy {
 
     if (!this.auth.isGuest()) {
       await this.multiplayer.spawnLocalPlayer();
+      // Se salió de la plaza mientras cargaba el personaje: quitar su teclado y su malla.
+      if (this.destroyed) {
+        this.multiplayer.disposeLocalPlayer();
+        return;
+      }
     }
 
     this.unsubscribeMultiplayerLoop =
@@ -97,7 +108,8 @@ export class MainScenario implements AfterViewInit, OnDestroy {
   constructor(
     private socketService: SocketService,
     private auth: AuthStateService,
-    private composerService: ComposerService
+    private composerService: ComposerService,
+    private ngZone: NgZone
   ) {
     effect(() => {
       const role = this.auth.role();
@@ -107,20 +119,32 @@ export class MainScenario implements AfterViewInit, OnDestroy {
 
       console.log('🔁 Role changed →', role);
 
-      this.multiplayer.setMode(mode);
+      // Fuera de Angular por lo mismo que la escena (ver ngAfterViewInit):
+      // el personaje añade listeners de teclado que no tocan ninguna plantilla.
+      this.ngZone.runOutsideAngular(() => {
+        this.multiplayer?.setMode(mode);
 
-      if (mode === 'player') {
-        this.multiplayer.spawnLocalPlayer();
-      } else {
-        this.multiplayer.disposeLocalPlayer();
-      }
+        if (mode === 'player') {
+          this.multiplayer?.spawnLocalPlayer();
+        } else {
+          this.multiplayer?.disposeLocalPlayer();
+        }
+      });
     });
   }
 
   @ViewChild('canvasContainer', { static: true })
   container!: ElementRef<HTMLDivElement>;
 
-  async ngAfterViewInit(): Promise<void> {
+  ngAfterViewInit(): void {
+    // La escena entera vive FUERA de la zona de Angular. Angular (zone.js) revisa
+    // todos los componentes tras cada requestAnimationFrame, setInterval o evento;
+    // el bucle 3D corre 60 veces por segundo y no cambia ninguna plantilla, así
+    // que dentro de la zona Angular trabajaría en cada fotograma para nada.
+    this.ngZone.runOutsideAngular(() => this.initScene());
+  }
+
+  private initScene(): void {
     const width = this.container.nativeElement.clientWidth;
     const height = this.container.nativeElement.clientHeight;
 
@@ -167,6 +191,7 @@ export class MainScenario implements AfterViewInit, OnDestroy {
       this.cameraManager.camera,
       this.rendererManager.renderer
     );
+    this.orbitControls = orbitControls;
 
     // -------------------------------------------------------------------------
     // 🔧 PUNTO DE ENFOQUE INICIAL (Donde mira la cámara al empezar)
@@ -182,14 +207,11 @@ export class MainScenario implements AfterViewInit, OnDestroy {
     this.debugHud = debugHud;
     this.loopManager.addUpdateCallback(() => debugHud.update());
 
-    new ResizeManager(
+    this.resizeManager = new ResizeManager(
       this.container.nativeElement,
       this.cameraManager.camera,
       this.rendererManager.renderer
     );
-
-    // 🔥 Crear multiplayer inicial una vez que la escena ya existe
-    await this.setupMultiplayer();
 
     // 🎨 CONEXIÓN COMPOSER -> 3D BUBBLE
     this.postCreatedSub = this.composerService.postCreated.subscribe((post) => {
@@ -208,13 +230,20 @@ export class MainScenario implements AfterViewInit, OnDestroy {
        START LOOP
     ========================= */
 
+    // Se empieza a dibujar ya: la plaza no espera al socket (hasta 3 s) ni a la
+    // descarga del personaje. El multijugador y los datos de los carteles van
+    // llegando después, sin bloquear.
     this.loopManager.start();
     /* =========================
        CARTELES (Steam, Discord, Spotify, AniList, Pixiv, Top Players)
     ========================= */
     const billboards = new WorldBillboards(this.sceneManager.scene, this.cameraManager.camera);
     this.billboards = billboards;
-    await billboards.init();
+    // Cada cartel ya captura sus propios errores de red (muestra "Error de Red").
+    billboards.init();
+
+    // 🔥 Multijugador en paralelo (espera al socket y carga el personaje)
+    this.setupMultiplayer().catch((e) => console.error('❌ No se pudo iniciar el multijugador', e));
 
     this.loopManager.addUpdateCallback((dt, time) => {
       // Jugadores que un cartel puede tapar (local + remotos)
@@ -242,6 +271,7 @@ export class MainScenario implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     console.log('💀 MainScenario DESTROYED - Cleaning up...');
+    this.destroyed = true;
 
     if (this.unsubscribeMultiplayerLoop) {
       this.unsubscribeMultiplayerLoop();
@@ -259,5 +289,8 @@ export class MainScenario implements AfterViewInit, OnDestroy {
     this.debugHud?.dispose();
     this.floorManager?.dispose();
     this.sceneManager?.dispose();
+    this.resizeManager?.dispose();
+    this.orbitControls?.dispose();
+    this.rendererManager?.dispose();
   }
 }

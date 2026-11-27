@@ -106,16 +106,18 @@ export class SteamBillboardManager {
     document.body.appendChild(this.label);
   }
 
-  private setupEvents() {
-    window.addEventListener('mousemove', (event) => {
-      this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  private readonly onMouseMove = (event: MouseEvent) => {
+    this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-      if (this.label) {
-        this.label.style.left = (event.clientX + 20) + 'px';
-        this.label.style.top = (event.clientY + 20) + 'px';
-      }
-    });
+    if (this.label) {
+      this.label.style.left = (event.clientX + 20) + 'px';
+      this.label.style.top = (event.clientY + 20) + 'px';
+    }
+  };
+
+  private setupEvents() {
+    window.addEventListener('mousemove', this.onMouseMove);
   }
 
   private lastMouseX = -1;
@@ -277,6 +279,7 @@ export class SteamBillboardManager {
   }
 
   dispose() {
+    window.removeEventListener('mousemove', this.onMouseMove);
     if (this.updateInterval) clearInterval(this.updateInterval);
     if (this.rotationInterval) clearInterval(this.rotationInterval);
     if (this.label) this.label.remove();

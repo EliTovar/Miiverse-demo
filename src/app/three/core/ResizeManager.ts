@@ -2,18 +2,25 @@
 import * as THREE from 'three';
 
 export class ResizeManager {
-  constructor(
-    container: HTMLElement,
-    camera: THREE.PerspectiveCamera,
-    renderer: THREE.WebGLRenderer
-  ) {
-    window.addEventListener('resize', () => {
-      const width = container.clientWidth;
-      const height = container.clientHeight;
+  private readonly onResize = () => {
+    const width = this.container.clientWidth;
+    const height = this.container.clientHeight;
 
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-      renderer.setSize(width, height);
-    });
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(width, height);
+  };
+
+  constructor(
+    private readonly container: HTMLElement,
+    private readonly camera: THREE.PerspectiveCamera,
+    private readonly renderer: THREE.WebGLRenderer
+  ) {
+    window.addEventListener('resize', this.onResize);
+  }
+
+  /** Quita el listener de `window` (si no, se acumula uno por cada visita a la plaza). */
+  dispose() {
+    window.removeEventListener('resize', this.onResize);
   }
 }

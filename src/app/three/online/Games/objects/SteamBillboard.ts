@@ -234,8 +234,10 @@ export class SteamBillboard {
     texture.needsUpdate = true;
 
     // Rotar texturas
+    // La textura que sale de tex1 ya no se muestra: se libera también si era otro
+    // aviso (CanvasTexture). Antes esas se quedaban en la GPU con cada reintento.
     const oldTex = this.material.uniforms['tex1'].value;
-    if (oldTex && oldTex !== this.blackTex && !(oldTex instanceof THREE.CanvasTexture)) {
+    if (oldTex && oldTex !== this.blackTex && oldTex !== this.material.uniforms['tex2'].value) {
         oldTex.dispose();
     }
 

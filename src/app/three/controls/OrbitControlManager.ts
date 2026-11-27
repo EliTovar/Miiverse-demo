@@ -17,4 +17,9 @@ export class OrbitControlManager {
   update() {
     this.controls.update();
   }
+
+  /** Quita los listeners de ratón y teclado que añade OrbitControls. */
+  dispose() {
+    this.controls.dispose();
+  }
 }

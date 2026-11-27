@@ -26,12 +26,17 @@ this.labelRenderer.setSize(width, height);
     // document.body.appendChild(this.labelRenderer.domElement);
 
     // --- Responsivo ---
-    window.addEventListener('resize', () => {
-      const width = container.clientWidth;
-        const height = container.clientHeight;
+    this.onResize = () => {
+      this.labelRenderer.setSize(container.clientWidth, container.clientHeight);
+    };
+    window.addEventListener('resize', this.onResize);
+  }
 
-        this.labelRenderer.setSize(width, height);
-    });
+  private readonly onResize: () => void;
+
+  dispose() {
+    window.removeEventListener('resize', this.onResize);
+    this.labelRenderer.domElement.remove();
   }
 
   /**

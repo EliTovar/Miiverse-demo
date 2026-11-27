@@ -41,7 +41,11 @@ export class MultiplayerManager {
   private pendingUpdates = new Map<string, NetworkPlayer>();
   private loadingRemotes = new Set<string>();
   private lastSendTime = 0;
-  private readonly SEND_INTERVAL = 33; // 30 updates per second for 1:1 real-time precision
+  private readonly SEND_INTERVAL = 33; // como máximo 30 envíos por segundo mientras el jugador se mueve
+  /** Si el jugador está quieto, se envía igualmente cada segundo ("sigo aquí"), así el servidor guarda su última posición. */
+  private readonly IDLE_SEND_INTERVAL = 1000;
+  /** Último estado enviado, para no repetir mensajes idénticos 30 veces por segundo. */
+  private lastSent?: { x: number; y: number; z: number; rotY: number; animation: string };
 
   remotePlayers = new Map<string, RemotePlayer>();
 
@@ -173,6 +177,7 @@ export class MultiplayerManager {
 
     if (this.localController) {
       this.localController.disable();
+      this.localController.dispose(); // quita sus listeners de teclado de window
       this.localController = undefined;
     }
 
@@ -191,6 +196,7 @@ export class MultiplayerManager {
     this.socket.off('player-joined');
     this.socket.off('player-left');
     this.socket.off('player-moved');
+    this.socket.off('player-posted');
 
     this.mode = 'spectator';
   }
@@ -359,18 +365,32 @@ export class MultiplayerManager {
   sendUpdates(time: number) {
     if (this.mode !== 'player') return;
     if (!this.localController || !this.localPlayer) return;
-    if (time - this.lastSendTime < this.SEND_INTERVAL) return;
+
+    const elapsed = time - this.lastSendTime;
+    if (elapsed < this.SEND_INTERVAL) return;
+
+    const { x, y, z } = this.localPlayer.position;
+    const rotY = this.localPlayer.rotation.y;
+    const animation = this.localController.currentAnimationName;
+
+    // Quieto y sin cambio de animación: no hace falta avisar a nadie salvo el "sigo aquí".
+    const last = this.lastSent;
+    const unchanged =
+      last !== undefined &&
+      last.animation === animation &&
+      Math.abs(last.x - x) < this.POSITION_THRESHOLD &&
+      Math.abs(last.y - y) < this.POSITION_THRESHOLD &&
+      Math.abs(last.z - z) < this.POSITION_THRESHOLD &&
+      Math.abs(last.rotY - rotY) < this.ROTATION_THRESHOLD;
+    if (unchanged && elapsed < this.IDLE_SEND_INTERVAL) return;
 
     this.lastSendTime = time;
+    this.lastSent = { x, y, z, rotY, animation };
 
     this.socket.emit('update-position', {
-      position: {
-        x: this.localPlayer.position.x,
-        y: this.localPlayer.position.y,
-        z: this.localPlayer.position.z,
-      },
-      rotation: { y: this.localPlayer.rotation.y },
-      animation: this.localController.currentAnimationName,
+      position: { x, y, z },
+      rotation: { y: rotY },
+      animation,
     });
   }
 

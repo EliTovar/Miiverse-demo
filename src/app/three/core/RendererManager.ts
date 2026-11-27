@@ -13,4 +13,14 @@ export class RendererManager {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(this.renderer.domElement);
   }
+
+  /**
+   * Libera el contexto WebGL y quita el canvas. El navegador solo permite unos
+   * pocos contextos a la vez: sin esto, cada visita a la plaza deja uno vivo.
+   */
+  dispose() {
+    this.renderer.dispose();
+    this.renderer.forceContextLoss();
+    this.renderer.domElement.remove();
+  }
 }

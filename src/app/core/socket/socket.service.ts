@@ -43,6 +43,11 @@ export class SocketService {
     this.socket?.on(event, callback);
   }
 
+  /** Quita un listener puesto con `on` (pasar la misma función). */
+  off(event: string, callback: (data: any) => void): void {
+    this.socket?.off(event, callback);
+  }
+
   getSocket(): Socket {
     if (!this.socket) throw new Error('Socket no conectado');
     return this.socket;
