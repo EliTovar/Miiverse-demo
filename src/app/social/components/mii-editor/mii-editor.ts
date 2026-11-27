@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, NgZone, OnDestroy, AfterViewInit, ViewChild, computed, inject, signal } from '@angular/core';
-import { MII_CATALOG, MiiAppearance, MiiColors } from '../../../three/online/loaders/mii-appearance';
+import { DEFAULT_APPEARANCE, MII_CATALOG, MiiAppearance, MiiColors } from '../../../three/online/loaders/mii-appearance';
 import { loadSavedAppearance, saveAppearance } from '../../../three/online/loaders/mii-appearance-storage';
 import { MiiPreview } from './mii-preview';
 
@@ -62,7 +62,7 @@ export class MiiEditor implements AfterViewInit, OnDestroy {
   @ViewChild('previewHost', { static: true }) previewHost!: ElementRef<HTMLDivElement>;
 
   readonly sections = SECTIONS;
-  appearance = signal<MiiAppearance>(loadSavedAppearance());
+  appearance = signal<MiiAppearance>(loadSavedAppearance() ?? DEFAULT_APPEARANCE);
   activeId = signal(SECTIONS[0].id);
   active = computed(() => SECTIONS.find((s) => s.id === this.activeId())!);
   saved = signal(true);
@@ -103,7 +103,7 @@ export class MiiEditor implements AfterViewInit, OnDestroy {
   }
 
   reset() {
-    this.update(loadSavedAppearance());
+    this.update(loadSavedAppearance() ?? DEFAULT_APPEARANCE);
     this.saved.set(true);
   }
 

@@ -1,6 +1,6 @@
 /*
  * Convierte las piezas del Mii (Tomodachi Life: Living the Dream, formato DAE) a GLB.
- * Uso:  node tools/mii-parts/convert.cjs <carpeta "Mii" descomprimida>
+ * Uso:  node tools/mii-parts/convert.cjs <carpeta "Mii"> <carpeta "Mii Mannequin">
  * Lee parts.json y escribe en public/models/mii-parts/<categoría>/<id>.glb
  * Requiere Playwright (con Chromium) disponible para Node. Ver README.md.
  */
@@ -15,16 +15,16 @@ const THREE_DIR = path.join(ROOT, 'node_modules/three');
 const RIGID = new Set(['heads', 'hair', 'noses']); // piezas que cuelgan del hueso Head
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.png': 'image/png', '.dae': 'model/vnd.collada+xml' };
 
-const srcDir = process.argv[2];
-if (!srcDir || !fs.existsSync(srcDir)) {
-  console.error('Indica la carpeta "Mii" descomprimida. Ej: node tools/mii-parts/convert.cjs ~/Downloads/Mii');
+const [srcDir, mannequinDir] = process.argv.slice(2);
+if (!srcDir || !fs.existsSync(srcDir) || !mannequinDir || !fs.existsSync(mannequinDir)) {
+  console.error('Uso: node tools/mii-parts/convert.cjs <carpeta "Mii"> <carpeta "Mii Mannequin">');
   process.exit(1);
 }
 const parts = JSON.parse(fs.readFileSync(path.join(__dirname, 'parts.json'), 'utf8'));
 
 /** Servidor estático mínimo: /src → piezas originales, /three → Three.js del proyecto. */
 function serve() {
-  const routes = { '/src/': path.resolve(srcDir), '/three/': THREE_DIR, '/': __dirname };
+  const routes = { '/src/': path.resolve(srcDir), '/mannequin/': path.resolve(mannequinDir), '/three/': THREE_DIR, '/': __dirname };
   const server = http.createServer((req, res) => {
     const url = decodeURIComponent(req.url.split('?')[0]);
     const prefix = Object.keys(routes).find((p) => url.startsWith(p));
@@ -46,7 +46,7 @@ function serve() {
     await page.waitForFunction('window.ready');
 
     for (const [category, items] of Object.entries(parts)) {
-      if (category === 'face') continue;
+      if (category === 'face' || category === 'mannequin') continue;
       fs.mkdirSync(path.join(OUT, category), { recursive: true });
       for (const [id, src] of Object.entries(items)) {
         const b64 = await page.evaluate(([s, r]) => window.convertPart(s, r), [src, RIGID.has(category)]);
@@ -60,6 +60,13 @@ function serve() {
     fs.mkdirSync(path.join(OUT, 'faces'), { recursive: true });
     fs.writeFileSync(path.join(OUT, 'faces/face-default.png'), Buffer.from(face, 'base64'));
     console.log('faces/face-default.png');
+
+    // Maniquí: el Mii por defecto de quien todavía no ha creado el suyo.
+    fs.mkdirSync(path.join(OUT, 'mannequin'), { recursive: true });
+    const head = await page.evaluate((s) => window.convertPart(s, true), '../mannequin/' + parts.mannequin.head);
+    fs.writeFileSync(path.join(OUT, 'mannequin/head.glb'), Buffer.from(head, 'base64'));
+    fs.copyFileSync(path.join(mannequinDir, parts.mannequin.face), path.join(OUT, 'mannequin/face.png'));
+    console.log('mannequin/head.glb, mannequin/face.png');
   } finally {
     await browser.close();
     server.close();

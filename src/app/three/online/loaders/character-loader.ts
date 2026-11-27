@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { createMiiAnimations } from './mii-animations';
-import { buildMii } from './mii-assembler';
-import { DEFAULT_APPEARANCE, MiiAppearance } from './mii-appearance';
+import { buildMannequin, buildMii } from './mii-assembler';
+import { MiiAppearance } from './mii-appearance';
 
 export interface LoadedCharacter {
   model: THREE.Group;
@@ -14,11 +14,12 @@ const MODEL_SCALE = 5.5;
 let cachedAnimations: THREE.AnimationClip[] | null = null;
 
 /**
- * Crea un personaje nuevo con la apariencia indicada.
+ * Crea un personaje con la apariencia indicada, o el maniquí si es `null`
+ * (usuario que todavía no ha creado su Mii).
  * Las piezas (GLB) se descargan una sola vez y se reutilizan entre jugadores.
  */
-export async function loadCharacter(appearance: MiiAppearance = DEFAULT_APPEARANCE): Promise<LoadedCharacter> {
-  const model = await buildMii(appearance);
+export async function loadCharacter(appearance: MiiAppearance | null = null): Promise<LoadedCharacter> {
+  const model = appearance ? await buildMii(appearance) : await buildMannequin();
   model.scale.setScalar(MODEL_SCALE);
 
   cachedAnimations ??= createMiiAnimations(model);

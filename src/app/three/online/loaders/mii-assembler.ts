@@ -16,6 +16,8 @@ import { MiiAppearance } from './mii-appearance';
 
 const PARTS_PATH = 'models/mii-parts';
 const FACE_TEXTURE = `${PARTS_PATH}/faces/face-default.png`;
+const MANNEQUIN_FACE = `${PARTS_PATH}/mannequin/face.png`;
+const MANNEQUIN_COLOR = '#f4f1ea';
 
 /** Partes del cuerpo que se ocultan porque la prenda las cubre (evita que se asomen). */
 const HIDDEN_BY = {
@@ -30,7 +32,7 @@ const NOSE_OFFSET = new THREE.Vector3(0, 0.3, 0.1);
 const loader = new GLTFLoader();
 const textureLoader = new THREE.TextureLoader();
 const partCache = new Map<string, Promise<THREE.Group>>();
-let faceTexture: THREE.Texture | null = null;
+const textureCache = new Map<string, THREE.Texture>();
 
 /** Carga cada GLB una sola vez; las siguientes llamadas reutilizan la misma promesa. */
 function loadPart(category: string, id: string): Promise<THREE.Group> {
@@ -43,12 +45,33 @@ function loadPart(category: string, id: string): Promise<THREE.Group> {
   return promise;
 }
 
-function getFaceTexture(): THREE.Texture {
-  if (!faceTexture) {
-    faceTexture = textureLoader.load(FACE_TEXTURE);
-    faceTexture.colorSpace = THREE.SRGBColorSpace;
+function getTexture(url: string): THREE.Texture {
+  let texture = textureCache.get(url);
+  if (!texture) {
+    texture = textureLoader.load(url);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    textureCache.set(url, texture);
   }
-  return faceTexture;
+  return texture;
+}
+
+/** La malla "Mask" de la cabeza lleva la cara (textura); el resto de la cabeza, el color de piel. */
+function paintHead(skin: string, faceUrl: string) {
+  return (mesh: THREE.Mesh) => {
+    if (!mesh.name.startsWith('Mask')) return skin;
+    mesh.material = new THREE.MeshStandardMaterial({ map: getTexture(faceUrl), transparent: true, roughness: 0.8 });
+    return null;
+  };
+}
+
+/** Clona el cuerpo base y devuelve sus huesos por nombre. */
+function cloneBody(body: THREE.Group) {
+  const model = SkeletonUtils.clone(body) as THREE.Group;
+  const bones = new Map<string, THREE.Bone>();
+  model.traverse((o) => {
+    if ((o as THREE.Bone).isBone) bones.set(o.name, o as THREE.Bone);
+  });
+  return { model, bones };
 }
 
 /** Copia el material para que cada jugador tenga su propio color. */
@@ -131,11 +154,7 @@ export async function buildMii(appearance: MiiAppearance): Promise<THREE.Group> 
   ]);
   const { colors } = appearance;
 
-  const model = SkeletonUtils.clone(body) as THREE.Group;
-  const bodyBones = new Map<string, THREE.Bone>();
-  model.traverse((o) => {
-    if ((o as THREE.Bone).isBone) bodyBones.set(o.name, o as THREE.Bone);
-  });
+  const { model, bones: bodyBones } = cloneBody(body);
 
   const bodyMeshes = collectMeshes(model);
   const meshParent = bodyMeshes[0].parent!;
@@ -150,11 +169,7 @@ export async function buildMii(appearance: MiiAppearance): Promise<THREE.Group> 
   dressWith(shoes, bodyBones, meshParent, colors.shoes);
 
   const anchor = createHeadAnchor(model, bodyBones.get('Head')!);
-  addRigid(head, anchor, (mesh) => {
-    if (!mesh.name.startsWith('Mask')) return colors.skin;
-    mesh.material = new THREE.MeshStandardMaterial({ map: getFaceTexture(), transparent: true, roughness: 0.8 });
-    return null;
-  });
+  addRigid(head, anchor, paintHead(colors.skin, FACE_TEXTURE));
   addRigid(hair, anchor, () => colors.hair);
   const noseGroup = new THREE.Group();
   noseGroup.position.copy(NOSE_OFFSET);
@@ -164,5 +179,17 @@ export async function buildMii(appearance: MiiAppearance): Promise<THREE.Group> 
     if (o.name.startsWith('NoseLine')) o.visible = false;
   });
 
+  return model;
+}
+
+/**
+ * Maniquí: el Mii de quien todavía no ha creado el suyo.
+ * Mismo cuerpo, sin ropa ni pelo, todo blanco y con una cara sencilla.
+ */
+export async function buildMannequin(): Promise<THREE.Group> {
+  const [body, head] = await Promise.all([loadPart('body', 'body'), loadPart('mannequin', 'head')]);
+  const { model, bones } = cloneBody(body);
+  for (const mesh of collectMeshes(model)) tint(mesh, MANNEQUIN_COLOR);
+  addRigid(head, createHeadAnchor(model, bones.get('Head')!), paintHead(MANNEQUIN_COLOR, MANNEQUIN_FACE));
   return model;
 }

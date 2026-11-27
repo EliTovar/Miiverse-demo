@@ -40,12 +40,13 @@ function sanitize(raw: unknown): MiiAppearance {
   };
 }
 
-export function loadSavedAppearance(): MiiAppearance {
+/** Apariencia guardada, o `null` si el usuario todavía no ha creado su Mii (se usa el maniquí). */
+export function loadSavedAppearance(): MiiAppearance | null {
   try {
     const text = localStorage.getItem(STORAGE_KEY);
-    return sanitize(text ? JSON.parse(text) : null);
+    return text ? sanitize(JSON.parse(text)) : null;
   } catch {
-    return sanitize(null); // JSON roto o almacenamiento bloqueado: usar la apariencia por defecto
+    return null; // JSON roto o almacenamiento bloqueado: maniquí
   }
 }
 

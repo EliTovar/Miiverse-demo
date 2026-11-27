@@ -48,5 +48,9 @@
   "face": {
     "eye": "MiiParts/Eye000.png",
     "mouth": "MiiParts/Mouth000.png"
+  },
+  "mannequin": {
+    "head": "MannequinHead.dae",
+    "face": "MannequinHead_Composite.png"
   }
 }
